@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { LuCopyCheck, LuCopy } from 'react-icons/lu';
 
 const INBOX_ADDRESS =
   process.env.NEXT_PUBLIC_INBOUND_ADDRESS ?? 'you@bleed-xxxx.resend.app';
@@ -22,9 +23,9 @@ export function InboxAddress() {
         </span>
         <button
           onClick={handleCopy}
-          className='shrink-0 rounded-md bg-pine px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-pine/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pine'
+          className='shrink-0 rounded-md bg-pine px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-pine/90 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-pine'
         >
-          {copied ? 'Copied' : 'Copy'}
+          {copied ? <LuCopyCheck size={20} /> : <LuCopy size={20} />}
         </button>
       </div>
       <p className='mt-3 text-sm text-ink/60'>
