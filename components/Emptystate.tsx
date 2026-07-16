@@ -1,12 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
+import { EnableNotifications } from './EnableNotifications';
+import { AddSubscriptionForm } from './AddSubscriptionForm';
 import { GhostTotal } from './Ghosttotal';
 import { InboxAddress } from './Inboxaddress';
-import { EnableNotifications } from './EnableNotifications';
 
 export function EmptyState() {
   const shouldReduceMotion = useReducedMotion();
+  const [showForm, setShowForm] = useState(false);
 
   const container = {
     hidden: {},
@@ -31,7 +34,7 @@ export function EmptyState() {
     >
       <motion.h1
         variants={item}
-        className='font-[family-name:var(--font-display)] text-2xl font-medium text-ink'
+        className='font-(family-name:--font-display) text-2xl font-medium text-ink'
       >
         Bleed
       </motion.h1>
@@ -45,6 +48,19 @@ export function EmptyState() {
 
       <motion.div variants={item}>
         <InboxAddress />
+      </motion.div>
+
+      <motion.div variants={item} className='w-full max-w-md'>
+        {showForm ? (
+          <AddSubscriptionForm onDone={() => setShowForm(false)} />
+        ) : (
+          <button
+            onClick={() => setShowForm(true)}
+            className='text-sm text-ink/50 underline decoration-ink/20 underline-offset-4 hover:text-ink/70'
+          >
+            Or add one manually
+          </button>
+        )}
       </motion.div>
 
       <motion.div variants={item}>
