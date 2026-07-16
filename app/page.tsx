@@ -1,17 +1,20 @@
 import { supabaseAdmin } from '@/lib/supabase';
 
 import { Dashboard } from '@/components/Dashboard';
+import type { Subscription } from '@/types/subscription';
 import { EmptyState } from '@/components/Emptystate';
 
 export default async function DashboardPage() {
-  const { data: subscriptions } = await supabaseAdmin
+  const { data: subscriptions, count } = await supabaseAdmin
     .from('subscriptions')
-    .select('*')
+    .select('*', { count: 'exact' })
     .order('monthly_equivalent', { ascending: false });
 
-  if (!subscriptions?.length) {
+  const hasSubscriptions = (count ?? 0) > 0;
+
+  if (!hasSubscriptions) {
     return <EmptyState />;
   }
 
-  return <Dashboard subscriptions={subscriptions} />;
+  return <Dashboard subscriptions={(subscriptions ?? []) as Subscription[]} />;
 }

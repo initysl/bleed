@@ -23,7 +23,7 @@ export function InboxAddress() {
         </span>
         <button
           onClick={handleCopy}
-          className='shrink-0 rounded-md bg-pine px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-pine/90 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-pine'
+          className='cursor-pointer shrink-0 rounded-md bg-pine px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-pine/90 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-pine'
         >
           {copied ? <LuCopyCheck size={20} /> : <LuCopy size={20} />}
         </button>
