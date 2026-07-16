@@ -7,6 +7,9 @@ export interface Subscription {
   billing_cycle: BillingCycle;
   monthly_equivalent: number;
   renewal_date: string; // ISO date
+  reminder_at: string; // ISO timestamp — user-chosen date + time
+  notify_email: boolean;
+  notify_push: boolean;
   category: string | null;
   last_used_at: string | null;
   source: 'manual' | 'email';

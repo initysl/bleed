@@ -44,12 +44,15 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const renewalDate =
+    extracted.renewal_date ?? nextGuessedRenewalDate(extracted.billing_cycle);
+
   const { error } = await supabaseAdmin.from('subscriptions').insert({
     name: extracted.name,
     price: extracted.price,
     billing_cycle: extracted.billing_cycle,
-    renewal_date:
-      extracted.renewal_date ?? nextGuessedRenewalDate(extracted.billing_cycle),
+    renewal_date: renewalDate,
+    reminder_at: defaultReminderAt(renewalDate),
     source: 'email',
     raw_email_snippet: emailBody.slice(0, 500),
   });
@@ -70,4 +73,13 @@ function nextGuessedRenewalDate(cycle: 'monthly' | 'yearly') {
   if (cycle === 'yearly') d.setFullYear(d.getFullYear() + 1);
   else d.setMonth(d.getMonth() + 1);
   return d.toISOString().slice(0, 10);
+}
+
+// Default reminder: 3 days before renewal at 9am local-to-server time.
+// This is just the starting point — the UI lets the user override date and time per subscription.
+function defaultReminderAt(renewalDateStr: string) {
+  const d = new Date(renewalDateStr);
+  d.setDate(d.getDate() - 3);
+  d.setHours(9, 0, 0, 0);
+  return d.toISOString();
 }
