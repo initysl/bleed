@@ -3,7 +3,6 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { sendRenewalReminderEmail } from '@/lib/resend';
 import { sendRenewalPushNotification } from '@/lib/webpush';
 
-const REMINDER_LEAD_DAYS = 3;
 const USER_EMAIL = process.env.REMINDER_TO_EMAIL!; // single-user v1
 
 export async function GET(req: NextRequest) {
@@ -13,14 +12,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
-  const targetDate = new Date();
-  targetDate.setDate(targetDate.getDate() + REMINDER_LEAD_DAYS);
-  const targetDateStr = targetDate.toISOString().slice(0, 10);
+  const now = new Date().toISOString();
 
+  // Anything whose user-chosen reminder time has passed and hasn't been sent yet.
+  // No lead-time math here — reminder_at is exactly when the user asked to be reminded.
   const { data: dueSubscriptions, error } = await supabaseAdmin
     .from('subscriptions')
     .select('*')
-    .eq('renewal_date', targetDateStr);
+    .lte('reminder_at', now);
 
   if (error)
     return NextResponse.json(
@@ -32,24 +31,26 @@ export async function GET(req: NextRequest) {
 
   let sent = 0;
   for (const sub of dueSubscriptions) {
-    // Skip if we've already sent a reminder for this exact renewal date
     const { data: alreadySent } = await supabaseAdmin
       .from('reminder_log')
       .select('id')
       .eq('subscription_id', sub.id)
-      .eq('renewal_date', sub.renewal_date)
+      .eq('reminder_at', sub.reminder_at)
       .maybeSingle();
 
     if (alreadySent) continue;
 
-    await Promise.all([
-      sendRenewalReminderEmail(USER_EMAIL, sub),
-      sendRenewalPushNotification(sub),
-    ]);
+    // Exactly two channels. Only fire the ones the user actually enabled for this subscription.
+    const dispatches: Promise<unknown>[] = [];
+    if (sub.notify_email)
+      dispatches.push(sendRenewalReminderEmail(USER_EMAIL, sub));
+    if (sub.notify_push) dispatches.push(sendRenewalPushNotification(sub));
+
+    await Promise.all(dispatches);
 
     await supabaseAdmin
       .from('reminder_log')
-      .insert({ subscription_id: sub.id, renewal_date: sub.renewal_date });
+      .insert({ subscription_id: sub.id, reminder_at: sub.reminder_at });
 
     sent++;
   }
