@@ -65,9 +65,9 @@ export function AddSubscriptionForm({ onDone }: { onDone?: () => void }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className='flex w-full max-w-md flex-col gap-4'
+      className='bg-white text-black rounded-md p-4 flex w-full max-w-md flex-col gap-4'
     >
-      <label className='flex flex-col gap-1 text-sm text-ink'>
+      <label className='flex flex-col gap-1 text-sm'>
         Name
         <input
           type='text'
@@ -75,12 +75,12 @@ export function AddSubscriptionForm({ onDone }: { onDone?: () => void }) {
           onChange={(e) => setName(e.target.value)}
           required
           placeholder='Netflix'
-          className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink outline-none focus:border-pine'
+          className='rounded-md border border-sage bg-white px-3 py-2 text-sm outline-none focus:border-pine'
         />
       </label>
 
       <div className='flex gap-3'>
-        <label className='flex flex-1 flex-col gap-1 text-sm text-ink'>
+        <label className='flex flex-1 flex-col gap-1 text-sm'>
           Price
           <input
             type='number'
@@ -90,16 +90,16 @@ export function AddSubscriptionForm({ onDone }: { onDone?: () => void }) {
             onChange={(e) => setPrice(e.target.value)}
             required
             placeholder='15.49'
-            className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink outline-none focus:border-pine'
+            className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm outline-none focus:border-pine'
           />
         </label>
 
-        <label className='flex flex-1 flex-col gap-1 text-sm text-ink'>
+        <label className='flex flex-1 flex-col gap-1 text-sm'>
           Billing cycle
           <select
             value={billingCycle}
             onChange={(e) => setBillingCycle(e.target.value as BillingCycle)}
-            className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink outline-none focus:border-pine'
+            className='rounded-md border border-sage bg-white px-3 py-2 text-sm outline-none focus:border-pine'
           >
             <option value='monthly'>Monthly</option>
             <option value='yearly'>Yearly</option>
@@ -107,14 +107,14 @@ export function AddSubscriptionForm({ onDone }: { onDone?: () => void }) {
         </label>
       </div>
 
-      <label className='flex flex-col gap-1 text-sm text-ink'>
+      <label className='flex flex-col gap-1 text-sm'>
         Renewal date
         <input
           type='date'
           value={renewalDate}
           onChange={(e) => handleRenewalDateChange(e.target.value)}
           required
-          className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink outline-none focus:border-pine'
+          className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm outline-none focus:border-pine'
         />
       </label>
 
