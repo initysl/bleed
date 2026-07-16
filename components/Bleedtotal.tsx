@@ -1,38 +1,30 @@
 'use client';
 
-import { useEffect } from 'react';
-import {
-  motion,
-  useMotionValue,
-  useTransform,
-  animate,
-  useReducedMotion,
-} from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { animate } from 'framer-motion';
 
 export function BleedTotal({ monthlyTotal }: { monthlyTotal: number }) {
-  const shouldReduceMotion = useReducedMotion();
-  const count = useMotionValue(0);
-  const rounded = useTransform(count, (v) => `$${v.toFixed(2)}`);
+  const [display, setDisplay] = useState(0);
 
   useEffect(() => {
-    if (shouldReduceMotion) {
-      count.set(monthlyTotal);
-      return;
-    }
-    const controls = animate(count, monthlyTotal, {
-      duration: 1,
+    const controls = animate(0, monthlyTotal, {
+      duration: 0.8,
       ease: 'easeOut',
+      onUpdate: (value) => setDisplay(value),
     });
-    return controls.stop;
-  }, [monthlyTotal, shouldReduceMotion, count]);
+    return () => controls.stop();
+  }, [monthlyTotal]);
 
   return (
-    <div className='w-full max-w-md rounded-lg border border-sage bg-white/60 px-6 py-8 text-center'>
-      <motion.p className='font-mono text-4xl tabular-nums text-pine'>
-        {rounded}
-      </motion.p>
-      <p className='mt-2 text-xs uppercase tracking-wide text-ink/40'>
-        per month, right now
+    <div className='w-full rounded-lg border border-sage bg-white/60 px-6 py-8 text-center'>
+      <p className='font-mono text-4xl tabular-nums text-ink'>
+        ${display.toFixed(2)}
+      </p>
+      <p className='mt-2 text-xs uppercase tracking-wide text-ink/50'>
+        per month
+      </p>
+      <p className='mt-1 text-xs text-ink/40'>
+        ${(monthlyTotal * 12).toFixed(2)} / year
       </p>
     </div>
   );

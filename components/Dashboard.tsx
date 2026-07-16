@@ -3,8 +3,9 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import type { Subscription } from '@/types/subscription';
 import { BleedTotal } from './Bleedtotal';
-import { InboxAddress } from './Inboxaddress';
+
 import { SubscriptionList } from './Subscriptionlist';
+import { InboxAddress } from './Inboxaddress';
 
 export function Dashboard({
   subscriptions,

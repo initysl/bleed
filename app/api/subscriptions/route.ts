@@ -7,7 +7,7 @@ const subscriptionInput = z
     name: z.string().min(1),
     price: z.number().positive(),
     billing_cycle: z.enum(['monthly', 'yearly']),
-    renewal_date: z.string().date(), // "YYYY-MM-DD"
+    renewal_date: z.iso.date(), // "YYYY-MM-DD"
     reminder_at: z.string().min(1), // ISO datetime
     notify_email: z.boolean(),
     notify_push: z.boolean(),
