@@ -7,7 +7,7 @@ import { AddSubscriptionForm } from './AddSubscriptionForm';
 import { GhostTotal } from './Ghosttotal';
 import { InboxAddress } from './Inboxaddress';
 
-export function EmptyState() {
+export function EmptyState({ inboxAddress }: { inboxAddress: string }) {
   const shouldReduceMotion = useReducedMotion();
   const [showForm, setShowForm] = useState(false);
 

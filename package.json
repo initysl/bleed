@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.4",
     "date-fns": "^4.4.0",
     "framer-motion": "^12.42.2",
@@ -18,6 +19,7 @@
     "react-dom": "^19.2.4",
     "react-icons": "^5.7.0",
     "resend": "^6.17.2",
+    "svix": "^1.97.0",
     "web-push": "^3.6.7",
     "zod": "^4.4.3"
   },

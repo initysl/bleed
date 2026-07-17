@@ -11,8 +11,10 @@ import { InboxAddress } from './Inboxaddress';
 
 export function Dashboard({
   subscriptions,
+  inboxAddress,
 }: {
   subscriptions: Subscription[];
+  inboxAddress: string;
 }) {
   const shouldReduceMotion = useReducedMotion();
   const [showForm, setShowForm] = useState(false);
