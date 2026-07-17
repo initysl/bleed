@@ -16,7 +16,7 @@ export function BleedTotal({ monthlyTotal }: { monthlyTotal: number }) {
   }, [monthlyTotal]);
 
   return (
-    <div className='w-full rounded-lg bg-pine px-6 py-6 text-left'>
+    <div className='bg-yellow-600 w-full rounded-lg bg-pine px-6 py-6 text-left'>
       <p className='text-xs uppercase tracking-wide text-paper/60'>
         Monthly bleed
       </p>

@@ -61,7 +61,7 @@ export function Dashboard({
       variants={container}
       initial='hidden'
       animate='show'
-      className='mx-auto flex max-w-md flex-col items-center gap-6 px-6 py-16'
+      className='mx-auto flex w-full max-w-md flex-col gap-6 px-6 py-16 md:max-w-5xl'
     >
       <motion.div variants={item} className='relative w-full'>
         <div className='flex w-full items-center justify-between gap-3'>
@@ -91,7 +91,7 @@ export function Dashboard({
               animate='show'
               exit='exit'
               style={{ transformOrigin: 'top right' }}
-              className='absolute right-0 top-full z-10 mt-2 w-full rounded-lg border border-sage bg-paper p-4 shadow-lg'
+              className='absolute right-0 top-full z-10 mt-2 w-full max-w-md rounded-md border border-sage bg-paper p-4 shadow-md'
             >
               <AddSubscriptionForm onDone={() => setShowForm(false)} />
             </motion.div>
@@ -99,21 +99,46 @@ export function Dashboard({
         </AnimatePresence>
       </motion.div>
 
-      <motion.div variants={item} className='w-full'>
-        <BleedTotal monthlyTotal={monthlyTotal} />
-      </motion.div>
+      {/*
+        Mobile: everything below just stacks in natural document order
+        (Total, Upcoming, List, Inbox) — no grid applied below the md breakpoint.
 
-      <motion.div variants={item} className='w-full'>
-        <UpcomingStrip subscriptions={subscriptions} />
-      </motion.div>
+        Desktop (md+): a two-column layout via named grid-template-areas.
+        List gets the wide "main content" column; Total/Upcoming/Inbox group
+        into a narrower sidebar column, sticky so it stays in view while the
+        list scrolls. Areas (not row/col-span math) mean this stays correct
+        regardless of how tall the list or sidebar end up being.
+      */}
+      <div
+        className="flex flex-col gap-6
+          md:grid md:grid-cols-[1fr_1.6fr] md:items-start md:gap-8
+          md:[grid-template-areas:'total_list'_'upcoming_list'_'inbox_list']"
+      >
+        <motion.div
+          variants={item}
+          className='w-full md:sticky md:top-16 md:[grid-area:total]'
+        >
+          <BleedTotal monthlyTotal={monthlyTotal} />
+        </motion.div>
 
-      <motion.div variants={item} className='w-full'>
-        <SubscriptionList subscriptions={subscriptions} />
-      </motion.div>
+        <motion.div
+          variants={item}
+          className='w-full md:sticky md:top-52 md:[grid-area:upcoming]'
+        >
+          <UpcomingStrip subscriptions={subscriptions} />
+        </motion.div>
 
-      <motion.div variants={item} className='w-full'>
-        <InboxAddress address={inboxAddress} />
-      </motion.div>
+        <motion.div variants={item} className='w-full md:[grid-area:list]'>
+          <SubscriptionList subscriptions={subscriptions} />
+        </motion.div>
+
+        <motion.div
+          variants={item}
+          className='w-full md:sticky md:bottom-4 md:[grid-area:inbox]'
+        >
+          <InboxAddress address={inboxAddress} />
+        </motion.div>
+      </div>
     </motion.div>
   );
 }
