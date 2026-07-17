@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import type { Subscription } from '@/types/subscription';
 import { BleedTotal } from './Bleedtotal';
-
 import { SubscriptionList } from './Subscriptionlist';
+import { UpcomingStrip } from './UpcomingStrip';
 import { AddSubscriptionForm } from './AddSubscriptionForm';
 import { InboxAddress } from './Inboxaddress';
 
@@ -64,16 +64,23 @@ export function Dashboard({
       className='mx-auto flex max-w-md flex-col items-center gap-6 px-6 py-16'
     >
       <motion.div variants={item} className='relative w-full'>
-        <div className='flex w-full items-center justify-between'>
+        <div className='flex w-full items-center justify-between gap-3'>
           <h1 className='font-(family-name:--font-display) text-2xl font-medium text-ink'>
             Bleed
           </h1>
-          <button
-            onClick={() => setShowForm((v) => !v)}
-            className='rounded-md bg-pine px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-pine/90'
-          >
-            {showForm ? 'Cancel' : '+ Add subscription'}
-          </button>
+          <div className='flex items-center gap-3'>
+            <form action='/auth/signout' method='post'>
+              <button className='text-xs text-ink/40 underline decoration-ink/20 underline-offset-4 hover:text-ink/60'>
+                Sign out
+              </button>
+            </form>
+            <button
+              onClick={() => setShowForm((v) => !v)}
+              className='rounded-md bg-pine px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-pine/90'
+            >
+              {showForm ? 'Cancel' : '+ Add subscription'}
+            </button>
+          </div>
         </div>
 
         <AnimatePresence>
@@ -84,7 +91,7 @@ export function Dashboard({
               animate='show'
               exit='exit'
               style={{ transformOrigin: 'top right' }}
-              className='absolute right-0 top-full z-10 mt-2 w-full'
+              className='absolute right-0 top-full z-10 mt-2 w-full rounded-lg border border-sage bg-paper p-4 shadow-lg'
             >
               <AddSubscriptionForm onDone={() => setShowForm(false)} />
             </motion.div>
@@ -97,11 +104,15 @@ export function Dashboard({
       </motion.div>
 
       <motion.div variants={item} className='w-full'>
+        <UpcomingStrip subscriptions={subscriptions} />
+      </motion.div>
+
+      <motion.div variants={item} className='w-full'>
         <SubscriptionList subscriptions={subscriptions} />
       </motion.div>
 
       <motion.div variants={item} className='w-full'>
-        <InboxAddress />
+        <InboxAddress address={inboxAddress} />
       </motion.div>
     </motion.div>
   );

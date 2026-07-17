@@ -41,3 +41,12 @@ export function addBillingCycles(
 export function addBillingCycle(anchorDate: Date, cycle: BillingCycle): Date {
   return addBillingCycles(anchorDate, cycle, 1);
 }
+
+// Whole days between now and a given date (can be negative if already past).
+export function daysUntil(dateStr: string): number {
+  const target = new Date(dateStr);
+  const now = new Date();
+  target.setHours(0, 0, 0, 0);
+  now.setHours(0, 0, 0, 0);
+  return Math.round((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+}

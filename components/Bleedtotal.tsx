@@ -16,14 +16,14 @@ export function BleedTotal({ monthlyTotal }: { monthlyTotal: number }) {
   }, [monthlyTotal]);
 
   return (
-    <div className='w-full rounded-lg border border-sage bg-white/60 px-6 py-8 text-center'>
-      <p className='font-mono text-4xl tabular-nums text-ink'>
+    <div className='w-full rounded-lg bg-pine px-6 py-6 text-left'>
+      <p className='text-xs uppercase tracking-wide text-paper/60'>
+        Monthly bleed
+      </p>
+      <p className='mt-1 font-mono text-4xl tabular-nums text-paper'>
         ${display.toFixed(2)}
       </p>
-      <p className='mt-2 text-xs uppercase tracking-wide text-ink/50'>
-        per month
-      </p>
-      <p className='mt-1 text-xs text-ink/40'>
+      <p className='mt-1 text-sm text-paper/70'>
         ${(monthlyTotal * 12).toFixed(2)} / year
       </p>
     </div>
