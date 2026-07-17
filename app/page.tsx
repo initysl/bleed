@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-
 import { Dashboard } from '@/components/Dashboard';
 import type { Subscription } from '@/types/subscription';
 import { EmptyState } from '@/components/Emptystate';
