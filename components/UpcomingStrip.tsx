@@ -1,6 +1,7 @@
 import type { Subscription } from '@/types/subscription';
 import { getBrandStyle } from '@/lib/brandColors';
 import { daysUntil } from '@/lib/dates';
+import { formatMoney } from '@/lib/currency';
 
 const UPCOMING_WINDOW_DAYS = 14;
 
@@ -38,7 +39,7 @@ export function UpcomingStrip({
             >
               <span className='text-sm font-medium'>{sub.name}</span>
               <span className='font-mono text-lg tabular-nums'>
-                ${sub.price.toFixed(2)}
+                {formatMoney(sub.price, sub.currency)}
               </span>
               <span className='text-xs opacity-75'>
                 {days === 0

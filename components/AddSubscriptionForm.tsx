@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ReminderPicker } from './ReminderPicker';
 import { toDatetimeLocalValue, defaultReminderAt } from '@/lib/dates';
+import { CURRENCIES } from '@/lib/currency';
 import type { BillingCycle, Subscription } from '@/types/subscription';
 
 const today = new Date();
@@ -24,6 +25,7 @@ export function AddSubscriptionForm({
 
   const [name, setName] = useState(existing?.name ?? '');
   const [price, setPrice] = useState(existing?.price?.toString() ?? '');
+  const [currency, setCurrency] = useState(existing?.currency ?? 'USD');
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(
     existing?.billing_cycle ?? 'monthly',
   );
@@ -60,6 +62,7 @@ export function AddSubscriptionForm({
     const payload = {
       name,
       price: parseFloat(price),
+      currency,
       billing_cycle: billingCycle,
       renewal_date: renewalDate,
       reminder_at: new Date(reminderAt).toISOString(),
@@ -116,7 +119,7 @@ export function AddSubscriptionForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className='flex w-full max-w-md flex-col gap-4'
+      className='flex w-full max-h-32 overflow-y-auto flex-col gap-4'
     >
       <label className='flex flex-col gap-1 text-sm text-ink'>
         Name
@@ -143,6 +146,21 @@ export function AddSubscriptionForm({
             placeholder='15.49'
             className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink outline-none focus:border-pine'
           />
+        </label>
+
+        <label className='flex w-24 flex-col gap-1 text-sm text-ink'>
+          Currency
+          <select
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value)}
+            className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink outline-none focus:border-pine'
+          >
+            {CURRENCIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
         </label>
 
         <label className='flex flex-1 flex-col gap-1 text-sm text-ink'>

@@ -11,8 +11,6 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Middleware already redirects unauthenticated requests, but a server component
-  // should never assume that ran — check again here as a second, independent guard.
   if (!user) {
     redirect('/login');
   }
@@ -27,15 +25,23 @@ export default async function DashboardPage() {
     ? `${profile.inbound_address}@${process.env.NEXT_PUBLIC_INBOUND_DOMAIN}`
     : '';
 
-  // RLS scopes this to the current user automatically — no manual user_id filter needed.
   const { data: subscriptions, count } = await supabase
     .from('subscriptions')
     .select('*', { count: 'exact' })
     .order('monthly_equivalent', { ascending: false });
 
-  const hasSubscriptions = (count ?? 0) > 0;
+  const { data: needsReview } = await supabase
+    .from('needs_review')
+    .select('id, subject, raw_email_snippet, reason, created_at')
+    .eq('resolved', false)
+    .order('created_at', { ascending: false });
 
-  if (!hasSubscriptions) {
+  const hasSubscriptions = (count ?? 0) > 0;
+  const hasReviewItems = (needsReview?.length ?? 0) > 0;
+
+  // A pending review item still deserves visibility even with zero real
+  // subscriptions yet — otherwise a failed parse would be invisible forever.
+  if (!hasSubscriptions && !hasReviewItems) {
     return <EmptyState inboxAddress={inboxAddress} />;
   }
 
@@ -43,6 +49,7 @@ export default async function DashboardPage() {
     <Dashboard
       subscriptions={(subscriptions ?? []) as Subscription[]}
       inboxAddress={inboxAddress}
+      needsReview={needsReview ?? []}
     />
   );
 }

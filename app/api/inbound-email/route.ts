@@ -88,6 +88,13 @@ export async function POST(req: NextRequest) {
   const extracted = await extractSubscription(combined);
 
   if ('error' in extracted) {
+    // Couldn't confidently parse — surface this to the user instead of losing the email.
+    await supabaseAdmin.from('needs_review').insert({
+      user_id: profile.id,
+      subject,
+      raw_email_snippet: emailBody.slice(0, 500),
+      reason: extracted.error,
+    });
     return NextResponse.json(
       { ok: false, reason: extracted.error },
       { status: 200 },
@@ -102,6 +109,7 @@ export async function POST(req: NextRequest) {
     user_id: profile.id,
     name: extracted.name,
     price: extracted.price,
+    currency: extracted.currency || 'USD',
     billing_cycle: extracted.billing_cycle,
     renewal_date: renewalDate,
     reminder_at: defaultReminderAt(renewalDate),

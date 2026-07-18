@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import type { Subscription } from '@/types/subscription';
 import { BleedTotal } from './Bleedtotal';
@@ -8,20 +9,19 @@ import { SubscriptionList } from './Subscriptionlist';
 import { UpcomingStrip } from './UpcomingStrip';
 import { AddSubscriptionForm } from './AddSubscriptionForm';
 import { InboxAddress } from './Inboxaddress';
+import { NeedsReviewItem, NeedsReviewList } from './Needsreviewlist';
 
 export function Dashboard({
   subscriptions,
   inboxAddress,
+  needsReview,
 }: {
   subscriptions: Subscription[];
   inboxAddress: string;
+  needsReview: NeedsReviewItem[];
 }) {
   const shouldReduceMotion = useReducedMotion();
   const [showForm, setShowForm] = useState(false);
-  const monthlyTotal = subscriptions.reduce(
-    (sum, s) => sum + s.monthly_equivalent,
-    0,
-  );
 
   const container = {
     hidden: {},
@@ -61,14 +61,18 @@ export function Dashboard({
       variants={container}
       initial='hidden'
       animate='show'
-      className='mx-auto flex w-full max-w-md flex-col gap-6 px-6 py-16 md:max-w-5xl'
+      className='mx-auto flex w-full max-w-md flex-col gap-6 px-6 py-16 lg:max-w-5xl'
     >
       <motion.div variants={item} className='relative w-full'>
         <div className='flex w-full items-center justify-between gap-3'>
-          <h1 className='font-(family-name:--font-display) text-2xl font-medium text-ink'>
-            Bleed
-          </h1>
+          <h1 className='font-display text-2xl font-medium text-ink'>Bleed</h1>
           <div className='flex items-center gap-3'>
+            <Link
+              href='/settings'
+              className='text-xs text-ink/40 underline decoration-ink/20 underline-offset-4 hover:text-ink/60'
+            >
+              Settings
+            </Link>
             <form action='/auth/signout' method='post'>
               <button className='text-xs text-ink/40 underline decoration-ink/20 underline-offset-4 hover:text-ink/60'>
                 Sign out
@@ -91,7 +95,7 @@ export function Dashboard({
               animate='show'
               exit='exit'
               style={{ transformOrigin: 'top right' }}
-              className='absolute right-0 top-full z-10 mt-2 w-full max-w-md rounded-md border border-sage bg-paper p-4 shadow-md'
+              className='absolute right-0 top-full z-10 mt-2 w-full max-w-md rounded-lg border border-sage bg-paper p-4 shadow-lg'
             >
               <AddSubscriptionForm onDone={() => setShowForm(false)} />
             </motion.div>
@@ -99,11 +103,15 @@ export function Dashboard({
         </AnimatePresence>
       </motion.div>
 
+      <motion.div variants={item} className='w-full'>
+        <NeedsReviewList items={needsReview} />
+      </motion.div>
+
       {/*
         Mobile: everything below just stacks in natural document order
-        (Total, Upcoming, List, Inbox) — no grid applied below the md breakpoint.
+        (Total, Upcoming, List, Inbox) — no grid applied below the lg breakpoint.
 
-        Desktop (md+): a two-column layout via named grid-template-areas.
+        Desktop (lg+): a two-column layout via named grid-template-areas.
         List gets the wide "main content" column; Total/Upcoming/Inbox group
         into a narrower sidebar column, sticky so it stays in view while the
         list scrolls. Areas (not row/col-span math) mean this stays correct
@@ -111,30 +119,30 @@ export function Dashboard({
       */}
       <div
         className="flex flex-col gap-6
-          md:grid md:grid-cols-[1fr_1.6fr] md:items-start md:gap-8
-          md:[grid-template-areas:'total_list'_'upcoming_list'_'inbox_list']"
+          lg:grid lg:grid-cols-[1fr_1.6fr] lg:items-start lg:gap-8
+          lg:[grid-template-areas:'total_list'_'upcoming_list'_'inbox_list']"
       >
         <motion.div
           variants={item}
-          className='w-full md:sticky md:top-16 md:[grid-area:total]'
+          className='w-full lg:sticky lg:top-16 lg:[grid-area:total]'
         >
-          <BleedTotal monthlyTotal={monthlyTotal} />
+          <BleedTotal subscriptions={subscriptions} />
         </motion.div>
 
         <motion.div
           variants={item}
-          className='w-full md:sticky md:top-52 md:[grid-area:upcoming]'
+          className='w-full lg:sticky lg:top-52 lg:[grid-area:upcoming]'
         >
           <UpcomingStrip subscriptions={subscriptions} />
         </motion.div>
 
-        <motion.div variants={item} className='w-full md:[grid-area:list]'>
+        <motion.div variants={item} className='w-full lg:[grid-area:list]'>
           <SubscriptionList subscriptions={subscriptions} />
         </motion.div>
 
         <motion.div
           variants={item}
-          className='w-full md:sticky md:bottom-4 md:[grid-area:inbox]'
+          className='w-full lg:sticky lg:bottom-4 lg:[grid-area:inbox]'
         >
           <InboxAddress address={inboxAddress} />
         </motion.div>
