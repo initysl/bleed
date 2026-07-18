@@ -2,8 +2,10 @@ export type BillingCycle = 'monthly' | 'yearly';
 
 export interface Subscription {
   id: string;
+  user_id: string;
   name: string;
   price: number;
+  currency: string; // ISO 4217, e.g. "USD", "NGN"
   billing_cycle: BillingCycle;
   monthly_equivalent: number;
   renewal_date: string; // ISO date
@@ -22,6 +24,7 @@ export interface Subscription {
 export interface ExtractedSubscription {
   name: string;
   price: number;
+  currency: string; // ISO 4217 code
   billing_cycle: BillingCycle;
   renewal_date: string | null; // may be null if the email doesn't state one
 }

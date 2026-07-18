@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import { EnableNotifications } from './EnableNotifications';
 import { AddSubscriptionForm } from './AddSubscriptionForm';
-import { GhostTotal } from './Ghosttotal';
 import { InboxAddress } from './Inboxaddress';
+import { GhostTotal } from './Ghosttotal';
 
 export function EmptyState({ inboxAddress }: { inboxAddress: string }) {
   const shouldReduceMotion = useReducedMotion();
@@ -32,12 +33,25 @@ export function EmptyState({ inboxAddress }: { inboxAddress: string }) {
       animate='show'
       className='flex min-h-screen flex-col items-center justify-center gap-8 px-6 py-16'
     >
-      <motion.h1
+      <motion.div
         variants={item}
-        className='font-(family-name:--font-display) text-2xl font-medium text-ink'
+        className='flex w-full max-w-md items-center justify-between'
       >
-        Bleed
-      </motion.h1>
+        <h1 className='font-display text-2xl font-medium text-ink'>Bleed</h1>
+        <div className='flex items-center gap-3'>
+          <Link
+            href='/settings'
+            className='text-xs text-ink/40 underline decoration-ink/20 underline-offset-4 hover:text-ink/60'
+          >
+            Settings
+          </Link>
+          <form action='/auth/signout' method='post'>
+            <button className='text-xs text-ink/40 underline decoration-ink/20 underline-offset-4 hover:text-ink/60'>
+              Sign out
+            </button>
+          </form>
+        </div>
+      </motion.div>
 
       <motion.div variants={item} className='text-center'>
         <p className='text-lg text-ink'>Nothing logged yet.</p>
@@ -47,7 +61,7 @@ export function EmptyState({ inboxAddress }: { inboxAddress: string }) {
       </motion.div>
 
       <motion.div variants={item}>
-        <InboxAddress />
+        <InboxAddress address={inboxAddress} />
       </motion.div>
 
       <motion.div variants={item} className='w-full max-w-md'>

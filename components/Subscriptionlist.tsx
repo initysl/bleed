@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import type { Subscription } from '@/types/subscription';
 import { AddSubscriptionForm } from './AddSubscriptionForm';
 import { getBrandStyle } from '@/lib/brandColors';
+import { formatMoney } from '@/lib/currency';
 
 const UNUSED_THRESHOLD_DAYS = 60;
 
@@ -71,7 +72,7 @@ export function SubscriptionList({
                 style={{ color: textColor }}
                 className='font-mono text-sm tabular-nums'
               >
-                ${sub.monthly_equivalent.toFixed(2)}
+                {formatMoney(sub.monthly_equivalent, sub.currency)}
                 <span style={{ color: mutedTextColor }}>/mo</span>
               </span>
             </button>
