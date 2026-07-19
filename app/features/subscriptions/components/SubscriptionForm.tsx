@@ -106,7 +106,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className='flex w-full max-w-md flex-col gap-4'
+      className='flex w-full max-h-38 overflow-y-auto flex-col gap-4'
     >
       <label className='flex flex-col gap-1 text-sm text-ink'>
         Name
