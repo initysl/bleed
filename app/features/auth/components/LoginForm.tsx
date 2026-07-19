@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
@@ -100,6 +101,15 @@ export function LoginForm() {
         >
           {loading ? '…' : mode === 'signup' ? 'Create account' : 'Sign in'}
         </button>
+
+        {mode === 'signin' && (
+          <Link
+            href='/forgot-password'
+            className='text-center text-sm text-ink/50 underline decoration-ink/20 underline-offset-4 hover:text-ink/70'
+          >
+            Forgot password?
+          </Link>
+        )}
 
         <button
           type='button'
