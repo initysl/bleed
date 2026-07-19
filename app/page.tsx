@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { Dashboard } from '@/components/Dashboard';
-import type { Subscription } from '@/types/subscription';
-import { EmptyState } from '@/components/Emptystate';
+import { EmptyState } from '@/app/features/subscriptions/components/EmptyState';
+import { Dashboard } from '@/app/features/subscriptions/components/Dashboard';
+import type { Subscription } from '@/app/features/subscriptions/types';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -39,17 +39,15 @@ export default async function DashboardPage() {
   const hasSubscriptions = (count ?? 0) > 0;
   const hasReviewItems = (needsReview?.length ?? 0) > 0;
 
-  // A pending review item still deserves visibility even with zero real
-  // subscriptions yet — otherwise a failed parse would be invisible forever.
   if (!hasSubscriptions && !hasReviewItems) {
     return <EmptyState inboxAddress={inboxAddress} />;
   }
 
   return (
     <Dashboard
-      subscriptions={(subscriptions ?? []) as Subscription[]}
+      initialSubscriptions={(subscriptions ?? []) as Subscription[]}
+      initialNeedsReview={needsReview ?? []}
       inboxAddress={inboxAddress}
-      needsReview={needsReview ?? []}
     />
   );
 }

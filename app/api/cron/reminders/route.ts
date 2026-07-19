@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
-import { sendRenewalReminderEmail } from '@/lib/resend';
-import { sendRenewalPushNotification } from '@/lib/webpush';
+import { supabaseAdmin } from '@/lib/supabase/admin';
+import { sendRenewalReminderEmail } from '@/lib/email/resend';
+import { sendRenewalPushNotification } from '@/lib/notifications/webpush';
 
 export async function GET(req: NextRequest) {
   const auth = req.headers.get('authorization');

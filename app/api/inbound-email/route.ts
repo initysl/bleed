@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Webhook } from 'svix';
 import { Resend } from 'resend';
-import { extractSubscription } from '@/lib/groq';
-import { supabaseAdmin } from '@/lib/supabase';
+import { extractSubscription } from '@/lib/email/groq';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 

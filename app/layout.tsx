@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Space_Grotesk, Inter, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
+import { QueryProvider } from '@/providers/QueryProvider';
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -35,7 +36,9 @@ export default function RootLayout({
       lang='en'
       className={`${spaceGrotesk.variable} ${inter.variable} ${plexMono.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <QueryProvider>{children}</QueryProvider>
+      </body>
     </html>
   );
 }
