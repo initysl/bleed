@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import type { Subscription } from '@/app/features/subscriptions/types';
 import { SubscriptionForm } from './SubscriptionForm';
 import { getBrandStyle } from '@/lib/utils/brandColors';
 import { formatMoney } from '@/lib/utils/currency';
+import { formatDate } from '@/lib/utils/dates';
+import { Subscription } from '../types';
 
 const UNUSED_THRESHOLD_DAYS = 60;
 
@@ -63,7 +64,7 @@ export function SubscriptionList({
                     {sub.name}
                   </span>
                   <span style={{ color: mutedTextColor }} className='text-xs'>
-                    Renews {new Date(sub.renewal_date).toLocaleDateString()}
+                    Renews {formatDate(sub.renewal_date)}
                     {isLikelyUnused(sub) && ' · not used in a while'}
                   </span>
                 </div>
