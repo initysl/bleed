@@ -35,7 +35,7 @@ export function UpcomingStrip({
             <div
               key={sub.id}
               style={{ backgroundColor: style.bg, color: textColor }}
-              className='flex min-w-[140px] flex-col gap-2 rounded-lg px-4 py-3'
+              className='flex min-w-35 flex-col gap-2 rounded-lg px-4 py-3'
             >
               <span className='text-sm font-medium'>{sub.name}</span>
               <span className='font-mono text-lg tabular-nums'>
