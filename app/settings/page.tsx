@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { FiArrowLeft } from 'react-icons/fi';
 import { createClient } from '@/lib/supabase/server';
 import { DeleteAccountButton } from '@/app/features/auth/components/DeleteAccountButton';
+import { UpdateAccountButton } from '@/app/features/auth/components/UpdateAccountButton';
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -47,6 +48,7 @@ export default async function SettingsPage() {
         <div className='rounded-lg border border-sage bg-white/60 px-4 py-3'>
           <p className='text-sm text-ink'>{user.email}</p>
         </div>
+        <UpdateAccountButton currentEmail={user.email ?? ''} />
       </section>
 
       <section className='flex flex-col gap-2'>
