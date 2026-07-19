@@ -12,6 +12,7 @@ export function NotificationSettings() {
     'default' | 'granted' | 'denied' | 'unsupported'
   >('default');
   const [enabling, setEnabling] = useState(false);
+  const [enableError, setEnableError] = useState<string | null>(null);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{
     ok: boolean;
@@ -24,12 +25,14 @@ export function NotificationSettings() {
 
   async function handleEnable() {
     setEnabling(true);
+    setEnableError(null);
     const result = await enablePushNotifications();
     setEnabling(false);
 
     if (result.status === 'subscribed') setPermission('granted');
     else if (result.status === 'denied') setPermission('denied');
     else if (result.status === 'unsupported') setPermission('unsupported');
+    else if (result.status === 'error') setEnableError(result.error);
   }
 
   async function handleTest() {
@@ -60,13 +63,16 @@ export function NotificationSettings() {
       </div>
 
       {permission === 'default' && (
-        <button
-          onClick={handleEnable}
-          disabled={enabling}
-          className='self-start rounded-md bg-pine px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-pine/90 disabled:opacity-60'
-        >
-          {enabling ? 'Enabling…' : 'Enable'}
-        </button>
+        <div className='flex flex-col gap-1'>
+          <button
+            onClick={handleEnable}
+            disabled={enabling}
+            className='self-start rounded-md bg-pine px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-pine/90 disabled:opacity-60'
+          >
+            {enabling ? 'Enabling…' : 'Enable'}
+          </button>
+          {enableError && <p className='text-xs text-rust'>{enableError}</p>}
+        </div>
       )}
 
       {permission === 'denied' && (
@@ -78,13 +84,25 @@ export function NotificationSettings() {
 
       {permission === 'granted' && (
         <div className='flex flex-col gap-2'>
-          <button
-            onClick={handleTest}
-            disabled={testing}
-            className='self-start rounded-md border border-sage px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-sage/30 disabled:opacity-60'
-          >
-            {testing ? 'Sending…' : 'Send test notification'}
-          </button>
+          <div className='flex gap-2'>
+            <button
+              onClick={handleEnable}
+              disabled={enabling}
+              className='self-start rounded-md border border-sage px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-sage/30 disabled:opacity-60'
+            >
+              {enabling ? 'Registering…' : 'Register this device'}
+            </button>
+
+            <button
+              onClick={handleTest}
+              disabled={testing}
+              className='self-start rounded-md border border-sage px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-sage/30 disabled:opacity-60'
+            >
+              {testing ? 'Sending…' : 'Send test notification'}
+            </button>
+          </div>
+
+          {enableError && <p className='text-xs text-rust'>{enableError}</p>}
 
           {testResult && (
             <div className='flex items-start gap-1.5 text-xs'>
