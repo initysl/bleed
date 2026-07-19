@@ -1,5 +1,5 @@
-import { BillingCycle } from '@/app/features/subscriptions/types';
-import { addMonths, addYears } from 'date-fns';
+import { addMonths, addYears, format } from 'date-fns';
+import type { BillingCycle } from '@/app/features/subscriptions/types';
 
 // Formats a Date as the string <input type="datetime-local"> expects (local time, no timezone suffix).
 export function toDatetimeLocalValue(date: Date): string {
@@ -49,4 +49,13 @@ export function daysUntil(dateStr: string): number {
   target.setHours(0, 0, 0, 0);
   now.setHours(0, 0, 0, 0);
   return Math.round((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+// Fixed format regardless of the runtime's default locale — using
+// .toLocaleDateString() directly would render differently on the server
+// (often en-US, "7/18/2026") vs. a browser set to a different locale
+// (e.g. "18/07/2026"), which breaks React hydration since the server-rendered
+// HTML has to match the client's first render exactly.
+export function formatDate(dateStr: string): string {
+  return format(new Date(dateStr), 'MMM d, yyyy');
 }
