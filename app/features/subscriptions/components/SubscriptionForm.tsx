@@ -86,7 +86,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
         e.stopPropagation();
         form.handleSubmit();
       }}
-      className='flex w-full max-w-md flex-col gap-4'
+      className='flex w-full flex-col gap-4'
     >
       <form.Field name='name'>
         {(field) => {

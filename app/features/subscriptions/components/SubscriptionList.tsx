@@ -87,7 +87,7 @@ export function SubscriptionList({
                   transition={{ duration: 0.25, ease: 'easeOut' }}
                   className='overflow-hidden'
                 >
-                  <div className='border border-t-0 border-sage bg-paper px-4 py-4'>
+                  <div className='max-h-38 overflow-y-auto border border-t-0 border-sage bg-paper px-4 py-4'>
                     <SubscriptionForm
                       existing={sub}
                       onDone={() => setEditingId(null)}
