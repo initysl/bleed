@@ -4,6 +4,7 @@ import { FiArrowLeft } from 'react-icons/fi';
 import { createClient } from '@/lib/supabase/server';
 import { DeleteAccountButton } from '@/app/features/auth/components/DeleteAccountButton';
 import { UpdateAccountButton } from '@/app/features/auth/components/UpdateAccountButton';
+import { NotificationSettings } from '@/app/features/notifications/components/NotificationSettings';
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -29,9 +30,7 @@ export default async function SettingsPage() {
   return (
     <main className='mx-auto flex min-h-screen w-full max-w-md flex-col gap-8 px-6 py-16'>
       <div className='flex items-center justify-between'>
-        <h1 className='font-(family-name:--font-display) text-2xl font-medium text-ink'>
-          Settings
-        </h1>
+        <h1 className='font-display text-2xl font-medium text-ink'>Settings</h1>
         <Link
           href='/'
           className='flex items-center gap-1 text-sm text-ink/50 hover:text-ink/70'
@@ -58,6 +57,13 @@ export default async function SettingsPage() {
         <div className='rounded-lg border border-sage bg-white/60 px-4 py-3'>
           <p className='font-mono text-sm text-ink'>{inboxAddress}</p>
         </div>
+      </section>
+
+      <section className='flex flex-col gap-2'>
+        <p className='text-xs font-medium uppercase tracking-wide text-ink/50'>
+          Notifications
+        </p>
+        <NotificationSettings />
       </section>
 
       <section className='flex flex-col gap-2'>
