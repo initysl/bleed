@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { supabaseAdmin } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/server';
 
 const subscriptionUpdate = z
   .object({
     name: z.string().min(1).optional(),
     price: z.number().positive().optional(),
+    currency: z.string().length(3).optional(),
     billing_cycle: z.enum(['monthly', 'yearly']).optional(),
-    renewal_date: z.string().date().optional(),
+    renewal_date: z.iso.date().optional(),
     reminder_at: z.string().min(1).optional(),
     notify_email: z.boolean().optional(),
     notify_push: z.boolean().optional(),
     category: z.string().nullable().optional(),
-    last_used_at: z.string().date().nullable().optional(),
+    last_used_at: z.iso.date().nullable().optional(),
   })
   .refine(
     (data) =>
@@ -22,11 +23,28 @@ const subscriptionUpdate = z
     { message: 'At least one reminder channel must stay enabled' },
   );
 
+async function requireUser() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return { supabase, user };
+}
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+  const { supabase, user } = await requireUser();
+
+  if (!user) {
+    return NextResponse.json(
+      { ok: false, error: 'unauthorized' },
+      { status: 401 },
+    );
+  }
+
   const body = await req.json();
   const parsed = subscriptionUpdate.safeParse(body);
 
@@ -37,16 +55,16 @@ export async function PATCH(
     );
   }
 
-  // If channel flags are being updated, fetch the current row first so the
-  // "at least one channel" rule can be checked against the merged result,
-  // not just the fields present in this particular request.
+  // If channel flags are being partially updated, check the merged result
+  // against the row as it currently stands — but RLS already guarantees this
+  // client can only see/touch its own row, so no separate ownership check needed.
   if (
     (parsed.data.notify_email === false &&
       parsed.data.notify_push === undefined) ||
     (parsed.data.notify_push === false &&
       parsed.data.notify_email === undefined)
   ) {
-    const { data: current } = await supabaseAdmin
+    const { data: current } = await supabase
       .from('subscriptions')
       .select('notify_email, notify_push')
       .eq('id', id)
@@ -67,15 +85,27 @@ export async function PATCH(
     }
   }
 
-  const { error } = await supabaseAdmin
+  // .select() after .update() only takes the columns argument in this overload —
+  // pass no second { count } option, and instead check whether any row came back.
+  const { data, error } = await supabase
     .from('subscriptions')
     .update(parsed.data)
-    .eq('id', id);
+    .eq('id', id)
+    .select('id');
 
   if (error) {
     return NextResponse.json(
       { ok: false, error: error.message },
       { status: 500 },
+    );
+  }
+
+  // RLS silently matches 0 rows if this id belongs to someone else, rather than erroring —
+  // surface that as a 404 so the client isn't told "ok" for something that didn't happen.
+  if (!data || data.length === 0) {
+    return NextResponse.json(
+      { ok: false, error: 'not found' },
+      { status: 404 },
     );
   }
 
@@ -87,16 +117,32 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+  const { supabase, user } = await requireUser();
 
-  const { error } = await supabaseAdmin
+  if (!user) {
+    return NextResponse.json(
+      { ok: false, error: 'unauthorized' },
+      { status: 401 },
+    );
+  }
+
+  const { data, error } = await supabase
     .from('subscriptions')
     .delete()
-    .eq('id', id);
+    .eq('id', id)
+    .select('id');
 
   if (error) {
     return NextResponse.json(
       { ok: false, error: error.message },
       { status: 500 },
+    );
+  }
+
+  if (!data || data.length === 0) {
+    return NextResponse.json(
+      { ok: false, error: 'not found' },
+      { status: 404 },
     );
   }
 

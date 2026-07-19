@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { FiArrowLeft } from 'react-icons/fi';
 import { createClient } from '@/lib/supabase/server';
-import { DeleteAccountButton } from '@/components/Deleteaccountbutton';
+import { DeleteAccountButton } from '@/app/features/auth/components/DeleteAccountButton';
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -27,11 +28,14 @@ export default async function SettingsPage() {
   return (
     <main className='mx-auto flex min-h-screen w-full max-w-md flex-col gap-8 px-6 py-16'>
       <div className='flex items-center justify-between'>
-        <h1 className='font-display text-2xl font-medium text-ink'>Settings</h1>
+        <h1 className='font-(family-name:--font-display) text-2xl font-medium text-ink'>
+          Settings
+        </h1>
         <Link
           href='/'
-          className='text-sm text-ink/50 underline decoration-ink/20 underline-offset-4 hover:text-ink/70'
+          className='flex items-center gap-1 text-sm text-ink/50 hover:text-ink/70'
         >
+          <FiArrowLeft className='h-3.5 w-3.5' />
           Back to dashboard
         </Link>
       </div>
