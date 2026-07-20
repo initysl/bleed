@@ -1,5 +1,5 @@
-import { Subscription } from '@/app/features/subscriptions/types';
 import { Resend } from 'resend';
+import type { Subscription } from '@/app/features/subscriptions/types';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -7,7 +7,7 @@ export async function sendRenewalReminderEmail(
   to: string,
   subscription: Subscription,
 ) {
-  return resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: process.env.RESEND_FROM_ADDRESS!,
     to,
     subject: `${subscription.name} renews in a few days — $${subscription.price}`,
@@ -17,4 +17,31 @@ export async function sendRenewalReminderEmail(
       <p>Decide now: cancel it, or let it renew.</p>
     `,
   });
+
+  // resend.emails.send() does NOT throw on API-level failures (unverified domain,
+  // the sandbox "can only send to your own address" restriction, etc.) — it just
+  // returns { error } and resolves normally. Not checking this was why reminder
+  // emails could silently never arrive with zero visibility anywhere.
+  if (error) {
+    console.error(`[email] send failed to ${to}:`, error);
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function sendTestEmail(to: string) {
+  const { data, error } = await resend.emails.send({
+    from: process.env.RESEND_FROM_ADDRESS!,
+    to,
+    subject: 'Bleed test email',
+    html: "<p>If you're reading this, outbound email is working.</p>",
+  });
+
+  if (error) {
+    console.error(`[email] test send failed to ${to}:`, error);
+    throw new Error(error.message);
+  }
+
+  return data;
 }

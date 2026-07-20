@@ -47,12 +47,26 @@ export async function GET(req: NextRequest) {
         .single();
 
       if (profile?.email) {
-        dispatches.push(sendRenewalReminderEmail(profile.email, sub));
+        dispatches.push(
+          sendRenewalReminderEmail(profile.email, sub).catch((err) => {
+            console.error(
+              `[cron] email dispatch failed for subscription ${sub.id}:`,
+              err,
+            );
+          }),
+        );
       }
     }
 
     if (sub.notify_push) {
-      dispatches.push(sendRenewalPushNotification(sub));
+      dispatches.push(
+        sendRenewalPushNotification(sub).catch((err) => {
+          console.error(
+            `[cron] push dispatch failed for subscription ${sub.id}:`,
+            err,
+          );
+        }),
+      );
     }
 
     await Promise.all(dispatches);
