@@ -55,9 +55,7 @@ export function Dashboard({
         variants={item}
         className='flex w-full items-center justify-between gap-3'
       >
-        <h1 className='font-(family-name:--font-display) text-2xl font-medium text-ink'>
-          Bleed
-        </h1>
+        <h1 className='font-display text-2xl font-medium text-ink'>Bleed</h1>
         <div className='flex items-center gap-3'>
           <Link
             href='/settings'
