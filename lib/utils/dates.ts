@@ -59,3 +59,50 @@ export function daysUntil(dateStr: string): number {
 export function formatDate(dateStr: string): string {
   return format(new Date(dateStr), 'MMM d, yyyy');
 }
+
+interface AdvanceRenewalInput {
+  billingAnchorDate: Date;
+  billingCycle: BillingCycle;
+  cyclesElapsed: number;
+  currentRenewalDate: Date;
+  currentReminderAt: Date;
+  now?: Date; // injectable for testing — defaults to the real current time
+}
+
+interface AdvanceRenewalResult {
+  renewalDate: Date;
+  reminderAt: Date;
+  cyclesElapsed: number;
+}
+
+// Moves a subscription forward to its next un-passed renewal, always computing
+// from the fixed billingAnchorDate (never from currentRenewalDate) to avoid the
+// month-end chaining drift described above. Loops in case multiple cycles were
+// missed entirely (e.g. the cron didn't run for a while) — each pass recomputes
+// from the anchor, so no drift accumulates regardless of how many cycles it
+// has to jump. The user's chosen reminder lead time (however many days/hours
+// before renewal they asked to be reminded) is preserved exactly, rather than
+// resetting to some default.
+export function advanceToNextRenewal(
+  input: AdvanceRenewalInput,
+): AdvanceRenewalResult {
+  const now = input.now ?? new Date();
+  const reminderLeadMs =
+    input.currentRenewalDate.getTime() - input.currentReminderAt.getTime();
+
+  let cyclesElapsed = input.cyclesElapsed;
+  let renewalDate = input.currentRenewalDate;
+
+  while (renewalDate.getTime() <= now.getTime()) {
+    cyclesElapsed += 1;
+    renewalDate = addBillingCycles(
+      input.billingAnchorDate,
+      input.billingCycle,
+      cyclesElapsed,
+    );
+  }
+
+  const reminderAt = new Date(renewalDate.getTime() - reminderLeadMs);
+
+  return { renewalDate, reminderAt, cyclesElapsed };
+}

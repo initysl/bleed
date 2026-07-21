@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { sendRenewalReminderEmail } from '@/lib/email/resend';
 import { sendRenewalPushNotification } from '@/lib/notifications/webpush';
+import { advanceToNextRenewal } from '@/lib/utils/dates';
 
 export async function GET(req: NextRequest) {
   const auth = req.headers.get('authorization');
@@ -9,25 +10,25 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
-  const now = new Date().toISOString();
+  const now = new Date();
+  const nowIso = now.toISOString();
+  const today = nowIso.slice(0, 10);
 
-  // Across all users — the admin client bypasses RLS here, which is intentional:
-  // this is a trusted background job, not a request on behalf of one user.
-  const { data: dueSubscriptions, error } = await supabaseAdmin
+  // ---- Phase 1: dispatch any reminders whose time has come ----
+  const { data: dueSubscriptions, error: dueError } = await supabaseAdmin
     .from('subscriptions')
     .select('*')
-    .lte('reminder_at', now);
+    .lte('reminder_at', nowIso);
 
-  if (error)
+  if (dueError) {
     return NextResponse.json(
-      { ok: false, error: error.message },
+      { ok: false, error: dueError.message },
       { status: 500 },
     );
-  if (!dueSubscriptions?.length)
-    return NextResponse.json({ ok: true, sent: 0 });
+  }
 
   let sent = 0;
-  for (const sub of dueSubscriptions) {
+  for (const sub of dueSubscriptions ?? []) {
     const { data: alreadySent } = await supabaseAdmin
       .from('reminder_log')
       .select('id')
@@ -78,5 +79,54 @@ export async function GET(req: NextRequest) {
     sent++;
   }
 
-  return NextResponse.json({ ok: true, sent });
+  // ---- Phase 2: advance any subscription whose renewal date has passed ----
+  // Deliberately separate from phase 1 — reminder_at is always set before
+  // renewal_date, so by the time a renewal_date has passed, that cycle's
+  // reminder has already necessarily fired earlier in a previous run.
+  // Advancing here computes the NEXT reminder_at, so future reminders keep
+  // firing every cycle without the user re-entering anything.
+  const { data: passedRenewals, error: passedError } = await supabaseAdmin
+    .from('subscriptions')
+    .select('*')
+    .lte('renewal_date', today);
+
+  if (passedError) {
+    return NextResponse.json(
+      { ok: false, sent, error: passedError.message },
+      { status: 500 },
+    );
+  }
+
+  let advanced = 0;
+  for (const sub of passedRenewals ?? []) {
+    const result = advanceToNextRenewal({
+      billingAnchorDate: new Date(sub.billing_anchor_date),
+      billingCycle: sub.billing_cycle,
+      cyclesElapsed: sub.cycles_elapsed,
+      currentRenewalDate: new Date(sub.renewal_date),
+      currentReminderAt: new Date(sub.reminder_at),
+      now,
+    });
+
+    const { error: updateError } = await supabaseAdmin
+      .from('subscriptions')
+      .update({
+        renewal_date: result.renewalDate.toISOString().slice(0, 10),
+        reminder_at: result.reminderAt.toISOString(),
+        cycles_elapsed: result.cyclesElapsed,
+      })
+      .eq('id', sub.id);
+
+    if (updateError) {
+      console.error(
+        `[cron] failed to advance renewal for subscription ${sub.id}:`,
+        updateError,
+      );
+      continue;
+    }
+
+    advanced++;
+  }
+
+  return NextResponse.json({ ok: true, sent, advanced });
 }

@@ -66,9 +66,22 @@ export async function PATCH(
 
   // .select() after .update() only takes the columns argument in this overload —
   // pass no second { count } option, and instead check whether any row came back.
+  // If the user is manually setting a new renewal_date, that redefines the
+  // cycle's origin — reset the anchor and cycle counter to match, so future
+  // auto-advances compute forward from THIS date, not the old one.
+  const updatePayload: typeof parsed.data & {
+    billing_anchor_date?: string;
+    cycles_elapsed?: number;
+  } = { ...parsed.data };
+
+  if (parsed.data.renewal_date) {
+    updatePayload.billing_anchor_date = parsed.data.renewal_date;
+    updatePayload.cycles_elapsed = 0;
+  }
+
   const { data, error } = await supabase
     .from('subscriptions')
-    .update(parsed.data)
+    .update(updatePayload)
     .eq('id', id)
     .select('id');
 

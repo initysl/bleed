@@ -61,8 +61,13 @@ export async function POST(req: NextRequest) {
 
   // No need to pass user_id explicitly — the column default (auth.uid()) fills it
   // in from this request's session, and the RLS "with check" clause enforces it.
+  // billing_anchor_date is fixed to the renewal_date set right now — this is the
+  // origin point every future cycle gets computed from (see advanceToNextRenewal
+  // in lib/utils/dates.ts), never recomputed from a previous cycle's date.
   const { error } = await supabase.from('subscriptions').insert({
     ...parsed.data,
+    billing_anchor_date: parsed.data.renewal_date,
+    cycles_elapsed: 0,
     source: 'manual',
   });
 
