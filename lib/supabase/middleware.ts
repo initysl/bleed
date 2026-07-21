@@ -1,6 +1,13 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+const PUBLIC_ROUTES = [
+  '/login',
+  '/signup',
+  '/forgot-password',
+  '/reset-password',
+];
+
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -16,7 +23,9 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
+
           response = NextResponse.next({ request });
+
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           );
@@ -25,21 +34,27 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  // Use getUser(), not getSession() — this verifies the token against the auth
-  // server rather than trusting whatever's in the cookie unchecked.
+  // Use getUser(), not getSession() — this validates the access token with
+  // Supabase Auth instead of trusting the session cookie alone.
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isAuthRoute = request.nextUrl.pathname.startsWith('/login');
+  const pathname = request.nextUrl.pathname;
 
-  if (!user && !isAuthRoute) {
+  const isPublicRoute = PUBLIC_ROUTES.some((route) =>
+    pathname.startsWith(route),
+  );
+
+  // Unauthenticated users may only access public routes.
+  if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
   }
 
-  if (user && isAuthRoute) {
+  // Authenticated users don't need to visit auth pages.
+  if (user && isPublicRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/';
     return NextResponse.redirect(url);

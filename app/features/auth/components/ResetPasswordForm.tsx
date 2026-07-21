@@ -41,7 +41,7 @@ export function ResetPasswordForm() {
 
   return (
     <div className='flex flex-col items-center gap-8'>
-      <h1 className='font-(family-name:--font-display) text-2xl font-medium text-ink'>
+      <h1 className='font-display text-2xl font-medium text-ink'>
         Set a new password
       </h1>
 
