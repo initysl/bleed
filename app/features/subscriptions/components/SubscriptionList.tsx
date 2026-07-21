@@ -51,7 +51,7 @@ export function SubscriptionList({
                 <div className='flex gap-4'>
                   <div
                     style={{ backgroundColor: style.bg }}
-                    className='flex h-8 w-8 shrink-0 items-center justify-center rounded-xl font-normal text-white'
+                    className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-normal text-white'
                   >
                     {sub.name.charAt(0).toUpperCase()}
                   </div>
