@@ -38,7 +38,7 @@ export function ForgotPasswordForm() {
   if (sentTo) {
     return (
       <div className='flex flex-col items-center gap-3 text-center'>
-        <h1 className='font-(family-name:--font-display) text-2xl font-medium text-ink'>
+        <h1 className='font-display text-2xl font-medium text-ink'>
           Check your email
         </h1>
         <p className='max-w-sm text-sm text-ink/60'>
@@ -51,7 +51,7 @@ export function ForgotPasswordForm() {
 
   return (
     <div className='flex flex-col items-center gap-8'>
-      <h1 className='font-(family-name:--font-display) text-2xl font-medium text-ink'>
+      <h1 className='font-display text-2xl font-medium text-ink'>
         Reset your password
       </h1>
 
