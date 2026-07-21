@@ -8,13 +8,16 @@ export async function sendRenewalReminderEmail(
   subscription: Subscription,
 ) {
   const { data, error } = await resend.emails.send({
-    from: process.env.RESEND_FROM_ADDRESS!,
+    from: `Bleed <${process.env.RESEND_FROM_ADDRESS}>`,
     to,
     subject: `${subscription.name} renews in a few days — $${subscription.price}`,
     html: `
       <p><strong>${subscription.name}</strong> renews on ${subscription.renewal_date}.</p>
       <p>You'll be charged <strong>$${subscription.price}</strong> (${subscription.billing_cycle}).</p>
       <p>Decide now: cancel it, or let it renew.</p>
+      <p style="color:#888; font-size:12px; margin-top:24px;">
+        This is an automated message — replies to this address aren't monitored.
+      </p>
     `,
   });
 
@@ -32,10 +35,15 @@ export async function sendRenewalReminderEmail(
 
 export async function sendTestEmail(to: string) {
   const { data, error } = await resend.emails.send({
-    from: process.env.RESEND_FROM_ADDRESS!,
+    from: `Bleed <${process.env.RESEND_FROM_ADDRESS}>`,
     to,
     subject: 'Bleed test email',
-    html: "<p>If you're reading this, outbound email is working.</p>",
+    html: `
+      <p>If you're reading this, outbound email is working.</p>
+      <p style="color:#888; font-size:12px; margin-top:24px;">
+        This is an automated message — replies to this address aren't monitored.
+      </p>
+    `,
   });
 
   if (error) {
