@@ -18,7 +18,7 @@ export function InboxAddress({ address }: { address: string }) {
         <span className='font-mono text-sm text-ink truncate'>{address}</span>
         <button
           onClick={handleCopy}
-          className='flex shrink-0 items-center gap-1.5 rounded-md bg-pine px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-pine/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pine'
+          className='flex shrink-0 items-center gap-1.5 rounded-md bg-pine px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-pine/90 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-pine'
         >
           {copied ? (
             <FiCheck className='h-3.5 w-3.5' />

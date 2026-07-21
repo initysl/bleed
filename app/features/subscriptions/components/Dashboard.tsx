@@ -61,12 +61,12 @@ export function Dashboard({
             href='/settings'
             className='flex items-center gap-1 text-xs text-ink/40 hover:text-ink/60'
           >
-            <FiSettings className='h-3.5 w-3.5' />
+            <FiSettings size={18} />
             Settings
           </Link>
           <form action='/auth/signout' method='post'>
             <button className='flex items-center gap-1 text-xs text-ink/40 hover:text-ink/60'>
-              <FiLogOut className='h-3.5 w-3.5' />
+              <FiLogOut size={18} />
               Sign out
             </button>
           </form>
@@ -74,7 +74,7 @@ export function Dashboard({
             onClick={() => setShowForm(true)}
             className='flex items-center gap-1.5 rounded-md bg-pine px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-pine/90'
           >
-            <FiPlus className='h-3.5 w-3.5' />
+            <FiPlus size={18} />
             Add subscription
           </button>
         </div>
