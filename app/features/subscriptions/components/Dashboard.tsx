@@ -49,33 +49,42 @@ export function Dashboard({
       variants={container}
       initial='hidden'
       animate='show'
-      className='mx-auto flex w-full max-w-md flex-col gap-6 px-6 py-16 lg:max-w-5xl'
+      className='mx-auto flex w-full flex-col gap-6 px-6 py-16 md:max-w-5xl'
     >
       <motion.div
         variants={item}
         className='flex w-full items-center justify-between gap-3'
       >
         <h1 className='font-display text-2xl font-medium text-ink'>Bleed</h1>
-        <div className='flex items-center gap-3'>
+
+        <div className='flex items-center gap-4'>
           <Link
             href='/settings'
-            className='flex items-center gap-1 text-xs text-ink/40 hover:text-ink/60'
+            className='group flex items-center gap-1 text-xs text-ink/50 transition-colors hover:text-ink'
           >
             <FiSettings size={18} />
-            Settings
+            <span className='relative hidden sm:inline'>
+              Settings
+              <span className='absolute -bottom-0.5 left-0 h-px w-0 bg-current transition-all duration-300 group-hover:w-full' />
+            </span>
           </Link>
+
           <form action='/auth/signout' method='post'>
-            <button className='flex items-center gap-1 text-xs text-ink/40 hover:text-ink/60'>
+            <button className='group flex items-center gap-1 text-xs text-ink/50 transition-colors hover:text-ink'>
               <FiLogOut size={18} />
-              Sign out
+              <span className='relative hidden sm:inline'>
+                Sign out
+                <span className='absolute -bottom-0.5 left-0 h-px w-0 bg-current transition-all duration-300 group-hover:w-full' />
+              </span>
             </button>
           </form>
+
           <button
             onClick={() => setShowForm(true)}
             className='flex items-center gap-1.5 rounded-md bg-pine px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-pine/90'
           >
             <FiPlus size={18} />
-            Add subscription
+            <span className='hidden sm:inline'>Add subscription</span>
           </button>
         </div>
       </motion.div>
@@ -94,30 +103,30 @@ export function Dashboard({
 
       <div
         className="flex flex-col gap-6
-          lg:grid lg:grid-cols-[1fr_1.6fr] lg:items-start lg:gap-8
-          lg:[grid-template-areas:'total_list'_'upcoming_list'_'inbox_list']"
+          md:grid md:grid-cols-[1fr_1.6fr] md:items-start md:gap-8
+          md:[grid-template-areas:'total_list'_'upcoming_list'_'inbox_list']"
       >
         <motion.div
           variants={item}
-          className='w-full lg:sticky lg:top-16 lg:[grid-area:total]'
+          className='w-full md:sticky md:top-16 md:[grid-area:total]'
         >
           <BleedTotal subscriptions={subscriptions} />
         </motion.div>
 
         <motion.div
           variants={item}
-          className='w-full lg:sticky lg:top-52 lg:[grid-area:upcoming]'
+          className='w-full md:sticky md:top-52 md:[grid-area:upcoming]'
         >
           <UpcomingStrip subscriptions={subscriptions} />
         </motion.div>
 
-        <motion.div variants={item} className='w-full lg:[grid-area:list]'>
+        <motion.div variants={item} className='w-full md:[grid-area:list]'>
           <SubscriptionList subscriptions={subscriptions} />
         </motion.div>
 
         <motion.div
           variants={item}
-          className='w-full lg:sticky lg:bottom-4 lg:[grid-area:inbox]'
+          className='w-full md:sticky md:bottom-4 md:[grid-area:inbox]'
         >
           <InboxAddress address={inboxAddress} />
         </motion.div>
