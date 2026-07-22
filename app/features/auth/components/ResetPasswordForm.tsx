@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from '@tanstack/react-form';
+import { FiLock } from 'react-icons/fi';
 import { createClient } from '@/lib/supabase/client';
 import { newPasswordSchema } from '@/app/features/auth/schema';
 
@@ -15,16 +16,20 @@ function firstErrorMessage(errors: unknown[]): string | null {
 export function ResetPasswordForm() {
   const router = useRouter();
   const supabase = createClient();
+
   const [formError, setFormError] = useState<string | null>(null);
 
   const form = useForm({
-    defaultValues: { password: '', confirm: '' },
-    validators: { onSubmit: newPasswordSchema },
+    defaultValues: {
+      password: '',
+      confirm: '',
+    },
+    validators: {
+      onSubmit: newPasswordSchema,
+    },
     onSubmit: async ({ value }) => {
       setFormError(null);
 
-      // By the time this page loads, /auth/confirm has already verified the
-      // recovery link and established a temporary session.
       const { error } = await supabase.auth.updateUser({
         password: value.password,
       });
@@ -40,10 +45,18 @@ export function ResetPasswordForm() {
   });
 
   return (
-    <div className='flex flex-col items-center gap-8'>
-      <h1 className='font-display text-2xl font-medium text-ink'>
-        Set a new password
-      </h1>
+    <div className='w-full max-w-md rounded-4xl bg-white p-10'>
+      <div className='mb-8 text-center'>
+        <div className='mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-pine/10 text-pine'>
+          <FiLock size={24} />
+        </div>
+
+        <h1 className='font-display text-3xl text-ink'>Create New Password</h1>
+
+        <p className='mt-2 text-sm leading-6 text-ink/55'>
+          Your new password must be different from the one you previously used.
+        </p>
+      </div>
 
       <form
         onSubmit={(e) => {
@@ -51,23 +64,25 @@ export function ResetPasswordForm() {
           e.stopPropagation();
           form.handleSubmit();
         }}
-        className='flex w-full max-w-sm flex-col gap-4'
+        className='space-y-5'
       >
         <form.Field name='password'>
           {(field) => {
             const error = firstErrorMessage(field.state.meta.errors);
+
             return (
-              <label className='flex flex-col gap-1 text-sm text-ink'>
-                New password
+              <div>
                 <input
                   type='password'
+                  placeholder='New password'
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink outline-none focus:border-pine'
+                  className='h-14 w-full rounded-full border border-sage/40 bg-[#F7F7F7] px-6 text-sm outline-none transition focus:border-pine focus:bg-white'
                 />
-                {error && <span className='text-xs text-rust'>{error}</span>}
-              </label>
+
+                {error && <p className='mt-2 text-xs text-rust'>{error}</p>}
+              </div>
             );
           }}
         </form.Field>
@@ -75,23 +90,29 @@ export function ResetPasswordForm() {
         <form.Field name='confirm'>
           {(field) => {
             const error = firstErrorMessage(field.state.meta.errors);
+
             return (
-              <label className='flex flex-col gap-1 text-sm text-ink'>
-                Confirm new password
+              <div>
                 <input
                   type='password'
+                  placeholder='Confirm new password'
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink outline-none focus:border-pine'
+                  className='h-14 w-full rounded-full border border-sage/40 bg-[#F7F7F7] px-6 text-sm outline-none transition focus:border-pine focus:bg-white'
                 />
-                {error && <span className='text-xs text-rust'>{error}</span>}
-              </label>
+
+                {error && <p className='mt-2 text-xs text-rust'>{error}</p>}
+              </div>
             );
           }}
         </form.Field>
 
-        {formError && <p className='text-sm text-rust'>{formError}</p>}
+        {formError && (
+          <div className='rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-rust'>
+            {formError}
+          </div>
+        )}
 
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
@@ -100,9 +121,9 @@ export function ResetPasswordForm() {
             <button
               type='submit'
               disabled={!canSubmit}
-              className='rounded-md bg-pine px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-pine/90 disabled:opacity-60'
+              className='h-14 w-full rounded-full bg-pine font-medium text-paper transition hover:bg-pine/90 disabled:cursor-not-allowed disabled:opacity-60'
             >
-              {isSubmitting ? 'Saving…' : 'Set new password'}
+              {isSubmitting ? 'Saving...' : 'Update Password'}
             </button>
           )}
         </form.Subscribe>
