@@ -108,54 +108,59 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
         }}
       </form.Field>
 
-      <div className='flex gap-3 font-mono'>
-        <form.Field name='price'>
-          {(field) => {
-            const error = firstErrorMessage(field.state.meta.errors);
-            return (
-              <label className='flex flex-1 flex-col gap-1 text-sm text-ink'>
-                Price
-                <input
-                  type='number'
-                  step='0.01'
-                  min='0'
+      <div className='flex flex-col gap-3'>
+        {/* Price + Currency */}
+        <div className='flex gap-3'>
+          <form.Field name='price'>
+            {(field) => {
+              const error = firstErrorMessage(field.state.meta.errors);
+
+              return (
+                <label className='flex flex-1 flex-col gap-1 text-sm text-ink'>
+                  Price
+                  <input
+                    type='number'
+                    step='0.01'
+                    min='0'
+                    value={field.state.value}
+                    onChange={(e) =>
+                      field.handleChange(e.target.valueAsNumber || 0)
+                    }
+                    onBlur={field.handleBlur}
+                    placeholder='15.49'
+                    className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink outline-none focus:border-pine'
+                  />
+                  {error && <span className='text-xs text-rust'>{error}</span>}
+                </label>
+              );
+            }}
+          </form.Field>
+
+          <form.Field name='currency'>
+            {(field) => (
+              <label className='flex w-28 flex-col gap-1 text-sm text-ink'>
+                Currency
+                <select
                   value={field.state.value}
-                  onChange={(e) =>
-                    field.handleChange(e.target.valueAsNumber || 0)
-                  }
-                  onBlur={field.handleBlur}
-                  placeholder='15.49'
+                  onChange={(e) => field.handleChange(e.target.value)}
                   className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink outline-none focus:border-pine'
-                />
-                {error && <span className='text-xs text-rust'>{error}</span>}
+                >
+                  {CURRENCIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
               </label>
-            );
-          }}
-        </form.Field>
+            )}
+          </form.Field>
+        </div>
 
-        <form.Field name='currency'>
-          {(field) => (
-            <label className='flex w-24 flex-col gap-1 text-sm text-ink'>
-              Currency
-              <select
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink outline-none focus:border-pine'
-              >
-                {CURRENCIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-        </form.Field>
-
+        {/* Billing Cycle */}
         <form.Field name='billing_cycle'>
           {(field) => (
-            <label className='flex flex-1 flex-col gap-1 text-sm text-ink'>
-              Billing cycle
+            <label className='flex flex-col gap-1 text-sm text-ink'>
+              Cycle
               <select
                 value={field.state.value}
                 onChange={(e) =>
