@@ -49,13 +49,13 @@ export function Dashboard({
       variants={container}
       initial='hidden'
       animate='show'
-      className='mx-auto flex w-full flex-col gap-6 px-6 py-16 md:max-w-5xl'
+      className='mx-auto flex w-full flex-col gap-6 px-6 py-16 max-w-5xl'
     >
       <motion.div
         variants={item}
         className='flex w-full items-center justify-between gap-3'
       >
-        <h1 className='font-display text-2xl font-medium text-ink'>Bleed</h1>
+        <h1 className='font-display text-4xl font-medium text-ink'>Bleed</h1>
 
         <div className='flex items-center gap-4'>
           <Link

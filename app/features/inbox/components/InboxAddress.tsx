@@ -28,7 +28,7 @@ export function InboxAddress({ address }: { address: string }) {
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
-      <p className='mt-3 text-sm text-ink/60'>
+      <p className='font-mini mt-3 text-sm text-ink/60'>
         Forward any subscription receipt here. Bleed reads it and adds it to
         your list — no typing required.
       </p>

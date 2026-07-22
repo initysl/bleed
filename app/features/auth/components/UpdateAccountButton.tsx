@@ -17,10 +17,10 @@ export function UpdateAccountButton({
     <>
       <button
         onClick={() => setOpen(true)}
-        className='flex items-center gap-2 rounded-md border border-sage px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-sage/30'
+        className='font-mini flex items-center gap-2 rounded-md border border-sage px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-sage/30'
       >
-        <FiEdit2 className='h-4 w-4' />
-        Update account info
+        <FiEdit2 size={18} />
+        Update
       </button>
 
       <Modal

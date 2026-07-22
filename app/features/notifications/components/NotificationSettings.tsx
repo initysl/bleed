@@ -115,13 +115,13 @@ export function NotificationSettings() {
                 {enabling ? 'Registering…' : 'Register this device'}
               </button>
 
-              <button
+              {/* <button
                 onClick={handleTest}
                 disabled={testing}
                 className='self-start rounded-md border border-sage px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-sage/30 disabled:opacity-60'
               >
                 {testing ? 'Sending…' : 'Send test notification'}
-              </button>
+              </button> */}
             </div>
 
             {enableError && <p className='text-xs text-rust'>{enableError}</p>}
