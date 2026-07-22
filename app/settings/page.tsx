@@ -33,9 +33,9 @@ export default async function SettingsPage() {
         <h1 className='font-display text-2xl font-medium text-ink'>Settings</h1>
         <Link
           href='/'
-          className='flex items-center gap-1 text-sm text-ink/50 hover:text-ink/70'
+          className='font-display flex items-center gap-1 text-sm text-ink/50 hover:text-ink/70'
         >
-          <FiArrowLeft className='h-3.5 w-3.5' />
+          <FiArrowLeft size={18} />
           Back to dashboard
         </Link>
       </div>
