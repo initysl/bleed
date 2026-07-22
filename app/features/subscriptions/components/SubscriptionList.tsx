@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { FiChevronDown } from 'react-icons/fi';
+
 import { SubscriptionForm } from './SubscriptionForm';
 import { getBrandStyle } from '@/lib/utils/brandColors';
 import { formatMoney } from '@/lib/utils/currency';
 import { formatDate } from '@/lib/utils/dates';
+
 import type { Subscription } from '../types';
-import { FiChevronDown } from 'react-icons/fi';
 
 const UNUSED_THRESHOLD_DAYS = 60;
 
@@ -32,50 +34,58 @@ export function SubscriptionList({
   );
 
   return (
-    <div className='flex w-full flex-col gap-4'>
+    <div className='flex flex-col gap-4'>
       {sorted.map((sub) => {
         const isEditing = editingId === sub.id;
         const style = getBrandStyle(sub.name);
 
         return (
-          <div
+          <motion.div
+            layout
             key={sub.id}
-            className='overflow-hidden rounded-lg border border-sage/60 bg-paper shadow-sm'
+            transition={{
+              layout: {
+                duration: 0.28,
+                ease: 'easeInOut',
+              },
+            }}
+            className='overflow-hidden rounded-2xl border border-sage/60 bg-paper shadow-sm transition-shadow hover:shadow-md'
           >
             <button
               onClick={() => setEditingId(isEditing ? null : sub.id)}
-              className='w-full text-left transition-colors hover:bg-black/5'
+              className='w-full text-left transition-colors hover:bg-black/2'
             >
-              <div className='flex items-start justify-between p-2 '>
-                {/* Left */}
+              <div className='flex items-start justify-between p-4'>
+                {/* LEFT */}
+
                 <div className='flex gap-4'>
                   <div
                     style={{ backgroundColor: style.bg }}
-                    className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-normal text-white'
+                    className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-semibold text-white shadow-sm'
                   >
                     {sub.name.charAt(0).toUpperCase()}
                   </div>
 
-                  <div className='flex flex-col gap-2'>
+                  <div className='space-y-2'>
                     <div>
-                      <h3 className='text-base font-normal text-ink'>
+                      <h3 className='text-[15px] font-medium text-ink font-mono'>
                         {sub.name}
                       </h3>
 
-                      <p className='text-xs text-ink/50'>
+                      <p className='text-xs text-ink/50 font-mono'>
                         {sub.billing_cycle === 'monthly'
                           ? 'Monthly subscription'
                           : 'Yearly subscription'}
                       </p>
                     </div>
 
-                    <div className='flex flex-wrap gap-2'>
-                      <span className='text-xs font-medium text-pine'>
+                    <div className='flex flex-wrap items-center gap-2'>
+                      <span className='font-mini rounded-full bg-pine/10 px-2 py-1 text-xs font-medium text-pine'>
                         Renews {formatDate(sub.renewal_date)}
                       </span>
 
                       {isLikelyUnused(sub) && (
-                        <span className=' bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700'>
+                        <span className='rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700'>
                           Unused
                         </span>
                       )}
@@ -83,33 +93,41 @@ export function SubscriptionList({
                   </div>
                 </div>
 
-                {/* Right */}
-                <div className='flex flex-col items-end'>
-                  <span className='font-mono text-sm font-normal text-ink'>
+                {/* RIGHT */}
+
+                <div className='ml-4 flex shrink-0 flex-col items-end font-body'>
+                  <span className='text-lg font-medium text-ink'>
                     {formatMoney(sub.monthly_equivalent, sub.currency)}
                   </span>
 
-                  <span className='text-xs text-ink/45'>/month</span>
-                </div>
-              </div>
+                  <div className='mt-1 flex items-center gap-2'>
+                    <span className='text-xs text-ink/45'>/month</span>
 
-              <div className='border-t border-sage/50 p-2'>
-                <motion.span
-                  animate={{
-                    rotate: isEditing ? 90 : 0,
-                  }}
-                  transition={{ duration: 0.2 }}
-                  className='text-lg text-ink/40 flex justify-end '
-                >
-                  <FiChevronDown size={18} />
-                </motion.span>
+                    <motion.div
+                      animate={{
+                        rotate: isEditing ? 180 : 0,
+                      }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 350,
+                        damping: 22,
+                      }}
+                      className='rounded-full p-1 text-ink/40'
+                    >
+                      <FiChevronDown size={18} />
+                    </motion.div>
+                  </div>
+                </div>
               </div>
             </button>
 
             <AnimatePresence initial={false}>
               {isEditing && (
                 <motion.div
-                  initial={{ height: 0, opacity: 0 }}
+                  initial={{
+                    height: 0,
+                    opacity: 0,
+                  }}
                   animate={{
                     height: 'auto',
                     opacity: 1,
@@ -124,8 +142,21 @@ export function SubscriptionList({
                   }}
                   className='overflow-hidden'
                 >
-                  <div className='border-t border-sage bg-paper p-2'>
-                    <div className='max-h-38 overflow-y-auto'>
+                  <div className='border-t border-sage bg-paper p-4'>
+                    <div className='mb-4 flex items-center justify-between'>
+                      <h4 className='text-xs text-ink/50 transition hover:text-ink'>
+                        Edit subscription
+                      </h4>
+
+                      {/* <button
+                        onClick={() => setEditingId(null)}
+                        className='text-xs text-ink/50 transition hover:text-ink'
+                      >
+                        Close
+                      </button> */}
+                    </div>
+
+                    <div className='max-h-40 overflow-y-auto'>
                       <SubscriptionForm
                         existing={sub}
                         onDone={() => setEditingId(null)}
@@ -135,7 +166,7 @@ export function SubscriptionList({
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+          </motion.div>
         );
       })}
     </div>

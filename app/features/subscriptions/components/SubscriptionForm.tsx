@@ -92,7 +92,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
         {(field) => {
           const error = firstErrorMessage(field.state.meta.errors);
           return (
-            <label className='flex flex-col gap-1 text-sm text-ink'>
+            <label className='flex flex-col gap-1 text-sm text-ink font-mono'>
               Name
               <input
                 type='text'
@@ -108,7 +108,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
         }}
       </form.Field>
 
-      <div className='flex gap-3'>
+      <div className='flex gap-3 font-mono'>
         <form.Field name='price'>
           {(field) => {
             const error = firstErrorMessage(field.state.meta.errors);
@@ -173,7 +173,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
 
       <form.Field name='renewal_date'>
         {(field) => (
-          <label className='flex flex-col gap-1 text-sm text-ink'>
+          <label className='flex flex-col gap-1 text-sm text-ink font-mono'>
             Renewal date
             <input
               type='date'
@@ -214,7 +214,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
                     pushField.state.meta.errors,
                   );
                   return (
-                    <div className='flex flex-col gap-1'>
+                    <div className='flex flex-col gap-1 font-mono'>
                       <ReminderPicker
                         reminderAt={reminderAtField.state.value}
                         notifyEmail={emailField.state.value}
@@ -250,7 +250,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
             <button
               type='submit'
               disabled={!canSubmit || submitting || deleting}
-              className='flex-1 rounded-md bg-pine px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-pine/90 disabled:opacity-60'
+              className='flex-1 rounded-md bg-pine px-4 py-2 text-sm font-medium font-body text-paper transition-colors hover:bg-pine/90 disabled:opacity-60'
             >
               {isSubmitting || submitting
                 ? 'Saving…'
@@ -266,7 +266,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
             type='button'
             onClick={handleDelete}
             disabled={submitting || deleting}
-            className='flex items-center gap-1.5 rounded-md border border-rust px-4 py-2 text-sm font-medium text-rust transition-colors hover:bg-rust/10 disabled:opacity-60'
+            className='flex items-center gap-1.5 rounded-md border border-rust px-4 py-2 text-sm font-medium font-body text-rust transition-colors hover:bg-rust/10 disabled:opacity-60'
           >
             <FiTrash2 className='h-4 w-4' />
             {deleting ? 'Removing…' : 'Remove'}
