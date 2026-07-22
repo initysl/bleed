@@ -63,7 +63,7 @@ export function Dashboard({
             className='group flex items-center gap-1 text-xs text-ink/50 transition-colors hover:text-ink'
           >
             <FiSettings size={18} />
-            <span className='relative hidden sm:inline'>
+            <span className='font-display relative hidden sm:inline'>
               Settings
               <span className='absolute -bottom-0.5 left-0 h-px w-0 bg-current transition-all duration-300 group-hover:w-full' />
             </span>
@@ -72,7 +72,7 @@ export function Dashboard({
           <form action='/auth/signout' method='post'>
             <button className='group flex items-center gap-1 text-xs text-ink/50 transition-colors hover:text-ink'>
               <FiLogOut size={18} />
-              <span className='relative hidden sm:inline'>
+              <span className='font-display relative hidden sm:inline'>
                 Sign out
                 <span className='absolute -bottom-0.5 left-0 h-px w-0 bg-current transition-all duration-300 group-hover:w-full' />
               </span>
@@ -84,7 +84,9 @@ export function Dashboard({
             className='flex items-center gap-1.5 rounded-md bg-pine px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-pine/90'
           >
             <FiPlus size={18} />
-            <span className='hidden sm:inline'>Add subscription</span>
+            <span className='font-display hidden sm:inline'>
+              Add subscription
+            </span>
           </button>
         </div>
       </motion.div>
