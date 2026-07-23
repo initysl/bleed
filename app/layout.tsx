@@ -32,9 +32,43 @@ const quantico = Quantico({
 });
 
 export const metadata: Metadata = {
-  title: "Bleed — see what's actually bleeding your money",
+  metadataBase: new URL('https://yusola.pro'),
+  title: {
+    default: 'Bleed — See exactly what your subscriptions are costing you',
+    template: '%s · Bleed',
+  },
   description:
-    'Forward a receipt, see your subscription bleed, cancel before it renews.',
+    'Forward a subscription receipt and Bleed logs it automatically — no manual entry. See your real monthly spend across every subscription, and get reminded before anything renews so you can decide to keep it or cancel.',
+  keywords: [
+    'subscription tracker',
+    'subscription management',
+    'cancel subscriptions',
+    'recurring payments tracker',
+    'subscription reminder app',
+    'track monthly spending',
+  ],
+  authors: [{ name: 'Yusuf Lawal' }],
+  openGraph: {
+    title: 'Bleed — See exactly what your subscriptions are costing you',
+    images: '/og-image.png',
+    description:
+      'Forward a receipt, Bleed reads it automatically. Get reminded before anything renews.',
+    url: 'https://yusola.pro',
+    siteName: 'Bleed',
+    type: 'website',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Bleed — See exactly what your subscriptions are costing you',
+    images: '/og-image.png',
+    description:
+      'Forward a receipt, Bleed reads it automatically. Get reminded before anything renews.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

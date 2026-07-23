@@ -64,12 +64,12 @@ export function Dashboard({
       variants={container}
       initial='hidden'
       animate='show'
-      className='mx-auto flex w-full max-w-5xl flex-col gap-6 px-6 py-8'
+      className='mx-auto flex w-full max-w-5xl flex-col gap-6 p-2 '
     >
       {/* Sticky Header */}
       <motion.header
         variants={item}
-        className='sticky top-0 z-50 flex h-20 items-center justify-between backdrop-blur-xl'
+        className='sticky top-0 z-50 flex p-5 w-full h-20 items-center justify-between backdrop-blur-xl rounded-2xl'
       >
         <h1 className='font-display text-4xl text-ink'>Bleed</h1>
 
@@ -123,11 +123,11 @@ export function Dashboard({
       </motion.div>
 
       {/* Dashboard Layout */}
-      <div className='grid gap-22 lg:grid-cols-[340px_minmax(0,1fr)]'>
+      <div className='grid gap-10 md:grid-cols-[420px_minmax(0,1fr)]'>
         {/* Left Sidebar */}
         <motion.aside
           variants={item}
-          className='space-y-5 lg:sticky lg:top-24 lg:self-start'
+          className='space-y-5 md:sticky md:top-24 md:self-start'
         >
           <BleedTotal subscriptions={subscriptions} />
 
