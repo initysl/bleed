@@ -69,7 +69,7 @@ export function Dashboard({
       {/* Sticky Header */}
       <motion.header
         variants={item}
-        className='sticky top-0 z-50 flex h-20 items-center justify-between  px-6 backdrop-blur-xl'
+        className='sticky top-0 z-50 flex h-20 items-center justify-between backdrop-blur-xl'
       >
         <h1 className='font-display text-4xl text-ink'>Bleed</h1>
 

@@ -76,7 +76,7 @@ export default async function SettingsPage() {
                 Email
               </p>
 
-              <p className='mt-1 text-base text-ink'>{user.email}</p>
+              <p className='font-mini mt-1 text-base text-ink'>{user.email}</p>
             </div>
 
             <div className='mt-5'>
