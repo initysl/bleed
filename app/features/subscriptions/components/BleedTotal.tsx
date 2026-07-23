@@ -85,7 +85,7 @@ export function BleedTotal({
       <p className='text-xs uppercase tracking-wide text-paper/60 font-mono'>
         Monthly bleed, by currency
       </p>
-      <div className='mt-2 flex flex-col gap-2 max-h-26 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-paper/20'>
+      <div className='mt-2 flex flex-col gap-2 max-h-28 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-paper/20'>
         {currencies.map((currency) => (
           <div key={currency} className='flex items-baseline justify-between'>
             <span className='font-body text-2xl tabular-nums text-paper'>
