@@ -148,7 +148,6 @@ export function LoginForm() {
         </form.Field>
 
         {/* PASSWORD */}
-
         <form.Field name='password'>
           {(field) => {
             const error = firstErrorMessage(field.state.meta.errors);
@@ -195,11 +194,7 @@ export function LoginForm() {
           </div>
         )}
 
-        {formError && (
-          <div className='rounded-xl bg-rust/10 p-3 text-sm text-rust'>
-            {formError}
-          </div>
-        )}
+        {formError && <div className='text-sm text-rust'>{formError}</div>}
 
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
