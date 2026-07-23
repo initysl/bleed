@@ -156,7 +156,7 @@ export function SubscriptionList({
                       </button> */}
                     </div>
 
-                    <div className='max-h-40 overflow-y-auto'>
+                    <div className='max-h-40 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-pine/65'>
                       <SubscriptionForm
                         existing={sub}
                         onDone={() => setEditingId(null)}
