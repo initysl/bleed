@@ -123,7 +123,7 @@ export function Dashboard({
       </motion.div>
 
       {/* Dashboard Layout */}
-      <div className='grid gap-8 lg:grid-cols-[340px_minmax(0,1fr)]'>
+      <div className='grid gap-22 lg:grid-cols-[340px_minmax(0,1fr)]'>
         {/* Left Sidebar */}
         <motion.aside
           variants={item}
