@@ -55,7 +55,7 @@ export function BleedTotal({
 
   if (currencies.length === 0) {
     return (
-      <div className='w-full rounded-lg bg-pine px-6 py-6 text-left'>
+      <div className='w-full rounded-lg bg-pine px-4 py-3 text-left'>
         <p className='text-xs uppercase tracking-wide text-paper/60 font-mono'>
           Monthly bleed
         </p>
@@ -68,7 +68,7 @@ export function BleedTotal({
     const currency = currencies[0];
     const monthly = totalsByCurrency[currency];
     return (
-      <div className='w-full rounded-lg bg-pine px-6 py-6 text-left shadow-sm transition-shadow hover:shadow-md'>
+      <div className='w-full rounded-lg bg-pine px-4 py-3 text-left shadow-sm transition-shadow hover:shadow-md'>
         <p className='text-xs uppercase tracking-wide text-paper/60 font-mono'>
           Monthly bleed
         </p>
@@ -81,7 +81,7 @@ export function BleedTotal({
   }
 
   return (
-    <div className='w-full rounded-lg bg-pine px-6 py-6 text-left'>
+    <div className='w-full rounded-lg bg-pine px-4 py-3 text-left'>
       <p className='text-xs uppercase tracking-wide text-paper/60 font-mono'>
         Monthly bleed, by currency
       </p>
