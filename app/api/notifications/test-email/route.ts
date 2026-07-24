@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { sendTestEmail } from '@/lib/email/resend';
+import { checkRateLimit, testEmailLimiter } from '@/lib/rate-limit';
 
 export async function POST() {
   const supabase = await createClient();
@@ -15,6 +16,9 @@ export async function POST() {
       { status: 401 },
     );
   }
+
+  const rateLimitResponse = await checkRateLimit(testEmailLimiter, user.id);
+  if (rateLimitResponse) return rateLimitResponse;
 
   try {
     await sendTestEmail(user.email);

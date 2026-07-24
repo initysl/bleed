@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { sendPushToUser } from '@/lib/notifications/webpush';
+import { checkRateLimit, testNotificationLimiter } from '@/lib/rate-limit';
 
 export async function POST() {
   const supabase = await createClient();
@@ -15,6 +16,12 @@ export async function POST() {
       { status: 401 },
     );
   }
+
+  const rateLimitResponse = await checkRateLimit(
+    testNotificationLimiter,
+    user.id,
+  );
+  if (rateLimitResponse) return rateLimitResponse;
 
   const result = await sendPushToUser(user.id, {
     title: 'Test notification',
