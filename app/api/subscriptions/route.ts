@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { subscriptionCreateSchema } from '@/app/features/subscriptions/schema';
+import { checkRateLimit, createSubscriptionLimiter } from '@/lib/rate-limit';
 import z from 'zod';
 
 // GET — list the current user's subscriptions. Added specifically so TanStack Query
@@ -49,6 +50,12 @@ export async function POST(req: NextRequest) {
       { status: 401 },
     );
   }
+
+  const rateLimitResponse = await checkRateLimit(
+    createSubscriptionLimiter,
+    user.id,
+  );
+  if (rateLimitResponse) return rateLimitResponse;
 
   const body = await req.json();
   const parsed = subscriptionCreateSchema.safeParse(body);
