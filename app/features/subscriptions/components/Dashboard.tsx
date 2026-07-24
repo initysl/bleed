@@ -1,20 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import { FiLogOut, FiPlus, FiSettings } from 'react-icons/fi';
-
 import type { NeedsReviewItem } from '@/app/features/needs-review/types';
 import type { Subscription } from '@/app/features/subscriptions/types';
-
 import { useNeedsReview } from '@/app/features/needs-review/hooks/useNeedsReview';
 import { useSubscriptions } from '@/app/features/subscriptions/hooks/useSubscriptions';
-
 import { Modal } from '@/app/components/ui/Modal';
 import { InboxAddress } from '@/app/features/inbox/components/InboxAddress';
 import { NeedsReviewList } from '@/app/features/needs-review/components/NeedsReviewList';
-
 import { BleedTotal } from './BleedTotal';
 import { SubscriptionForm } from './SubscriptionForm';
 import { SubscriptionList } from './SubscriptionList';
@@ -69,9 +66,18 @@ export function Dashboard({
       {/* Sticky Header */}
       <motion.header
         variants={item}
-        className='sticky top-0 z-50 flex p-5 w-full h-20 items-center justify-between backdrop-blur-xl rounded-2xl'
+        className='sticky top-0 z-50 flex sm:p-0 p-5 w-full h-20 items-center justify-between backdrop-blur-xl rounded-2xl'
       >
-        <h1 className='font-display text-4xl text-ink'>Bleed</h1>
+        <div className='flex items-center gap-1'>
+          <Image
+            src='/logo.svg'
+            alt='Bleed logo'
+            width={32}
+            height={32}
+            priority={true}
+          />
+          <span className='font-mini text-base text-ink'>leed</span>
+        </div>
 
         <div className='flex items-center gap-4'>
           <Link
