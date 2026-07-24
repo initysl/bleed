@@ -76,7 +76,7 @@ export function Dashboard({
             height={32}
             priority={true}
           />
-          <span className='font-mini text-base text-ink'>leed</span>
+          <span className='font-display text-base text-ink'>leed</span>
         </div>
 
         <div className='flex items-center gap-4'>

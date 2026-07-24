@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useForm } from '@tanstack/react-form';
@@ -109,17 +108,10 @@ export function LoginForm() {
       className='w-full max-w-md rounded-4xl border border-white/50 bg-white/75 p-10'
     >
       <div className='mb-10 text-center'>
-        <Image
-          src='/logo.svg'
-          alt='Bleed logo'
-          width={32}
-          height={32}
-          priority={true}
-          style={{ height: 'auto' }}
-        />
+        <h1 className='font-display text-4xl text-ink'>Bleed</h1>
 
         <p className='mt-3 text-sm leading-6 text-ink/60'>
-          Stop paying for subscriptions you've forgotten.
+          Mange your subscriptions.
         </p>
       </div>
 
