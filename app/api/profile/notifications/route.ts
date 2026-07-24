@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-export async function POST(req: NextRequest) {
+export async function GET() {
   const supabase = await createClient();
 
   const {
@@ -15,27 +15,23 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const sub = await req.json(); // { endpoint, keys: { p256dh, auth } }
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('email_notifications_enabled')
+    .eq('id', user.id)
+    .single();
 
-  const { error } = await supabase.from('push_subscriptions').upsert(
-    {
-      endpoint: sub.endpoint,
-      p256dh: sub.keys.p256dh,
-      auth: sub.keys.auth,
-      user_id: user.id,
-    },
-    { onConflict: 'endpoint' },
-  );
-
-  if (error)
+  if (error) {
     return NextResponse.json(
       { ok: false, error: error.message },
       { status: 500 },
     );
-  return NextResponse.json({ ok: true });
+  }
+
+  return NextResponse.json({ ok: true, data });
 }
 
-export async function DELETE(req: NextRequest) {
+export async function PATCH(req: NextRequest) {
   const supabase = await createClient();
 
   const {
@@ -49,28 +45,26 @@ export async function DELETE(req: NextRequest) {
     );
   }
 
-  const { endpoint } = await req.json();
+  const body = await req.json();
 
-  if (!endpoint) {
+  if (typeof body.email_notifications_enabled !== 'boolean') {
     return NextResponse.json(
-      { ok: false, error: 'endpoint required' },
+      { ok: false, error: 'invalid payload' },
       { status: 400 },
     );
   }
 
-  // Scoped by both endpoint AND user_id — RLS already prevents touching another
-  // user's row, but the explicit user_id check makes that guarantee visible
-  // here too, not just implicit in the database policy.
   const { error } = await supabase
-    .from('push_subscriptions')
-    .delete()
-    .eq('endpoint', endpoint)
-    .eq('user_id', user.id);
+    .from('profiles')
+    .update({ email_notifications_enabled: body.email_notifications_enabled })
+    .eq('id', user.id);
 
-  if (error)
+  if (error) {
     return NextResponse.json(
       { ok: false, error: error.message },
       { status: 500 },
     );
+  }
+
   return NextResponse.json({ ok: true });
 }

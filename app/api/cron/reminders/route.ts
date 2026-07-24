@@ -43,11 +43,13 @@ export async function GET(req: NextRequest) {
     if (sub.notify_email) {
       const { data: profile } = await supabaseAdmin
         .from('profiles')
-        .select('email')
+        .select('email, email_notifications_enabled')
         .eq('id', sub.user_id)
         .single();
 
-      if (profile?.email) {
+      // Two gates, both must pass: the per-subscription toggle (sub.notify_email,
+      // checked above) AND the account-wide email preference set in Settings.
+      if (profile?.email && profile.email_notifications_enabled) {
         dispatches.push(
           sendRenewalReminderEmail(profile.email, sub).catch((err) => {
             console.error(
