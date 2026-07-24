@@ -29,7 +29,7 @@ export default async function SettingsPage() {
     : '';
 
   return (
-    <main className='mx-auto w-full max-w-5xl px-6 py-16'>
+    <main className='mx-auto w-full max-w-5xl p-2'>
       {/* Header */}
       <div className='mb-12 flex items-center justify-between'>
         <div>
@@ -62,7 +62,7 @@ export default async function SettingsPage() {
         </aside>
 
         {/* Right column */}
-        <div className='space-y-10'>
+        <div className='min-w-0 space-y-10'>
           {/* Account */}
           <section className='rounded-2xl border border-sage/60 bg-white/70 p-6 shadow-sm backdrop-blur'>
             <h2 className='font-display text-xl text-ink'>Account</h2>

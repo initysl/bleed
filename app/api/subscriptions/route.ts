@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { subscriptionCreateSchema } from '@/app/features/subscriptions/schema';
+import z from 'zod';
 
 // GET — list the current user's subscriptions. Added specifically so TanStack Query
 // has something to refetch from after a mutation invalidates its cache; the initial
@@ -54,7 +55,10 @@ export async function POST(req: NextRequest) {
 
   if (!parsed.success) {
     return NextResponse.json(
-      { ok: false, error: parsed.error.flatten() },
+      {
+        ok: false,
+        error: z.treeifyError(parsed.error),
+      },
       { status: 400 },
     );
   }
