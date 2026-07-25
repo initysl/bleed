@@ -41,7 +41,7 @@ export default async function SettingsPage() {
           </div>
 
           <Link
-            href='/'
+            href='/dashboard'
             className='group flex items-center gap-2 text-sm text-ink/50 transition hover:text-ink'
           >
             <FiArrowLeft

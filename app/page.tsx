@@ -1,53 +1,57 @@
-import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { EmptyState } from '@/app/features/subscriptions/components/EmptyState';
-import { Dashboard } from '@/app/features/subscriptions/components/Dashboard';
-import type { Subscription } from '@/app/features/subscriptions/types';
 
-export default async function DashboardPage() {
+// Public, unauthenticated marketing page — this is what social media
+// crawlers, search engines, and first-time visitors actually see. Deliberately
+// does NOT redirect based on auth state (middleware already sends logged-in
+// users straight to /dashboard) — this component only needs to know whether
+// to say "Sign in" or "Open dashboard" in the CTA.
+export default async function HomePage() {
   const supabase = await createClient();
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect('/login');
-  }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('inbound_address')
-    .eq('id', user.id)
-    .single();
-
-  const inboxAddress = profile
-    ? `${profile.inbound_address}@${process.env.NEXT_PUBLIC_INBOUND_DOMAIN}`
-    : '';
-
-  const { data: subscriptions, count } = await supabase
-    .from('subscriptions')
-    .select('*', { count: 'exact' })
-    .order('monthly_equivalent', { ascending: false });
-
-  const { data: needsReview } = await supabase
-    .from('needs_review')
-    .select('id, subject, raw_email_snippet, reason, created_at')
-    .eq('resolved', false)
-    .order('created_at', { ascending: false });
-
-  const hasSubscriptions = (count ?? 0) > 0;
-  const hasReviewItems = (needsReview?.length ?? 0) > 0;
-
-  if (!hasSubscriptions && !hasReviewItems) {
-    return <EmptyState inboxAddress={inboxAddress} />;
-  }
-
   return (
-    <Dashboard
-      initialSubscriptions={(subscriptions ?? []) as Subscription[]}
-      initialNeedsReview={needsReview ?? []}
-      inboxAddress={inboxAddress}
-    />
+    <main className='flex min-h-screen flex-col items-center justify-center gap-10 px-6 py-20 text-center'>
+      <div className='flex flex-col items-center gap-4'>
+        <h1 className='font-display text-5xl font-medium text-ink'>Bleed</h1>
+        <p className='max-w-md text-lg text-ink/60'>
+          Forward a subscription receipt and Bleed logs it automatically — no
+          manual entry. See your real monthly spend, and get reminded before
+          anything renews.
+        </p>
+      </div>
+
+      <Link
+        href={user ? '/dashboard' : '/login'}
+        className='rounded-md bg-pine px-6 py-3 text-sm font-medium text-paper transition-colors hover:bg-pine/90'
+      >
+        {user ? 'Open dashboard' : 'Get started'}
+      </Link>
+
+      <div className='mt-12 grid w-full max-w-2xl grid-cols-1 gap-6 text-left sm:grid-cols-3'>
+        <div className='flex flex-col gap-1'>
+          <p className='text-sm font-medium text-ink'>Forward, don't type</p>
+          <p className='text-sm text-ink/60'>
+            Send a receipt to your inbox address — Bleed reads it and logs it.
+          </p>
+        </div>
+        <div className='flex flex-col gap-1'>
+          <p className='text-sm font-medium text-ink'>See the real total</p>
+          <p className='text-sm text-ink/60'>
+            Every subscription, sorted by cost, in your actual currency.
+          </p>
+        </div>
+        <div className='flex flex-col gap-1'>
+          <p className='text-sm font-medium text-ink'>
+            Decide before it renews
+          </p>
+          <p className='text-sm text-ink/60'>
+            Email and push reminders a few days before you're charged again.
+          </p>
+        </div>
+      </div>
+    </main>
   );
 }
