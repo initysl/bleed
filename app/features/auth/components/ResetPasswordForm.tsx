@@ -51,10 +51,7 @@ export function ResetPasswordForm() {
         <div className='flex items-center justify-center'>
           <Image src={Logo} alt='Bleed logo' width={150} priority={true} />
         </div>
-
-        <h1 className='font-display text-xl text-ink'>Create New Password</h1>
-
-        <p className='mt-2 text-sm leading-6 text-ink/55'>
+        <p className='font-display mt-3 text-sm leading-6 text-ink/55'>
           Your new password must be different from the one you previously used.
         </p>
       </div>
@@ -80,7 +77,7 @@ export function ResetPasswordForm() {
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  className='h-14 w-full rounded-full border border-sage/40 bg-[#F7F7F7] px-6 text-sm outline-none transition focus:border-pine focus:bg-white'
+                  className='font-display h-14 w-full rounded-full border border-sage/40 bg-[#F7F7F7] px-6 text-sm outline-none transition focus:border-pine focus:bg-white'
                 />
 
                 {error && <p className='mt-2 text-xs text-rust'>{error}</p>}
@@ -102,7 +99,7 @@ export function ResetPasswordForm() {
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  className='h-14 w-full rounded-full border border-sage/40 bg-[#F7F7F7] px-6 text-sm outline-none transition focus:border-pine focus:bg-white'
+                  className='font-display h-14 w-full rounded-full border border-sage/40 bg-[#F7F7F7] px-6 text-sm outline-none transition focus:border-pine focus:bg-white'
                 />
 
                 {error && <p className='mt-2 text-xs text-rust'>{error}</p>}
@@ -112,7 +109,7 @@ export function ResetPasswordForm() {
         </form.Field>
 
         {formError && (
-          <div className='rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-rust'>
+          <div className='font-mini rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-rust'>
             {formError}
           </div>
         )}
@@ -124,7 +121,7 @@ export function ResetPasswordForm() {
             <button
               type='submit'
               disabled={!canSubmit}
-              className='h-14 w-full rounded-full bg-pine font-medium text-paper transition hover:bg-pine/90 disabled:cursor-not-allowed disabled:opacity-60'
+              className='font-display h-14 w-full rounded-full bg-pine font-medium text-paper transition hover:bg-pine/90 disabled:cursor-not-allowed disabled:opacity-60'
             >
               {isSubmitting ? 'Saving...' : 'Update Password'}
             </button>

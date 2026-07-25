@@ -113,10 +113,7 @@ export function ForgotPasswordForm() {
         <div className='flex items-center justify-center'>
           <Image src={Logo} alt='Bleed logo' width={150} priority={true} />
         </div>
-
-        <h1 className='font-display text-xl text-ink'>Forgot Password?</h1>
-
-        <p className='mt-3 text-sm leading-6 text-ink/60'>
+        <p className='font-display mt-3 text-sm leading-6 text-ink/60'>
           Enter your email and we'll send you a secure link to reset your
           password.
         </p>
@@ -142,7 +139,7 @@ export function ForgotPasswordForm() {
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  className='h-14 w-full rounded-full border border-sage/50 bg-paper px-5 text-sm outline-none transition focus:border-pine focus:ring-4 focus:ring-pine/10'
+                  className='font-display h-14 w-full rounded-full border border-sage/50 bg-paper px-5 text-sm outline-none transition focus:border-pine focus:ring-4 focus:ring-pine/10'
                 />
 
                 {error && <p className='mt-2 text-xs text-rust'>{error}</p>}
@@ -152,7 +149,7 @@ export function ForgotPasswordForm() {
         </form.Field>
 
         {formError && (
-          <div className='rounded-xl bg-rust/10 p-3 text-sm text-rust'>
+          <div className='font-mini rounded-xl bg-rust/10 p-3 text-sm text-rust'>
             {formError}
           </div>
         )}
@@ -169,7 +166,7 @@ export function ForgotPasswordForm() {
                 scale: 0.98,
               }}
               disabled={!canSubmit}
-              className='h-14 w-full rounded-full bg-pine font-medium text-paper disabled:opacity-50'
+              className='font-display h-14 w-full rounded-full bg-pine font-medium text-paper disabled:opacity-50'
             >
               {isSubmitting ? 'Sending...' : 'Send Reset Link'}
             </motion.button>
@@ -179,7 +176,7 @@ export function ForgotPasswordForm() {
         <div className='pt-4 text-center'>
           <Link
             href='/login'
-            className='inline-flex items-center gap-2 text-sm text-ink/55 transition hover:text-pine'
+            className='font-mini inline-flex items-center gap-2 text-sm text-ink/55 transition hover:text-pine'
           >
             <FiArrowLeft />
             Back to Sign In
