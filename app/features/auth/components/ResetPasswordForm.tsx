@@ -74,6 +74,7 @@ export function ResetPasswordForm() {
               <div>
                 <input
                   type='password'
+                  autoComplete='new-password'
                   placeholder='New password'
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
@@ -95,6 +96,7 @@ export function ResetPasswordForm() {
               <div>
                 <input
                   type='password'
+                  autoComplete='new-password'
                   placeholder='Confirm new password'
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
