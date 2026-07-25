@@ -133,6 +133,8 @@ export function LoginForm() {
               <div>
                 <input
                   type='email'
+                  autoComplete='email'
+                  name={field.name}
                   placeholder='Email'
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
@@ -156,7 +158,11 @@ export function LoginForm() {
                 <div className='relative'>
                   <input
                     type={showPassword ? 'text' : 'password'}
+                    autoComplete={
+                      mode === 'signup' ? 'new-password' : 'current-password'
+                    }
                     placeholder='Password'
+                    name={field.name}
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}

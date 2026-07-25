@@ -133,7 +133,7 @@ export function Dashboard({
         {/* Left Sidebar */}
         <motion.aside
           variants={item}
-          className='space-y-5 md:sticky md:top-24 md:self-start'
+          className='space-y-5 md:sticky md:top-24 md:self-start min-w-0'
         >
           <BleedTotal subscriptions={subscriptions} />
 
