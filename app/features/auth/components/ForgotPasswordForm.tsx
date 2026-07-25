@@ -4,10 +4,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useForm } from '@tanstack/react-form';
-import { FiArrowLeft, FiCheckCircle, FiMail } from 'react-icons/fi';
-
+import { FiArrowLeft, FiMail } from 'react-icons/fi';
 import { createClient } from '@/lib/supabase/client';
 import { emailSchema } from '@/app/features/auth/schema';
+import Image from 'next/image';
+import Logo from '@/public/bleedlogo.svg';
 
 function firstErrorMessage(errors: unknown[]): string | null {
   if (!errors.length) return null;
@@ -63,8 +64,8 @@ export function ForgotPasswordForm() {
         className='w-full max-w-md rounded-4xl border border-white/50 bg-white/80 p-10'
       >
         <div className='flex flex-col items-center text-center'>
-          <div className='mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-pine/10'>
-            <FiCheckCircle size={34} className='text-pine' />
+          <div className='mx-auto mb-5 flex items-center justify-center'>
+            <Image src={Logo} alt='Bleed logo' width={150} priority={true} />
           </div>
 
           <h1 className='font-display text-3xl text-ink'>Check your inbox</h1>
@@ -109,11 +110,11 @@ export function ForgotPasswordForm() {
       {/* Header */}
 
       <div className='mb-10 text-center'>
-        <div className='mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-pine/10'>
-          <FiMail size={28} className='text-pine' />
+        <div className='flex items-center justify-center'>
+          <Image src={Logo} alt='Bleed logo' width={150} priority={true} />
         </div>
 
-        <h1 className='font-display text-3xl text-ink'>Forgot Password?</h1>
+        <h1 className='font-display text-xl text-ink'>Forgot Password?</h1>
 
         <p className='mt-3 text-sm leading-6 text-ink/60'>
           Enter your email and we'll send you a secure link to reset your

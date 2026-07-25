@@ -8,6 +8,8 @@ import { useForm } from '@tanstack/react-form';
 import { FiEye, FiEyeOff, FiCheckCircle } from 'react-icons/fi';
 import { createClient } from '@/lib/supabase/client';
 import { loginSchema } from '@/app/features/auth/schema';
+import Image from 'next/image';
+import Logo from '@/public/bleedlogo.svg';
 
 function firstErrorMessage(errors: unknown[]): string | null {
   if (!errors.length) return null;
@@ -107,10 +109,9 @@ export function LoginForm() {
       transition={{ duration: 0.45 }}
       className='w-full max-w-md rounded-4xl border border-white/50 bg-white/75 p-10'
     >
-      <div className='mb-10 text-center'>
-        <h1 className='font-display text-4xl text-ink'>Bleed</h1>
-
-        <p className='mt-3 text-sm leading-6 text-ink/60'>
+      <div className='mb-5 flex flex-col items-center text-center'>
+        <Image src={Logo} alt='Bleed logo' width={150} priority={true} />
+        <p className='text-sm leading-6 text-ink/60'>
           Mange your subscriptions.
         </p>
       </div>
