@@ -9,7 +9,7 @@ async function parseOrThrow(res: Response) {
     const message =
       typeof body.error === 'string'
         ? body.error
-        : (body.error?.formErrors?.[0] ?? 'Request failed');
+        : (body.error?.formErrors?.[0] ?? body.message ?? 'Request failed');
     throw new Error(message);
   }
   return body;

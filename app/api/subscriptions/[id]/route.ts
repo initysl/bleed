@@ -1,27 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
-
-const subscriptionUpdate = z
-  .object({
-    name: z.string().min(1).optional(),
-    price: z.number().positive().optional(),
-    currency: z.string().length(3).optional(),
-    billing_cycle: z.enum(['monthly', 'yearly']).optional(),
-    renewal_date: z.iso.date().optional(),
-    reminder_at: z.string().min(1).optional(),
-    notify_email: z.boolean().optional(),
-    notify_push: z.boolean().optional(),
-    category: z.string().nullable().optional(),
-    last_used_at: z.iso.date().nullable().optional(),
-  })
-  .refine(
-    (data) =>
-      data.notify_email === undefined && data.notify_push === undefined
-        ? true
-        : data.notify_email !== false || data.notify_push !== false,
-    { message: 'At least one reminder channel must stay enabled' },
-  );
+import { subscriptionUpdateSchema } from '@/app/features/subscriptions/schema';
 
 async function requireUser() {
   const supabase = await createClient();
@@ -46,7 +25,7 @@ export async function PATCH(
   }
 
   const body = await req.json();
-  const parsed = subscriptionUpdate.safeParse(body);
+  const parsed = subscriptionUpdateSchema.safeParse(body);
 
   if (!parsed.success) {
     return NextResponse.json(
@@ -87,9 +66,22 @@ export async function PATCH(
 
   // .select() after .update() only takes the columns argument in this overload —
   // pass no second { count } option, and instead check whether any row came back.
+  // If the user is manually setting a new renewal_date, that redefines the
+  // cycle's origin — reset the anchor and cycle counter to match, so future
+  // auto-advances compute forward from THIS date, not the old one.
+  const updatePayload: typeof parsed.data & {
+    billing_anchor_date?: string;
+    cycles_elapsed?: number;
+  } = { ...parsed.data };
+
+  if (parsed.data.renewal_date) {
+    updatePayload.billing_anchor_date = parsed.data.renewal_date;
+    updatePayload.cycles_elapsed = 0;
+  }
+
   const { data, error } = await supabase
     .from('subscriptions')
-    .update(parsed.data)
+    .update(updatePayload)
     .eq('id', id)
     .select('id');
 

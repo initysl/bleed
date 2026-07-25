@@ -9,6 +9,8 @@ export interface Subscription {
   billing_cycle: BillingCycle;
   monthly_equivalent: number;
   renewal_date: string; // ISO date
+  billing_anchor_date: string; // fixed origin date renewal cycles are computed from
+  cycles_elapsed: number;
   reminder_at: string; // ISO timestamp — user-chosen date + time
   notify_email: boolean;
   notify_push: boolean;

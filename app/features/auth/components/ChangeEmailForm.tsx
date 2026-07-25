@@ -1,67 +1,93 @@
 'use client';
 
 import { useState } from 'react';
+import { useForm } from '@tanstack/react-form';
 import { createClient } from '@/lib/supabase/client';
+import { emailSchema } from '@/app/features/auth/schema';
+
+function firstErrorMessage(errors: unknown[]): string | null {
+  if (!errors.length) return null;
+  const err = errors[0] as { message?: string } | string;
+  return typeof err === 'string' ? err : (err.message ?? null);
+}
 
 export function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
   const supabase = createClient();
-  const [newEmail, setNewEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [sent, setSent] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [sentTo, setSentTo] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+  const form = useForm({
+    defaultValues: { email: '' },
+    validators: { onSubmit: emailSchema },
+    onSubmit: async ({ value }) => {
+      setFormError(null);
 
-    // Supabase sends a confirmation link to the NEW address (and, depending on
-    // your project's auth settings, also a notice to the old one) — the email
-    // isn't actually changed until that link is clicked.
-    const { error } = await supabase.auth.updateUser({ email: newEmail });
+      // Sends a confirmation link to the NEW address — the email isn't
+      // actually changed until that link is clicked.
+      const { error } = await supabase.auth.updateUser({ email: value.email });
 
-    setLoading(false);
+      if (error) {
+        setFormError(error.message);
+        return;
+      }
 
-    if (error) {
-      setError(error.message);
-      return;
-    }
+      setSentTo(value.email);
+    },
+  });
 
-    setSent(true);
-  }
-
-  if (sent) {
+  if (sentTo) {
     return (
       <p className='text-sm text-ink/60'>
-        Check {newEmail} for a confirmation link. Your email won't change until
+        Check {sentTo} for a confirmation link. Your email won't change until
         you click it.
       </p>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className='flex flex-col gap-3'>
-      <label className='flex flex-col gap-1 text-sm text-ink'>
-        New email
-        <input
-          type='email'
-          value={newEmail}
-          onChange={(e) => setNewEmail(e.target.value)}
-          placeholder={currentEmail}
-          required
-          className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink outline-none focus:border-pine'
-        />
-      </label>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        form.handleSubmit();
+      }}
+      className='flex flex-col gap-3'
+    >
+      <form.Field name='email'>
+        {(field) => {
+          const error = firstErrorMessage(field.state.meta.errors);
+          return (
+            <label className='flex flex-col gap-1 text-sm text-ink'>
+              New email
+              <input
+                type='email'
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                onBlur={field.handleBlur}
+                placeholder={currentEmail}
+                className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink outline-none focus:border-pine'
+              />
+              {error && <span className='text-xs text-rust'>{error}</span>}
+            </label>
+          );
+        }}
+      </form.Field>
 
-      {error && <p className='text-sm text-rust'>{error}</p>}
+      {formError && <p className='text-sm text-rust'>{formError}</p>}
 
-      <button
-        type='submit'
-        disabled={loading}
-        className='self-start rounded-md bg-pine px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-pine/90 disabled:opacity-60'
+      <form.Subscribe
+        selector={(state) => [state.canSubmit, state.isSubmitting]}
       >
-        {loading ? 'Sending…' : 'Update email'}
-      </button>
+        {([canSubmit, isSubmitting]) => (
+          <button
+            type='submit'
+            disabled={!canSubmit}
+            className='self-start rounded-md bg-pine px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-pine/90 disabled:opacity-60'
+          >
+            {isSubmitting ? 'Sending…' : 'Update email'}
+          </button>
+        )}
+      </form.Subscribe>
     </form>
   );
 }

@@ -1,8 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-// GET — list the current user's unresolved needs-review items.
-export async function GET() {
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
   const supabase = await createClient();
 
   const {
@@ -16,11 +19,14 @@ export async function GET() {
     );
   }
 
+  // .select() after .delete() only takes the columns argument in this overload —
+  // no second { count } option. Check data.length instead, same fix as the
+  // subscriptions/[id] route.
   const { data, error } = await supabase
     .from('needs_review')
-    .select('id, subject, raw_email_snippet, reason, created_at')
-    .eq('resolved', false)
-    .order('created_at', { ascending: false });
+    .delete()
+    .eq('id', id)
+    .select('id');
 
   if (error) {
     return NextResponse.json(
@@ -29,5 +35,12 @@ export async function GET() {
     );
   }
 
-  return NextResponse.json({ ok: true, data });
+  if (!data || data.length === 0) {
+    return NextResponse.json(
+      { ok: false, error: 'not found' },
+      { status: 404 },
+    );
+  }
+
+  return NextResponse.json({ ok: true });
 }
