@@ -39,9 +39,7 @@ export function EmptyState({ inboxAddress }: { inboxAddress: string }) {
         variants={item}
         className='flex w-full max-w-md items-center justify-between'
       >
-        <h1 className='font-(family-name:--font-display) text-2xl font-medium text-ink'>
-          Bleed
-        </h1>
+        <h1 className='font-display text-2xl font-medium text-ink'>Bleed</h1>
         <div className='flex items-center gap-3'>
           <Link
             href='/settings'

@@ -1,20 +1,21 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
-import { FiPlus, FiSettings, FiLogOut } from 'react-icons/fi';
-import type { Subscription } from '@/app/features/subscriptions/types';
+import { FiLogOut, FiPlus, FiSettings } from 'react-icons/fi';
 import type { NeedsReviewItem } from '@/app/features/needs-review/types';
-import { useSubscriptions } from '@/app/features/subscriptions/hooks/useSubscriptions';
+import type { Subscription } from '@/app/features/subscriptions/types';
 import { useNeedsReview } from '@/app/features/needs-review/hooks/useNeedsReview';
-import { BleedTotal } from './BleedTotal';
-import { SubscriptionList } from './SubscriptionList';
-import { UpcomingStrip } from './UpcomingStrip';
-import { SubscriptionForm } from './SubscriptionForm';
+import { useSubscriptions } from '@/app/features/subscriptions/hooks/useSubscriptions';
+import { Modal } from '@/app/components/ui/Modal';
 import { InboxAddress } from '@/app/features/inbox/components/InboxAddress';
 import { NeedsReviewList } from '@/app/features/needs-review/components/NeedsReviewList';
-import { Modal } from '@/app/components/ui/Modal';
+import { BleedTotal } from './BleedTotal';
+import { SubscriptionForm } from './SubscriptionForm';
+import { SubscriptionList } from './SubscriptionList';
+import { UpcomingStrip } from './UpcomingStrip';
 
 export function Dashboard({
   initialSubscriptions,
@@ -33,54 +34,87 @@ export function Dashboard({
 
   const container = {
     hidden: {},
-    show: { transition: { staggerChildren: shouldReduceMotion ? 0 : 0.1 } },
+    show: {
+      transition: {
+        staggerChildren: shouldReduceMotion ? 0 : 0.08,
+      },
+    },
   };
+
   const item = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 10 },
+    hidden: {
+      opacity: 0,
+      y: shouldReduceMotion ? 0 : 10,
+    },
     show: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.35, ease: 'easeOut' as const },
+      transition: {
+        duration: 0.35,
+        ease: 'easeOut' as const,
+      },
     },
   };
 
   return (
-    <motion.div
+    <motion.main
       variants={container}
       initial='hidden'
       animate='show'
-      className='mx-auto flex w-full max-w-md flex-col gap-6 px-6 py-16 lg:max-w-5xl'
+      className='mx-auto flex w-full max-w-5xl flex-col gap-6 p-2 '
     >
-      <motion.div
+      {/* Sticky Header */}
+      <motion.header
         variants={item}
-        className='flex w-full items-center justify-between gap-3'
+        className='sticky top-0 z-50 flex sm:p-0 p-5 w-full h-20 items-center justify-between backdrop-blur-xl rounded-2xl'
       >
-        <h1 className='font-(family-name:--font-display) text-2xl font-medium text-ink'>
-          Bleed
-        </h1>
-        <div className='flex items-center gap-3'>
+        <div className='flex items-center gap-1'>
+          <Image
+            src='/logo.svg'
+            alt='Bleed logo'
+            width={32}
+            height={32}
+            priority={true}
+          />
+          <span className='font-display text-base text-ink'>leed</span>
+        </div>
+
+        <div className='flex items-center gap-4'>
           <Link
             href='/settings'
-            className='flex items-center gap-1 text-xs text-ink/40 hover:text-ink/60'
+            className='group flex items-center gap-1 text-xs text-ink/50 transition hover:text-ink'
           >
-            <FiSettings className='h-3.5 w-3.5' />
-            Settings
+            <FiSettings size={18} />
+
+            <span className='relative hidden font-display sm:inline'>
+              Settings
+              <span className='absolute bottom-0 left-0 h-px w-0 bg-current transition-all duration-300 group-hover:w-full' />
+            </span>
           </Link>
+
           <form action='/auth/signout' method='post'>
-            <button className='flex items-center gap-1 text-xs text-ink/40 hover:text-ink/60'>
-              <FiLogOut className='h-3.5 w-3.5' />
-              Sign out
+            <button className='group flex items-center gap-1 text-xs text-ink/50 transition hover:text-ink'>
+              <FiLogOut size={18} />
+
+              <span className='relative hidden font-display sm:inline'>
+                Sign out
+                <span className='absolute bottom-0 left-0 h-px w-0 bg-current transition-all duration-300 group-hover:w-full' />
+              </span>
             </button>
           </form>
+
           <button
             onClick={() => setShowForm(true)}
-            className='flex items-center gap-1.5 rounded-md bg-pine px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-pine/90'
+            className='flex items-center gap-2 rounded-xl bg-pine px-4 py-2 text-xs font-medium text-paper transition hover:bg-pine/90'
           >
-            <FiPlus className='h-3.5 w-3.5' />
-            Add subscription
+            <FiPlus size={18} />
+
+            <span className='hidden font-display sm:inline'>
+              Add subscription
+            </span>
           </button>
         </div>
-      </motion.div>
+      </motion.header>
 
       <Modal
         open={showForm}
@@ -90,40 +124,29 @@ export function Dashboard({
         <SubscriptionForm onDone={() => setShowForm(false)} />
       </Modal>
 
-      <motion.div variants={item} className='w-full'>
+      <motion.div variants={item}>
         <NeedsReviewList items={needsReview} />
       </motion.div>
 
-      <div
-        className="flex flex-col gap-6
-          lg:grid lg:grid-cols-[1fr_1.6fr] lg:items-start lg:gap-8
-          lg:[grid-template-areas:'total_list'_'upcoming_list'_'inbox_list']"
-      >
-        <motion.div
+      {/* Dashboard Layout */}
+      <div className='grid gap-10 md:grid-cols-[420px_minmax(0,1fr)]'>
+        {/* Left Sidebar */}
+        <motion.aside
           variants={item}
-          className='w-full lg:sticky lg:top-16 lg:[grid-area:total]'
+          className='space-y-5 md:sticky md:top-24 md:self-start'
         >
           <BleedTotal subscriptions={subscriptions} />
-        </motion.div>
 
-        <motion.div
-          variants={item}
-          className='w-full lg:sticky lg:top-52 lg:[grid-area:upcoming]'
-        >
           <UpcomingStrip subscriptions={subscriptions} />
-        </motion.div>
 
-        <motion.div variants={item} className='w-full lg:[grid-area:list]'>
-          <SubscriptionList subscriptions={subscriptions} />
-        </motion.div>
-
-        <motion.div
-          variants={item}
-          className='w-full lg:sticky lg:bottom-4 lg:[grid-area:inbox]'
-        >
           <InboxAddress address={inboxAddress} />
-        </motion.div>
+        </motion.aside>
+
+        {/* Right Content */}
+        <motion.section variants={item} className='min-w-0'>
+          <SubscriptionList subscriptions={subscriptions} />
+        </motion.section>
       </div>
-    </motion.div>
+    </motion.main>
   );
 }

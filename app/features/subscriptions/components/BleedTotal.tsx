@@ -29,7 +29,7 @@ function MonthlyDisplay({
 }) {
   const value = CountUp({ target: monthly });
   return (
-    <p className='mt-1 font-mono text-4xl tabular-nums text-paper'>
+    <p className='mt-1 font-body text-4xl tabular-nums text-paper'>
       {formatMoney(value, currency)}
     </p>
   );
@@ -55,11 +55,11 @@ export function BleedTotal({
 
   if (currencies.length === 0) {
     return (
-      <div className='w-full rounded-lg bg-pine px-6 py-6 text-left'>
-        <p className='text-xs uppercase tracking-wide text-paper/60'>
+      <div className='w-full rounded-lg bg-pine px-4 py-3 text-left'>
+        <p className='text-xs uppercase tracking-wide text-paper/60 font-mono'>
           Monthly bleed
         </p>
-        <p className='mt-1 font-mono text-4xl tabular-nums text-paper'>$0.00</p>
+        <p className='mt-1 font-body text-4xl tabular-nums text-paper'>$0.00</p>
       </div>
     );
   }
@@ -68,12 +68,12 @@ export function BleedTotal({
     const currency = currencies[0];
     const monthly = totalsByCurrency[currency];
     return (
-      <div className='w-full rounded-lg bg-pine px-6 py-6 text-left'>
-        <p className='text-xs uppercase tracking-wide text-paper/60'>
+      <div className='w-full rounded-lg bg-pine px-4 py-3 text-left shadow-sm transition-shadow hover:shadow-md'>
+        <p className='text-xs uppercase tracking-wide text-paper/60 font-mono'>
           Monthly bleed
         </p>
         <MonthlyDisplay monthly={monthly} currency={currency} />
-        <p className='mt-1 text-sm text-paper/70'>
+        <p className='mt-1 text-sm text-paper/70 font-body'>
           {formatMoney(monthly * 12, currency)} / year
         </p>
       </div>
@@ -81,14 +81,14 @@ export function BleedTotal({
   }
 
   return (
-    <div className='w-full rounded-lg bg-pine px-6 py-6 text-left'>
-      <p className='text-xs uppercase tracking-wide text-paper/60'>
+    <div className='w-full rounded-lg bg-pine px-4 py-3 text-left'>
+      <p className='text-xs uppercase tracking-wide text-paper/60 font-mono'>
         Monthly bleed, by currency
       </p>
-      <div className='mt-2 flex flex-col gap-2'>
+      <div className='mt-2 flex flex-col gap-2 max-h-28 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-paper/20'>
         {currencies.map((currency) => (
           <div key={currency} className='flex items-baseline justify-between'>
-            <span className='font-mono text-2xl tabular-nums text-paper'>
+            <span className='font-body text-2xl tabular-nums text-paper'>
               {formatMoney(totalsByCurrency[currency], currency)}
             </span>
             <span className='text-xs text-paper/60'>{currency}/mo</span>

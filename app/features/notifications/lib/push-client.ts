@@ -58,6 +58,60 @@ export async function enablePushNotifications(): Promise<PushSetupResult> {
   }
 }
 
+export type PushDisableResult =
+  | { status: 'unsubscribed' }
+  | { status: 'error'; error: string };
+
+export async function disablePushNotifications(): Promise<PushDisableResult> {
+  try {
+    const registration = await navigator.serviceWorker.getRegistration();
+    const subscription = await registration?.pushManager.getSubscription();
+
+    if (subscription) {
+      const endpoint = subscription.endpoint;
+      await subscription.unsubscribe();
+
+      const res = await fetch('/api/push/subscribe', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        return {
+          status: 'error',
+          error: body.error ?? 'Failed to remove subscription',
+        };
+      }
+    }
+
+    return { status: 'unsubscribed' };
+  } catch (err) {
+    return {
+      status: 'error',
+      error: err instanceof Error ? err.message : 'Unknown error',
+    };
+  }
+}
+
+// The authoritative check for "is push actually active on this device" —
+// Notification.permission being "granted" is NOT sufficient on its own, since
+// permission and an actual saved PushSubscription are two separate things
+// (this exact gap caused the earlier "no device registered" bug).
+export async function hasActivePushSubscription(): Promise<boolean> {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window))
+    return false;
+
+  try {
+    const registration = await navigator.serviceWorker.getRegistration();
+    const subscription = await registration?.pushManager.getSubscription();
+    return subscription != null;
+  } catch {
+    return false;
+  }
+}
+
 export function getNotificationPermissionState():
   | 'default'
   | 'granted'
