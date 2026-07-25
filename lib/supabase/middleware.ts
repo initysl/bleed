@@ -1,7 +1,9 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const PUBLIC_ROUTES = [
+// Pages an unauthenticated visitor can reach. Matched with startsWith, so
+// each entry protects its own sub-paths too (e.g. /reset-password?token=...).
+const AUTH_ONLY_ROUTES = [
   '/login',
   '/signup',
   '/forgot-password',
@@ -42,21 +44,27 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
-  const isPublicRoute = PUBLIC_ROUTES.some((route) =>
+  // "/" is the public marketing page — must be an EXACT match, not startsWith,
+  // since every path starts with "/" and that would make everything "public".
+  const isMarketingRoot = pathname === '/';
+  const isAuthOnlyRoute = AUTH_ONLY_ROUTES.some((route) =>
     pathname.startsWith(route),
   );
+  const isPublicRoute = isMarketingRoot || isAuthOnlyRoute;
 
-  // Unauthenticated users may only access public routes.
+  // Unauthenticated users may only access public routes — everything else
+  // (including /dashboard, /settings) requires a session.
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
   }
 
-  // Authenticated users don't need to visit auth pages.
+  // Authenticated users don't need to see auth pages or the marketing
+  // landing page — send them straight into the app.
   if (user && isPublicRoute) {
     const url = request.nextUrl.clone();
-    url.pathname = '/';
+    url.pathname = '/dashboard';
     return NextResponse.redirect(url);
   }
 
