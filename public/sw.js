@@ -3,7 +3,7 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title ?? 'Bleed', {
       body: data.body ?? '',
-      icon: '/icon.png',
+      icon: '/logo.svg',
     }),
   );
 });
