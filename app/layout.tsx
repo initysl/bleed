@@ -49,25 +49,26 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'Yusuf Lawal' }],
   openGraph: {
-    title: 'Bleed — See exactly what your subscriptions are costing you',
-    images: '/og-image.png',
+    title: 'Bleed - See exactly what your subscriptions are costing you',
     description:
       'Forward a receipt, Bleed reads it automatically. Get reminded before anything renews.',
     url: 'https://bleed.up.railway.app',
     siteName: 'Bleed',
-    type: 'website',
-    locale: 'en_US',
+    images: [
+      {
+        url: 'https://bleed.up.railway.app/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Bleed',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Bleed — See exactly what your subscriptions are costing you',
-    images: '/og-image.png',
+    title: 'Bleed - See exactly what your subscriptions are costing you',
     description:
       'Forward a receipt, Bleed reads it automatically. Get reminded before anything renews.',
-  },
-  robots: {
-    index: true,
-    follow: true,
+    images: ['https://bleed.up.railway.app/og-image.png'],
   },
 };
 
