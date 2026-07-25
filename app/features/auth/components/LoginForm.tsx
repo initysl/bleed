@@ -109,9 +109,9 @@ export function LoginForm() {
       transition={{ duration: 0.45 }}
       className='w-full max-w-md rounded-4xl border border-white/50 bg-white/75 p-10'
     >
-      <div className='mb-5 flex flex-col items-center text-center'>
+      <div className='mb-5 flex flex-col gap-1 items-center text-center'>
         <Image src={Logo} alt='Bleed logo' width={150} priority={true} />
-        <p className='text-sm leading-6 text-ink/60'>
+        <p className='font-mini text-sm leading-6 text-ink/60'>
           Mange your subscriptions.
         </p>
       </div>
@@ -140,7 +140,7 @@ export function LoginForm() {
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  className='h-14 w-full rounded-full border border-sage/50 bg-paper px-5 text-sm outline-none transition focus:border-pine focus:ring-4 focus:ring-pine/10'
+                  className='font-display h-14 w-full rounded-full border border-sage/50 bg-paper px-5 text-sm outline-none transition focus:border-pine focus:ring-4 focus:ring-pine/10'
                 />
 
                 {error && <p className='mt-2 text-xs text-rust'>{error}</p>}
@@ -167,7 +167,7 @@ export function LoginForm() {
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
-                    className='h-14 w-full rounded-full border border-sage/50 bg-paper px-5 pr-14 text-sm outline-none transition focus:border-pine focus:ring-4 focus:ring-pine/10'
+                    className='font-display h-14 w-full rounded-full border border-sage/50 bg-paper px-5 pr-14 text-sm outline-none transition focus:border-pine focus:ring-4 focus:ring-pine/10'
                   />
 
                   <button
@@ -193,7 +193,7 @@ export function LoginForm() {
           <div className='flex justify-end'>
             <Link
               href='/forgot-password'
-              className='text-sm text-ink/55 transition hover:text-pine'
+              className='font-mini text-sm text-ink/55 transition hover:text-pine'
             >
               Forgot Password?
             </Link>
@@ -210,7 +210,7 @@ export function LoginForm() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               disabled={!canSubmit}
-              className='h-14 w-full rounded-full bg-pine font-medium text-paper shadow-lg transition hover:bg-pine/90 disabled:opacity-50'
+              className='font-display h-14 w-full rounded-full bg-pine font-medium text-paper shadow-lg transition hover:bg-pine/90 disabled:opacity-50'
             >
               {isSubmitting
                 ? 'Signing in...'
@@ -223,13 +223,13 @@ export function LoginForm() {
 
         <div className='flex items-center gap-4 pt-2'>
           <div className='h-px flex-1 bg-sage' />
-          <span className='text-xs uppercase tracking-wider text-ink/45'>
+          <span className='font-mini text-xs uppercase tracking-wider text-ink/45'>
             OR
           </span>
           <div className='h-px flex-1 bg-sage' />
         </div>
 
-        <p className='text-center text-sm text-ink/55'>
+        <p className='font-mini text-center text-sm text-ink/55'>
           {mode === 'signup'
             ? 'Already have an account? '
             : "Don't have an account? "}
