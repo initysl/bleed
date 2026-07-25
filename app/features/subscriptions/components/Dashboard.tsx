@@ -70,13 +70,12 @@ export function Dashboard({
       >
         <div className='flex items-center gap-1'>
           <Image
-            src='/logo.svg'
+            src='/bleedlogo.svg'
             alt='Bleed logo'
-            width={32}
+            width={100}
             height={32}
             priority={true}
           />
-          <span className='font-display text-base text-ink'>leed</span>
         </div>
 
         <div className='flex items-center gap-4'>

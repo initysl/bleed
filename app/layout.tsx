@@ -32,7 +32,7 @@ const quantico = Quantico({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://yusola.pro'),
+  metadataBase: new URL('https://bleed.up.railway.app'),
   title: {
     default: 'Bleed — See exactly what your subscriptions are costing you',
     template: '%s · Bleed',
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     images: '/og-image.png',
     description:
       'Forward a receipt, Bleed reads it automatically. Get reminded before anything renews.',
-    url: 'https://yusola.pro',
+    url: 'https://bleed.up.railway.app',
     siteName: 'Bleed',
     type: 'website',
     locale: 'en_US',

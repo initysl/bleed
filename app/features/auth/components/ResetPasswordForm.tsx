@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from '@tanstack/react-form';
-import { FiLock } from 'react-icons/fi';
 import { createClient } from '@/lib/supabase/client';
 import { newPasswordSchema } from '@/app/features/auth/schema';
+import Image from 'next/image';
+import Logo from '@/public/bleedlogo.svg';
 
 function firstErrorMessage(errors: unknown[]): string | null {
   if (!errors.length) return null;
@@ -47,11 +48,11 @@ export function ResetPasswordForm() {
   return (
     <div className='w-full max-w-md rounded-4xl bg-white p-10'>
       <div className='mb-8 text-center'>
-        <div className='mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-pine/10 text-pine'>
-          <FiLock size={24} />
+        <div className='flex items-center justify-center'>
+          <Image src={Logo} alt='Bleed logo' width={150} priority={true} />
         </div>
 
-        <h1 className='font-display text-3xl text-ink'>Create New Password</h1>
+        <h1 className='font-display text-xl text-ink'>Create New Password</h1>
 
         <p className='mt-2 text-sm leading-6 text-ink/55'>
           Your new password must be different from the one you previously used.
