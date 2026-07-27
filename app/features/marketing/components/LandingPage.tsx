@@ -31,38 +31,58 @@ interface FeatureItem {
   readonly tag: string;
 }
 
-const FEATURE_LIST: readonly FeatureItem[] = [
+const FEATURE_LIST = [
   {
     id: 'frictionless-logging',
-    icon: <FiMail className='w-6 h-6 text-emerald-800' />,
+    icon: <FiMail className='w-5 h-5' />,
     title: 'Frictionless Logging',
     description:
       'Forward any receipt or confirmation email directly to your custom Bleed inbox, or type plain text like "signed up for Spotify premium, $11.99/month".',
     tag: 'Auto-Extraction',
+    theme: {
+      bg: 'bg-emerald-50 text-emerald-600',
+      hoverText: 'group-hover:text-emerald-600',
+      hoverGlow: 'hover:shadow-[0_20px_40px_rgba(16,185,129,0.12)]',
+    },
   },
   {
     id: 'real-bleed-dashboard',
-    icon: <FiTrendingUp className='w-6 h-6 text-emerald-800' />,
+    icon: <FiTrendingUp className='w-5 h-5' />,
     title: 'Real Bleed Dashboard',
     description:
       'View your total monthly and yearly spend with live metrics. Subscriptions are sorted by cost with automatic flags for unused services.',
-    tag: 'Live Tracking',
+    tag: 'Live Analytics',
+    theme: {
+      bg: 'bg-violet-50 text-violet-600',
+      hoverText: 'group-hover:text-violet-600',
+      hoverGlow: 'hover:shadow-[0_20px_40px_rgba(139,92,246,0.12)]',
+    },
   },
   {
     id: 'proactive-nudges',
-    icon: <FiBell className='w-6 h-6 text-emerald-800' />,
+    icon: <FiBell className='w-5 h-5' />,
     title: 'Proactive Nudges',
     description:
       'Get email and push notifications days before your card is charged: "Netflix renews in 3 days — $15.49/mo. Cancel or keep?"',
     tag: 'Smart Alerts',
+    theme: {
+      bg: 'bg-amber-50 text-amber-600',
+      hoverText: 'group-hover:text-amber-600',
+      hoverGlow: 'hover:shadow-[0_20px_40px_rgba(245,158,11,0.12)]',
+    },
   },
   {
     id: 'zero-effort-cycles',
-    icon: <FiZap className='w-6 h-6 text-emerald-800' />,
+    icon: <FiZap className='w-5 h-5' />,
     title: 'Zero-Effort Cycles',
     description:
       'After every renewal, Bleed automatically updates the next billing cycle. Set it once or forward a receipt, and never touch it again.',
     tag: 'Automated',
+    theme: {
+      bg: 'bg-sky-50 text-sky-600',
+      hoverText: 'group-hover:text-sky-600',
+      hoverGlow: 'hover:shadow-[0_20px_40px_rgba(14,165,233,0.12)]',
+    },
   },
 ];
 
@@ -331,13 +351,13 @@ export default function BleedLandingPage({
             variants={fadeInUp}
             className='text-center max-w-3xl mx-auto space-y-4 mb-16'
           >
-            <h2 className='text-xs font-bold text-emerald-800 uppercase tracking-widest'>
+            <h2 className='font-minin text-xs font-bold text-emerald-800 uppercase tracking-widest'>
               How Bleed Operates
             </h2>
-            <h3 className='text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight'>
+            <h3 className='font-display text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight'>
               Turn "forgot I was paying for this" into timely decisions.
             </h3>
-            <p className='text-zinc-600 text-base sm:text-lg'>
+            <p className='font-display text-zinc-600 text-base sm:text-lg'>
               Designed from the ground up to eliminate repetitive management and
               protect your monthly cash flow.
             </p>
@@ -348,21 +368,24 @@ export default function BleedLandingPage({
             whileInView='visible'
             viewport={{ once: true, margin: '-60px' }}
             variants={staggerContainer}
-            className='grid grid-cols-1 md:grid-cols-3 gap-8'
+            className='grid grid-cols-1 md:grid-cols-3 gap-6'
           >
             {[
               {
-                step: '1',
+                step: '01',
+                tag: 'Input Layer',
                 title: 'Forward or Type',
                 text: 'Send any subscription receipt or invoice to your dedicated address, or type plain text directly into the quick logger.',
               },
               {
-                step: '2',
+                step: '02',
+                tag: 'Automation',
                 title: 'Auto-Extract & Dashboard',
                 text: 'Bleed reads price, recurring billing cycles, and next renewal dates automatically. Animated counters reveal your real monthly spend.',
               },
               {
-                step: '3',
+                step: '03',
+                tag: 'Notification',
                 title: 'Get Nudged Before Charge',
                 text: 'Receive proactive reminders via email and push notification days before renewal so you can cancel unused services effortlessly.',
               },
@@ -370,19 +393,32 @@ export default function BleedLandingPage({
               <motion.div
                 key={idx}
                 variants={fadeInUp}
-                whileHover={{ y: -6 }}
-                transition={{ duration: 0.3 }}
-                className='bg-white p-8 rounded-2xl border border-zinc-200/80 shadow-xs space-y-4 hover:shadow-md transition-all'
+                whileHover={{ y: -4 }}
+                transition={{ duration: 0.25 }}
+                className='group bg-white p-7 rounded-2xl border border-slate-100 shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.08)] hover:border-slate-200/80 transition-all flex flex-col justify-between'
               >
-                <div className='w-12 h-12 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center font-bold text-lg'>
-                  {item.step}
+                <div className='space-y-4'>
+                  {/* Header: Step Icon + Stacked Header */}
+                  <div className='flex items-start gap-4'>
+                    <div className='w-12 h-12 rounded-full bg-slate-900 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-sm'>
+                      {item.step}
+                    </div>
+
+                    <div className='space-y-0.5 pt-0.5'>
+                      <h4 className='text-lg font-bold text-slate-900 leading-snug'>
+                        {item.title}
+                      </h4>
+                      <p className='text-xs font-medium text-slate-400 tracking-wide'>
+                        {item.tag}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <p className='text-slate-500 text-sm leading-relaxed pt-1'>
+                    {item.text}
+                  </p>
                 </div>
-                <h4 className='text-xl font-bold text-zinc-900'>
-                  {item.title}
-                </h4>
-                <p className='text-zinc-600 text-sm leading-relaxed'>
-                  {item.text}
-                </p>
               </motion.div>
             ))}
           </motion.div>
@@ -404,19 +440,19 @@ export default function BleedLandingPage({
             className='grid grid-cols-1 lg:grid-cols-12 gap-12 items-center'
           >
             <motion.div variants={fadeInUp} className='lg:col-span-6 space-y-6'>
-              <span className='px-3 py-1 rounded-md bg-emerald-50 text-emerald-800 text-xs font-semibold uppercase tracking-wider'>
+              <span className='font-mini px-3 py-1 rounded-md bg-emerald-50 text-emerald-800 text-xs font-semibold uppercase tracking-wider'>
                 Zero Friction
               </span>
-              <h3 className='text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight'>
+              <h3 className='font-display text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight'>
                 No endless form fields or tedious typing.
               </h3>
-              <p className='text-zinc-600 text-base sm:text-lg leading-relaxed'>
+              <p className='font-display text-zinc-600 text-base sm:text-lg leading-relaxed'>
                 Whether adding manually or through email parsing, Bleed
                 configures exact renewal dates, reminder schedules, and
                 notification preference toggles in seconds.
               </p>
 
-              <ul className='space-y-3 pt-2 text-zinc-700 font-medium'>
+              <ul className='font-mini space-y-3 pt-2 text-zinc-700 font-medium'>
                 {[
                   'Automatic detection of billing currencies and cycles',
                   'Customizable reminder lead times (e.g., 3 days prior)',
@@ -462,13 +498,13 @@ export default function BleedLandingPage({
               variants={fadeInUp}
               className='lg:col-span-6 lg:order-2 space-y-6'
             >
-              <span className='px-3 py-1 rounded-md bg-emerald-50 text-emerald-800 text-xs font-semibold uppercase tracking-wider'>
+              <span className='font-mini px-3 py-1 rounded-md bg-emerald-50 text-emerald-800 text-xs font-semibold uppercase tracking-wider'>
                 Complete Visibility
               </span>
-              <h3 className='text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight'>
+              <h3 className='font-display text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight'>
                 Understand your true monthly and annual expenditure.
               </h3>
-              <p className='text-zinc-600 text-base sm:text-lg leading-relaxed'>
+              <p className='font-display text-zinc-600 text-base sm:text-lg leading-relaxed'>
                 Get a single, clean overview of upcoming bills, total monthly
                 bleed, and active recurring services. Know exactly what you pay
                 for and when.
@@ -491,39 +527,61 @@ export default function BleedLandingPage({
       </section>
 
       {/* Grid Features Listing */}
-      <section className='py-20 bg-zinc-50/60 border-b border-zinc-100'>
+      <section className='py-24 bg-slate-50/50'>
         <div className='max-w-7xl mx-auto px-6'>
           <motion.div
             initial='hidden'
             whileInView='visible'
             viewport={{ once: true, margin: '-60px' }}
             variants={staggerContainer}
-            className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'
+            className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[minmax(220px,auto)]'
           >
-            {FEATURE_LIST.map((feature) => (
-              <motion.div
-                key={feature.id}
-                variants={fadeInUp}
-                whileHover={{ y: -5 }}
-                transition={{ duration: 0.3 }}
-                className='p-6 bg-white rounded-2xl border border-zinc-200/80 shadow-xs flex flex-col justify-between space-y-4 hover:border-emerald-300 hover:shadow-md transition-all'
-              >
-                <div className='space-y-4'>
-                  <div className='w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center'>
-                    {feature.icon}
+            {FEATURE_LIST.map((feature, idx) => {
+              // Assign specific Bento grid classes based on index
+              const bentoSpanClass =
+                idx === 0
+                  ? 'lg:col-span-2' // Card 1: Wide horizontal feature
+                  : idx === 1
+                    ? 'lg:row-span-1' // Card 2: Tall vertical feature
+                    : 'lg:col-span-1'; // Cards 3 & 4: Standard bento blocks
+
+              return (
+                <motion.div
+                  key={feature.id}
+                  variants={fadeInUp}
+                  whileHover={{ y: -4 }}
+                  transition={{ duration: 0.25 }}
+                  className={`group relative bg-white p-7 rounded-2xl border border-slate-100 shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.08)] hover:border-slate-200/80 transition-all flex flex-col justify-between ${bentoSpanClass}`}
+                >
+                  {/* Top Content Area */}
+                  <div className='space-y-4'>
+                    <div className='flex items-start gap-4'>
+                      {/* Unique Colored Icon Container */}
+                      <div
+                        className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform ${feature.theme.bg}`}
+                      >
+                        {feature.icon}
+                      </div>
+
+                      {/* Stacked Title & Category/Tag */}
+                      <div className='space-y-0.5 pt-0.5'>
+                        <h4 className='font-display text-lg font-bold text-slate-900 leading-snug group-hover:text-emerald-600 transition-colors'>
+                          {feature.title}
+                        </h4>
+                        <p className='font-mini text-xs font-medium text-slate-400 tracking-wide uppercase'>
+                          {feature.tag}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <p className='font-display text-slate-500 text-sm leading-relaxed pt-1 max-w-2xl'>
+                      {feature.description}
+                    </p>
                   </div>
-                  <span className='text-[11px] font-bold text-emerald-800 uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded'>
-                    {feature.tag}
-                  </span>
-                  <h4 className='text-xl font-bold text-zinc-900'>
-                    {feature.title}
-                  </h4>
-                  <p className='text-zinc-600 text-sm leading-relaxed'>
-                    {feature.description}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </motion.div>
         </div>
       </section>
@@ -539,13 +597,13 @@ export default function BleedLandingPage({
         >
           <motion.h2
             variants={fadeInUp}
-            className='text-3xl sm:text-5xl font-extrabold tracking-tight'
+            className='font-display text-3xl sm:text-5xl font-extrabold tracking-tight'
           >
             Ready to stop the subscription bleed?
           </motion.h2>
           <motion.p
             variants={fadeInUp}
-            className='text-zinc-400 text-lg max-w-2xl mx-auto'
+            className='font-mono text-zinc-400 text-lg max-w-2xl mx-auto'
           >
             Forward your first receipt and see your real monthly spend in under
             a minute.
@@ -558,16 +616,16 @@ export default function BleedLandingPage({
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               href={ctaHref}
-              className='px-8 py-4 rounded-xl font-semibold bg-emerald-700 text-white hover:bg-emerald-800 transition-all shadow-lg flex items-center gap-2'
+              className='font-mono px-8 py-4 rounded-xl font-semibold bg-emerald-700 text-white hover:bg-emerald-800 transition-all shadow-lg flex items-center gap-2'
             >
-              {ctaLabel} <FiArrowRight className='w-5 h-5' />
+              {ctaLabel}
             </motion.a>
           </motion.div>
         </motion.div>
       </section>
 
       {/* Footer Navigation */}
-      <footer className='py-12 bg-white border-t border-zinc-100 text-sm text-zinc-500'>
+      <footer className='font-mono py-12 bg-white border-t border-zinc-100 text-sm text-zinc-500'>
         <div className='max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6'>
           <div className='flex items-center gap-3'>
             <Image
