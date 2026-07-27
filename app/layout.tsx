@@ -34,7 +34,7 @@ const quantico = Quantico({
 export const metadata: Metadata = {
   metadataBase: new URL('https://bleed.up.railway.app'),
   title: {
-    default: 'Bleed — See exactly what your subscriptions are costing you',
+    default: 'Bleed - See exactly what your subscriptions are costing you',
     template: '%s · Bleed',
   },
   description:

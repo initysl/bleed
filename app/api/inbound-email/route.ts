@@ -112,6 +112,8 @@ export async function POST(req: NextRequest) {
     currency: extracted.currency || 'USD',
     billing_cycle: extracted.billing_cycle,
     renewal_date: renewalDate,
+    billing_anchor_date: renewalDate,
+    cycles_elapsed: 0,
     reminder_at: defaultReminderAt(renewalDate),
     source: 'email',
     raw_email_snippet: emailBody.slice(0, 500),
