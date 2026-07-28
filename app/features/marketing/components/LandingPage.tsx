@@ -517,8 +517,7 @@ export default function BleedLandingPage({
                   src={fullDashboard}
                   alt='Bleed Web Dashboard View'
                   fill
-                  sizes='(max-width: 768px) 100vw, 600px'
-                  className='object-cover object-top'
+                  className='object-contain object-top'
                 />
               </div>
             </motion.div>
