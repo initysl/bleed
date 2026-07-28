@@ -60,9 +60,11 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Authenticated users don't need to see auth pages or the marketing
-  // landing page — send them straight into the app.
-  if (user && isPublicRoute) {
+  // Authenticated users don't need to see auth pages (login/signup/etc) —
+  // send them straight into the app. The marketing root ("/") is exempt:
+  // an authenticated user can still visit it intentionally (to view the
+  // page, demo it, etc.) rather than being bounced to /dashboard every time.
+  if (user && isAuthOnlyRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard';
     return NextResponse.redirect(url);
