@@ -34,10 +34,11 @@ export function SubscriptionList({
   );
 
   return (
-    <div className='flex flex-col gap-4'>
+    <div className='flex flex-col gap-3'>
       {sorted.map((sub) => {
         const isEditing = editingId === sub.id;
         const style = getBrandStyle(sub.name);
+        const unused = isLikelyUnused(sub);
 
         return (
           <motion.div
@@ -45,115 +46,105 @@ export function SubscriptionList({
             key={sub.id}
             transition={{
               layout: {
-                duration: 0.28,
+                duration: 0.25,
                 ease: 'easeInOut',
               },
             }}
-            className='overflow-hidden rounded-2xl border border-sage/60 bg-paper shadow-sm transition-shadow hover:shadow-md'
+            className={`overflow-hidden rounded-2xl border bg-white transition-all duration-200 ${
+              isEditing
+                ? 'border-ink/20 shadow-md ring-1 ring-ink/10'
+                : 'border-sage/60 shadow-sm hover:border-sage/80 hover:shadow'
+            }`}
           >
+            {/* Clickable Header Row */}
             <button
+              type='button'
               onClick={() => setEditingId(isEditing ? null : sub.id)}
-              className='w-full text-left transition-colors hover:bg-black/2'
+              className='w-full text-left transition-colors hover:bg-sage/10 p-4 sm:p-5'
             >
-              <div className='flex items-start justify-between p-4'>
-                {/* LEFT */}
-
-                <div className='flex gap-4'>
+              <div className='flex items-center justify-between gap-4'>
+                {/* Left Side: Avatar & Name/Metadata */}
+                <div className='flex items-center gap-3.5 min-w-0'>
+                  {/* Brand Avatar / Badge */}
                   <div
                     style={{ backgroundColor: style.bg }}
-                    className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-semibold text-white shadow-sm'
+                    className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white shadow-sm font-mono'
                   >
                     {sub.name.charAt(0).toUpperCase()}
                   </div>
 
-                  <div className='space-y-2'>
-                    <div>
-                      <h3 className='text-[15px] font-medium text-ink font-mono'>
+                  {/* Title and Pills */}
+                  <div className='min-w-0 space-y-1'>
+                    <div className='flex items-center gap-2'>
+                      <h3 className='text-sm font-bold text-ink font-display truncate'>
                         {sub.name}
                       </h3>
 
-                      <p className='text-xs text-ink/50 font-mono'>
-                        {sub.billing_cycle === 'monthly'
-                          ? 'Monthly subscription'
-                          : 'Yearly subscription'}
-                      </p>
-                    </div>
-
-                    <div className='flex flex-wrap items-center gap-2'>
-                      <span className='font-mini rounded-full bg-pine/10 px-2 py-1 text-xs font-medium text-pine'>
-                        Renews {formatDate(sub.renewal_date)}
-                      </span>
-
-                      {isLikelyUnused(sub) && (
-                        <span className='rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700'>
+                      {unused && (
+                        <span className='inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200/60 px-2 py-0.5 text-[10px] font-mono font-medium text-amber-700'>
+                          <span className='h-1.5 w-1.5 rounded-full bg-amber-500' />
                           Unused
                         </span>
                       )}
                     </div>
+
+                    <div className='text-xs font-mono text-ink/50'>
+                      <span>Renews {formatDate(sub.renewal_date)}</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* RIGHT */}
-
-                <div className='ml-4 flex shrink-0 flex-col items-end font-body'>
-                  <span className='text-lg font-medium text-ink'>
-                    {formatMoney(sub.monthly_equivalent, sub.currency)}
-                  </span>
-
-                  <div className='mt-1 flex items-center gap-2'>
-                    <span className='text-xs text-ink/45'>/month</span>
-
-                    <motion.div
-                      animate={{
-                        rotate: isEditing ? 180 : 0,
-                      }}
-                      transition={{
-                        type: 'spring',
-                        stiffness: 350,
-                        damping: 22,
-                      }}
-                      className='rounded-full p-1 text-ink/40'
-                    >
-                      <FiChevronDown size={18} />
-                    </motion.div>
+                {/* Right Side: Cost & Chevron */}
+                <div className='flex items-center gap-3 shrink-0'>
+                  <div className='text-right'>
+                    <span className='font-display text-base sm:text-lg font-bold text-ink tabular-nums block'>
+                      {formatMoney(sub.monthly_equivalent, sub.currency)}
+                    </span>
+                    <span className='text-[10px] font-mono text-ink/40 block'>
+                      /month
+                    </span>
                   </div>
+
+                  <motion.div
+                    animate={{ rotate: isEditing ? 180 : 0 }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 350,
+                      damping: 22,
+                    }}
+                    className='rounded-lg p-1.5 text-ink/40 bg-sage/20 hover:text-ink'
+                  >
+                    <FiChevronDown size={16} />
+                  </motion.div>
                 </div>
               </div>
             </button>
 
+            {/* Expandable Form Drawer */}
             <AnimatePresence initial={false}>
               {isEditing && (
                 <motion.div
-                  initial={{
-                    height: 0,
-                    opacity: 0,
-                  }}
-                  animate={{
-                    height: 'auto',
-                    opacity: 1,
-                  }}
-                  exit={{
-                    height: 0,
-                    opacity: 0,
-                  }}
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
                   transition={{
-                    duration: 0.25,
-                    ease: 'easeOut',
+                    duration: 0.22,
+                    ease: 'easeInOut',
                   }}
-                  className='overflow-hidden'
+                  className='overflow-hidden border-t border-sage/40 bg-paper/50'
                 >
-                  <div className='border-t border-sage bg-paper p-4'>
-                    <div className='mb-4 flex items-center justify-between'>
-                      <h4 className='text-xs text-ink/50 transition hover:text-ink'>
-                        Edit subscription
-                      </h4>
-
-                      {/* <button
+                  <div className='p-4 sm:p-5'>
+                    <div className='mb-3 flex items-center justify-between border-b border-sage/30 pb-2'>
+                      <span className='text-xs font-mono font-semibold uppercase tracking-wider text-ink/50'>
+                        Edit Subscription
+                      </span>
+                      <button
+                        type='button'
                         onClick={() => setEditingId(null)}
-                        className='text-xs text-ink/50 transition hover:text-ink'
+                        className='text-xs font-mono text-ink/40 hover:text-ink transition-colors'
                       >
-                        Close
-                      </button> */}
+                        Cancel
+                      </button>
                     </div>
 
                     <div className='max-h-40 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-pine/65'>
