@@ -40,7 +40,7 @@ export function EnableNotifications() {
 
   if (status === 'denied') {
     return (
-      <p className='text-xs text-ink/50'>
+      <p className='font-mini text-xs text-ink/50'>
         Notifications are blocked in your browser. Enable them in your browser's
         site settings to get renewal reminders here as well as by email.
       </p>
@@ -48,9 +48,8 @@ export function EnableNotifications() {
   }
 
   return (
-    <div className='flex w-full max-w-md items-center justify-between gap-3 rounded-lg border border-sage bg-white/60 px-4 py-3'>
+    <div className='font-mini flex w-full max-w-md items-center justify-between gap-3 rounded-lg border border-sage bg-white/60 px-4 py-3'>
       <div className='flex items-center gap-2'>
-        <FiBell className='h-4 w-4 text-ink/50' />
         <p className='text-sm text-ink/70'>
           Get a push notification a few days before something renews.
         </p>
@@ -58,7 +57,7 @@ export function EnableNotifications() {
       <button
         onClick={handleEnable}
         disabled={status === 'loading'}
-        className='shrink-0 rounded-md bg-pine px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-pine/90 disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pine'
+        className='shrink-0 rounded-md bg-pine px-3 py-1.5 text-xs font-medium text-paper transition-colors hover:bg-pine/90 disabled:opacity-60 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-pine'
       >
         {status === 'loading' ? 'Enabling…' : 'Enable'}
       </button>
