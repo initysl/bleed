@@ -34,20 +34,24 @@ export default async function SettingsPage() {
       <main className='mx-auto w-full max-w-5xl p-2'>
         {/* Header */}
         <div className='mb-12 flex items-center justify-between mt-5'>
-          <div>
+          {/* <div>
             <p className='font-mini mt-2 text-base text-ink/55'>
               Manage your Bleed account and preferences.
             </p>
-          </div>
+          </div> */}
 
           <Link
             href='/dashboard'
-            className='group flex items-center gap-2 text-sm text-ink/50 transition hover:text-ink'
+            className='group inline-flex items-center gap-2 text-xs text-ink/60 transition-colors hover:text-ink'
           >
             <FiArrowLeft
-              className='transition-transform group-hover:-translate-x-1'
+              className='transition-transform duration-200 group-hover:-translate-x-1'
               size={18}
             />
+            <span className='relative font-display'>
+              Dashboard
+              <span className='absolute -bottom-0.5 left-0 h-0.5 w-0 rounded-full bg-current transition-all duration-200 group-hover:w-full' />
+            </span>
           </Link>
         </div>
 

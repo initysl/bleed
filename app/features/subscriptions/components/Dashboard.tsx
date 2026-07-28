@@ -68,40 +68,41 @@ export function Dashboard({
         variants={item}
         className='sticky top-0 z-50 flex sm:p-0 p-5 w-full h-20 items-center justify-between backdrop-blur-xl rounded-2xl'
       >
-        <div className='flex items-center gap-1'>
-          <Image
-            src='/bleedlogo.svg'
-            alt='Bleed logo'
-            width={100}
-            height={32}
-            priority={true}
-          />
-        </div>
+        <Image
+          src='/bleedlogo.svg'
+          alt='Bleed logo'
+          width={100}
+          height={32}
+          priority={true}
+        />
 
         <div className='flex items-center gap-4'>
+          {/* Settings Link */}
           <Link
             href='/settings'
-            className='group flex items-center gap-1 text-xs text-ink/50 transition hover:text-ink'
+            className='group flex items-center gap-1.5 text-xs text-ink/60 transition hover:text-ink'
           >
             <FiSettings size={18} />
 
-            <span className='relative hidden font-display sm:inline'>
+            <span className='relative hidden font-display sm:inline-block'>
               Settings
-              <span className='absolute bottom-0 left-0 h-px w-0 bg-current transition-all duration-300 group-hover:w-full' />
+              <span className='absolute -bottom-0.5 left-0 h-0.5 w-0 rounded-full bg-current transition-all duration-300 group-hover:w-full' />
             </span>
           </Link>
 
+          {/* Sign Out Button */}
           <form action='/auth/signout' method='post'>
-            <button className='group flex items-center gap-1 text-xs text-ink/50 transition hover:text-ink'>
+            <button className='group flex items-center gap-1.5 text-xs text-ink/50 transition hover:text-ink'>
               <FiLogOut size={18} />
 
-              <span className='relative hidden font-display sm:inline'>
+              <span className='relative hidden font-display sm:inline-block'>
                 Sign out
-                <span className='absolute bottom-0 left-0 h-px w-0 bg-current transition-all duration-300 group-hover:w-full' />
+                <span className='absolute -bottom-0.5 left-0 h-0.5 w-0 rounded-full bg-current transition-all duration-300 group-hover:w-full' />
               </span>
             </button>
           </form>
 
+          {/* Primary Action Button */}
           <button
             onClick={() => setShowForm(true)}
             className='flex items-center gap-2 rounded-xl bg-pine px-4 py-2 text-xs font-medium text-paper transition hover:bg-pine/90'

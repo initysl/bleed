@@ -189,7 +189,7 @@ export default function BleedLandingPage({
       </header>
 
       {/* Hero Section */}
-      <section className='font-display relative overflow-hidden py-12 lg:py-20'>
+      <section className='font-display relative overflow-hidden '>
         <div className='max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center'>
           {/* Hero Content */}
           <motion.div
@@ -351,7 +351,7 @@ export default function BleedLandingPage({
             variants={fadeInUp}
             className='text-center max-w-3xl mx-auto space-y-4 mb-16'
           >
-            <h2 className='font-minin text-xs font-bold text-emerald-800 uppercase tracking-widest'>
+            <h2 className='font-mini text-xs font-bold text-emerald-800 uppercase tracking-widest'>
               How Bleed Operates
             </h2>
             <h3 className='font-display text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight'>
@@ -400,15 +400,15 @@ export default function BleedLandingPage({
                 <div className='space-y-4'>
                   {/* Header: Step Icon + Stacked Header */}
                   <div className='flex items-start gap-4'>
-                    <div className='w-12 h-12 rounded-full bg-slate-900 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-sm'>
+                    <div className='font-mini w-12 h-12 rounded-full bg-pine text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-sm'>
                       {item.step}
                     </div>
 
                     <div className='space-y-0.5 pt-0.5'>
-                      <h4 className='text-lg font-bold text-slate-900 leading-snug'>
+                      <h4 className='font-display text-lg font-bold text-slate-900 leading-snug'>
                         {item.title}
                       </h4>
-                      <p className='text-xs font-medium text-slate-400 tracking-wide'>
+                      <p className='font-display text-xs font-medium text-slate-400 tracking-wide'>
                         {item.tag}
                       </p>
                     </div>

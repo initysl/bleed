@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
-import { FiSettings, FiLogOut } from 'react-icons/fi';
-
+import { FiSettings, FiLogOut, FiPlus } from 'react-icons/fi';
+import Image from 'next/image';
 import { GhostTotal } from './GhostTotal';
 import { EnableNotifications } from '@/app/features/notifications/components/EnableNotifications';
 import { SubscriptionForm } from './SubscriptionForm';
@@ -16,7 +16,7 @@ export function EmptyState({ inboxAddress }: { inboxAddress: string }) {
 
   const container = {
     hidden: {},
-    show: { transition: { staggerChildren: shouldReduceMotion ? 0 : 0.12 } },
+    show: { transition: { staggerChildren: shouldReduceMotion ? 0 : 0.1 } },
   };
 
   const item = {
@@ -33,61 +33,103 @@ export function EmptyState({ inboxAddress }: { inboxAddress: string }) {
       variants={container}
       initial='hidden'
       animate='show'
-      className='flex min-h-screen flex-col items-center justify-center gap-8 px-6 py-16'
+      className='mx-auto flex w-full max-w-6xl flex-col min-h-screen px-4 sm:px-8 py-4 gap-8'
     >
-      <motion.div
+      {/* Header — Preserved Exactly As Is */}
+      <motion.header
         variants={item}
-        className='flex w-full max-w-md items-center justify-between'
+        className='sticky top-0 z-50 flex sm:p-0 p-5 w-full h-20 items-center justify-between backdrop-blur-xl rounded-2xl'
       >
-        <h1 className='font-display text-2xl font-medium text-ink'>Bleed</h1>
-        <div className='flex items-center gap-3'>
+        <Image
+          src='/bleedlogo.svg'
+          alt='Bleed logo'
+          width={100}
+          height={32}
+          priority={true}
+        />
+
+        <div className='flex items-center gap-4'>
           <Link
             href='/settings'
-            className='flex items-center gap-1 text-xs text-ink/40 hover:text-ink/60'
+            className='group flex items-center gap-1 text-xs text-ink/50 transition hover:text-ink'
           >
-            <FiSettings className='h-3.5 w-3.5' />
-            Settings
+            <FiSettings size={18} />
+
+            <span className='relative hidden font-display sm:inline'>
+              Settings
+              <span className='absolute bottom-0 left-0 h-px w-0 bg-current transition-all duration-300 group-hover:w-full' />
+            </span>
           </Link>
+
           <form action='/auth/signout' method='post'>
-            <button className='flex items-center gap-1 text-xs text-ink/40 hover:text-ink/60'>
-              <FiLogOut className='h-3.5 w-3.5' />
-              Sign out
+            <button className='group flex items-center gap-1 text-xs text-ink/50 transition hover:text-ink'>
+              <FiLogOut size={18} />
+
+              <span className='relative hidden font-display sm:inline'>
+                Sign out
+                <span className='absolute bottom-0 left-0 h-px w-0 bg-current transition-all duration-300 group-hover:w-full' />
+              </span>
             </button>
           </form>
-        </div>
-      </motion.div>
 
-      <motion.div variants={item} className='text-center'>
-        <p className='text-lg text-ink'>Nothing logged yet.</p>
-        <p className='mt-1 text-sm text-ink/60'>
-          Forward your first receipt below and watch this fill in.
-        </p>
-      </motion.div>
-
-      <motion.div variants={item}>
-        <InboxAddress address={inboxAddress} />
-      </motion.div>
-
-      <motion.div variants={item} className='w-full max-w-md'>
-        {showForm ? (
-          <SubscriptionForm onDone={() => setShowForm(false)} />
-        ) : (
           <button
             onClick={() => setShowForm(true)}
-            className='text-sm text-ink/50 underline decoration-ink/20 underline-offset-4 hover:text-ink/70'
+            className='flex items-center gap-2 rounded-xl bg-pine px-4 py-2 text-xs font-medium text-paper transition hover:bg-pine/90'
           >
-            Or add one manually
+            <FiPlus size={18} />
+
+            <span className='hidden font-display sm:inline'>
+              Add subscription
+            </span>
           </button>
-        )}
-      </motion.div>
+        </div>
+      </motion.header>
 
-      <motion.div variants={item}>
-        <GhostTotal />
-      </motion.div>
+      {/* Main Responsive Grid Layout */}
+      <div className='flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start my-auto'>
+        {/* Left Primary Hero Section (8 Columns on Desktop) */}
+        <div className='lg:col-span-7 xl:col-span-8 flex flex-col justify-center space-y-6'>
+          <motion.div variants={item} className='space-y-2'>
+            <h1 className='font-display text-3xl sm:text-4xl font-bold tracking-tight text-ink'>
+              Nothing logged yet.
+            </h1>
+            <p className='font-mini text-base text-ink/60 max-w-lg'>
+              Forward your first receipt below and watch your subscription
+              metrics fill in automatically.
+            </p>
+          </motion.div>
 
-      <motion.div variants={item}>
-        <EnableNotifications />
-      </motion.div>
+          <motion.div variants={item} className='w-full'>
+            <InboxAddress address={inboxAddress} />
+          </motion.div>
+
+          <motion.div variants={item} className='w-full'>
+            {showForm ? (
+              <div className='w-full pt-2'>
+                <SubscriptionForm onDone={() => setShowForm(false)} />
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowForm(true)}
+                className='font-mini text-sm text-ink/50 underline decoration-ink/20 underline-offset-4 hover:text-ink/70 transition-colors'
+              >
+                Or add one manually
+              </button>
+            )}
+          </motion.div>
+        </div>
+
+        {/* Right Sidebar Widgets Section (4 Columns on Desktop) */}
+        <div className='lg:col-span-5 xl:col-span-4 flex flex-col gap-6'>
+          <motion.div variants={item} className='w-full'>
+            <GhostTotal />
+          </motion.div>
+
+          <motion.div variants={item} className='w-full'>
+            <EnableNotifications />
+          </motion.div>
+        </div>
+      </div>
     </motion.div>
   );
 }

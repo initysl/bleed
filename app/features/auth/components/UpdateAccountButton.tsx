@@ -28,7 +28,7 @@ export function UpdateAccountButton({
         onClose={() => setOpen(false)}
         title='Update account info'
       >
-        <div className='flex flex-col gap-6'>
+        <div className='font-display flex flex-col gap-6'>
           <div className='flex flex-col gap-2'>
             <p className='text-xs font-medium uppercase tracking-wide text-ink/50'>
               Email
