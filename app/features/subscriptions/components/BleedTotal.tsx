@@ -20,80 +20,130 @@ function CountUp({ target }: { target: number }) {
   return display;
 }
 
-function MonthlyDisplay({
-  monthly,
+// Split currency into main integer string and muted decimal string
+function FormattedAmount({
+  amount,
   currency,
 }: {
-  monthly: number;
+  amount: number;
   currency: string;
 }) {
-  const value = CountUp({ target: monthly });
+  const animatedValue = CountUp({ target: amount });
+  const formatted = formatMoney(animatedValue, currency);
+
+  // Match currency string parts (e.g., "$80,883.59" -> "$80,883" & ".59")
+  const parts = formatted.match(/^([^\d]*[\d,]+)(\.\d+)?$/);
+  const mainPart = parts ? parts[1] : formatted;
+  const decimalPart = parts && parts[2] ? parts[2] : '';
+
   return (
-    <p className='mt-1 font-body text-4xl tabular-nums text-paper'>
-      {formatMoney(value, currency)}
-    </p>
+    <h2 className='font-display text-4xl sm:text-5xl tracking-tight text-ink tabular-nums'>
+      {mainPart}
+      {decimalPart && (
+        <span className='text-ink/35 font-normal'>{decimalPart}</span>
+      )}
+    </h2>
   );
 }
 
 export function BleedTotal({
   subscriptions,
+  onCurrencyChange,
 }: {
   subscriptions: Subscription[];
+  onCurrencyChange?: (currency: string) => void;
 }) {
-  // Group by currency rather than summing everything into one number —
-  // blending currencies silently is the fastest way to break a user's trust
-  // in a finance tool, even if the intent is just "show me one total."
-  const totalsByCurrency = subscriptions.reduce<Record<string, number>>(
-    (acc, sub) => {
-      acc[sub.currency] = (acc[sub.currency] ?? 0) + sub.monthly_equivalent;
-      return acc;
-    },
-    {},
-  );
+  // Aggregate data by currency
+  const totalsByCurrency = subscriptions.reduce<
+    Record<string, { total: number; count: number }>
+  >((acc, sub) => {
+    if (!acc[sub.currency]) {
+      acc[sub.currency] = { total: 0, count: 0 };
+    }
+    acc[sub.currency].total += sub.monthly_equivalent;
+    acc[sub.currency].count += 1;
+    return acc;
+  }, {});
 
   const currencies = Object.keys(totalsByCurrency);
+  const [activeCurrency, setActiveCurrency] = useState<string>(
+    currencies[0] ?? 'USD',
+  );
 
-  if (currencies.length === 0) {
-    return (
-      <div className='w-full rounded-lg bg-pine px-4 py-3 text-left'>
-        <p className='text-xs uppercase tracking-wide text-paper/60 font-mono'>
-          Monthly bleed
-        </p>
-        <p className='mt-1 font-body text-4xl tabular-nums text-paper'>$0.00</p>
-      </div>
-    );
-  }
+  // Fallback sync when subscriptions array changes
+  useEffect(() => {
+    if (currencies.length > 0 && !currencies.includes(activeCurrency)) {
+      setActiveCurrency(currencies[0]);
+    }
+  }, [currencies, activeCurrency]);
 
-  if (currencies.length === 1) {
-    const currency = currencies[0];
-    const monthly = totalsByCurrency[currency];
-    return (
-      <div className='w-full rounded-lg bg-pine px-4 py-3 text-left shadow-sm transition-shadow hover:shadow-md'>
-        <p className='text-xs uppercase tracking-wide text-paper/60 font-mono'>
-          Monthly bleed
-        </p>
-        <MonthlyDisplay monthly={monthly} currency={currency} />
-        <p className='mt-1 text-sm text-paper/70 font-body'>
-          {formatMoney(monthly * 12, currency)} / year
-        </p>
-      </div>
-    );
-  }
+  const handleCurrencySelect = (currency: string) => {
+    setActiveCurrency(currency);
+    if (onCurrencyChange) onCurrencyChange(currency);
+  };
+
+  const currentData = totalsByCurrency[activeCurrency] ?? {
+    total: 0,
+    count: 0,
+  };
+
+  // Quick Currency Flag Helper (Optional enhancement)
+  const getFlag = (code: string) => {
+    switch (code.toUpperCase()) {
+      case 'USD':
+        return '🇺🇸';
+      case 'EUR':
+        return '🇪🇺';
+      case 'GBP':
+        return '🇬🇧';
+      case 'CAD':
+        return '🇨🇦';
+      case 'NGN':
+        return '🇳🇬';
+      default:
+        return '🌐';
+    }
+  };
 
   return (
-    <div className='w-full rounded-lg bg-pine px-4 py-3 text-left'>
-      <p className='text-xs uppercase tracking-wide text-paper/60 font-mono'>
-        Monthly bleed, by currency
-      </p>
-      <div className='mt-2 flex flex-col gap-2 max-h-28 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-paper/20'>
-        {currencies.map((currency) => (
-          <div key={currency} className='flex items-baseline justify-between'>
-            <span className='font-body text-2xl tabular-nums text-paper'>
-              {formatMoney(totalsByCurrency[currency], currency)}
-            </span>
-            <span className='text-xs text-paper/60'>{currency}/mo</span>
-          </div>
-        ))}
+    <div className='w-full rounded-3xl bg-white border border-sage/60 p-6 sm:p-7 shadow-sm'>
+      {/* 1. Currency Selector Pill Row */}
+      {currencies.length > 1 && (
+        <div className='flex items-center gap-2 mb-6 overflow-x-auto pb-1 scrollbar-none'>
+          {currencies.map((curr) => {
+            const isActive = curr === activeCurrency;
+            return (
+              <button
+                key={curr}
+                type='button'
+                onClick={() => handleCurrencySelect(curr)}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all ${
+                  isActive
+                    ? 'bg-paper text-ink shadow-sm border border-sage'
+                    : 'bg-sage/20 text-ink/50 hover:bg-sage/40 hover:text-ink'
+                }`}
+              >
+                <span>{getFlag(curr)}</span>
+                <span className='uppercase'>{curr}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* 2. Primary Balance Display */}
+      <div className='space-y-1'>
+        <FormattedAmount amount={currentData.total} currency={activeCurrency} />
+
+        {/* Metric Subtitle */}
+        <div className='flex items-center gap-2 pt-1'>
+          <span className='text-xs text-ink/50 font-medium'>Monthly bleed</span>
+          <span className='inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-600'>
+            <span className='h-1.5 w-1.5 rounded-full bg-emerald-500' />
+            {currentData.count}{' '}
+            {currentData.count === 1 ? 'active sub' : 'active subs'}
+          </span>
+        </div>
       </div>
     </div>
   );
