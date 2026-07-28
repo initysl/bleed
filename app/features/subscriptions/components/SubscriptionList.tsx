@@ -50,7 +50,7 @@ export function SubscriptionList({
                 ease: 'easeInOut',
               },
             }}
-            className={`overflow-hidden rounded-2xl border bg-white transition-all duration-200 ${
+            className={`overflow-hidden rounded-lg border bg-white transition-all duration-200 ${
               isEditing
                 ? 'border-ink/20 shadow-md ring-1 ring-ink/10'
                 : 'border-sage/60 shadow-sm hover:border-sage/80 hover:shadow'

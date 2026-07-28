@@ -66,7 +66,7 @@ export function Dashboard({
       {/* Sticky Header */}
       <motion.header
         variants={item}
-        className='sticky top-0 z-50 flex sm:p-0 p-5 w-full h-20 items-center justify-between backdrop-blur-xl rounded-2xl'
+        className='sticky top-0  flex sm:p-0 p-5 w-full h-20 items-center justify-between backdrop-blur-xl rounded-2xl'
       >
         <Image
           src='/bleedlogo.svg'

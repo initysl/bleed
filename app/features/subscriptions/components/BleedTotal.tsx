@@ -106,7 +106,7 @@ export function BleedTotal({
   };
 
   return (
-    <div className='w-full rounded-3xl bg-white border border-sage/60 p-6 sm:p-7 shadow-sm'>
+    <div className='w-full rounded-lg bg-white border border-sage/60 p-6 sm:p-7 shadow-sm'>
       {/* 1. Currency Selector Pill Row */}
       {currencies.length > 1 && (
         <div className='flex items-center gap-2 mb-6 overflow-x-auto pb-1 scrollbar-none'>
@@ -117,7 +117,7 @@ export function BleedTotal({
                 key={curr}
                 type='button'
                 onClick={() => handleCurrencySelect(curr)}
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all ${
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all ${
                   isActive
                     ? 'bg-paper text-ink shadow-sm border border-sage'
                     : 'bg-sage/20 text-ink/50 hover:bg-sage/40 hover:text-ink'
