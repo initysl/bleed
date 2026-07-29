@@ -38,7 +38,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
     defaultValues: {
       name: existing?.name ?? '',
       price: existing?.price ?? 0,
-      currency: existing?.currency ?? 'USD',
+      currency: existing?.currency ?? 'NGN',
       billing_cycle: existing?.billing_cycle ?? ('monthly' as const),
       renewal_date: existing?.renewal_date ?? initialRenewalDate,
       reminder_at: existing?.reminder_at

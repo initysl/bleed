@@ -1,6 +1,6 @@
 export const CURRENCIES = [
-  'USD',
   'NGN',
+  'USD',
   'GBP',
   'EUR',
   'CAD',
