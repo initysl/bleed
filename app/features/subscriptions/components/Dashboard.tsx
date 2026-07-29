@@ -76,42 +76,44 @@ export function Dashboard({
           priority={true}
         />
 
-        <div className='flex items-center gap-4'>
-          {/* Settings Link */}
+        <div className='flex items-center gap-2'>
+          {/* Settings Link Pill */}
           <Link
             href='/settings'
-            className='group flex items-center gap-1.5 text-xs text-ink/60 transition hover:text-ink'
+            className='group inline-flex items-center gap-1.5 rounded-full border border-sage/60 bg-white px-3 py-1.5 font-mono text-xs font-medium text-ink/70 shadow-xs transition-all hover:border-sage hover:bg-sage/15 hover:text-ink active:scale-95'
+            title='Settings'
           >
-            <FiSettings size={18} />
-
-            <span className='relative hidden font-display sm:inline-block'>
-              Settings
-              <span className='absolute -bottom-0.5 left-0 h-0.5 w-0 rounded-full bg-current transition-all duration-300 group-hover:w-full' />
-            </span>
+            <FiSettings
+              className='text-ink/60 transition-transform duration-300 group-hover:rotate-45'
+              size={14}
+            />
+            <span className='hidden sm:inline'>Settings</span>
           </Link>
 
-          {/* Sign Out Button */}
-          <form action='/auth/signout' method='post'>
-            <button className='group flex items-center gap-1.5 text-xs text-ink/50 transition hover:text-ink'>
-              <FiLogOut size={18} />
-
-              <span className='relative hidden font-display sm:inline-block'>
-                Sign out
-                <span className='absolute -bottom-0.5 left-0 h-0.5 w-0 rounded-full bg-current transition-all duration-300 group-hover:w-full' />
-              </span>
+          {/* Sign Out Button Pill */}
+          <form action='/auth/signout' method='post' className='inline-flex'>
+            <button
+              type='submit'
+              className='group inline-flex items-center gap-1.5 rounded-2xl border border-sage/60 bg-white px-3 py-1.5 font-mono text-xs font-medium text-ink/60 shadow-xs transition-all hover:border-red-200 hover:bg-red-50/60 hover:text-red-600 active:scale-95'
+              title='Sign out'
+            >
+              <FiLogOut
+                className='text-ink/50 transition-transform duration-200 group-hover:-translate-x-0.5 group-hover:text-red-600'
+                size={14}
+              />
+              <span className='hidden sm:inline'>Sign out</span>
             </button>
           </form>
 
-          {/* Primary Action Button */}
+          {/* Primary Action Button (Add Subscription Pill) */}
           <button
+            type='button'
             onClick={() => setShowForm(true)}
-            className='flex items-center gap-2 rounded-xl bg-pine px-4 py-2 text-xs font-medium text-paper transition hover:bg-pine/90'
+            className='inline-flex items-center gap-1.5 rounded-lg bg-pine px-3.5 py-1.5 font-mono text-xs font-semibold text-paper shadow-sm transition-all hover:bg-pine/90 hover:shadow active:scale-95'
           >
-            <FiPlus size={18} />
-
-            <span className='hidden font-display sm:inline'>
-              Add subscription
-            </span>
+            <FiPlus size={15} />
+            <span className='hidden sm:inline'>Add subscription</span>
+            <span className='sm:hidden'>Add</span>
           </button>
         </div>
       </motion.header>
