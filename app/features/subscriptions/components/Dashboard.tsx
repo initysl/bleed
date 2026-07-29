@@ -62,12 +62,12 @@ export function Dashboard({
       variants={container}
       initial='hidden'
       animate='show'
-      className='mx-auto flex w-full max-w-5xl flex-col gap-6 p-2'
+      className='mx-auto flex w-full max-w-5xl flex-col gap-3 sm:gap-6 p-2'
     >
       {/* Sticky Header */}
       <motion.header
         variants={item}
-        className='sticky top-0 z-30 flex sm:p-0 p-2 w-full h-20 items-center justify-between backdrop-blur-xl rounded-lg'
+        className='sticky top-0 z-30 flex w-full items-center justify-between px-3 py-2.5 backdrop-blur-xl rounded-xl'
       >
         <Image
           src='/bleedlogo.svg'
