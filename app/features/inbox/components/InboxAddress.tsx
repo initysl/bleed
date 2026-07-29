@@ -14,7 +14,7 @@ export function InboxAddress({ address }: { address: string }) {
 
   return (
     <div className='w-full max-w-md'>
-      <div className='flex items-center justify-between gap-3 rounded-lg border border-sage bg-white/60 px-4 py-3'>
+      <div className='flex items-center justify-between gap-3 rounded-2xl bg-white/60 px-4 py-3'>
         <span className='font-mini text-sm text-ink truncate'>{address}</span>
         <button
           onClick={handleCopy}

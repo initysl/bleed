@@ -50,7 +50,7 @@ export function SubscriptionList({
                 ease: 'easeInOut',
               },
             }}
-            className={`overflow-hidden rounded-lg border bg-white transition-all duration-200 ${
+            className={`overflow-hidden rounded-2xl bg-white transition-all duration-200 ${
               isEditing
                 ? 'border-ink/20 shadow-md ring-1 ring-ink/10'
                 : 'border-sage/60 shadow-sm hover:border-sage/80 hover:shadow'
@@ -76,7 +76,7 @@ export function SubscriptionList({
                   {/* Title and Pills */}
                   <div className='min-w-0 space-y-1'>
                     <div className='flex items-center gap-2'>
-                      <h3 className='text-sm font-bold text-ink font-display truncate'>
+                      <h3 className='text-sm font-medium text-ink font-display truncate'>
                         {sub.name}
                       </h3>
 
@@ -97,7 +97,7 @@ export function SubscriptionList({
                 {/* Right Side: Cost & Chevron */}
                 <div className='flex items-center gap-3 shrink-0'>
                   <div className='text-right'>
-                    <span className='font-display text-base sm:text-lg font-bold text-ink tabular-nums block'>
+                    <span className='font-display text-base sm:text-lg font-medium text-ink tabular-nums block'>
                       {formatMoney(sub.monthly_equivalent, sub.currency)}
                     </span>
                     <span className='text-[10px] font-mono text-ink/40 block'>

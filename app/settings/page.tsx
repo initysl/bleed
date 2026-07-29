@@ -64,7 +64,7 @@ export default async function SettingsPage() {
 
           <Link
             href='/dashboard'
-            className='group inline-flex shrink-0 items-center gap-1.5 rounded-full border border-sage/60 bg-white px-3 py-1.5 text-xs font-semibold text-ink shadow-sm transition-all hover:border-sage hover:bg-sage/10'
+            className='group inline-flex shrink-0 items-center gap-1.5 rounded-full  bg-white px-3 py-1.5 text-xs font-semibold text-ink shadow-sm transition-all hover:border-sage hover:bg-sage/10'
           >
             <FiArrowLeft
               className='transition-transform duration-200 group-hover:-translate-x-0.5'
@@ -124,7 +124,7 @@ export default async function SettingsPage() {
             {/* 1. Account Section */}
             <AnimatedSection
               id='account'
-              className='scroll-mt-20 sm:scroll-mt-10 rounded-2xl border border-sage/60 bg-white p-5 sm:p-6 shadow-xs transition-all hover:shadow-md'
+              className='scroll-mt-20 sm:scroll-mt-10 rounded-2xl bg-white p-5 sm:p-6 shadow-xs transition-all hover:shadow-md'
             >
               <div className='border-b border-sage/30 pb-3 sm:pb-4'>
                 <h2 className='font-display text-base font-bold text-ink sm:text-lg'>
@@ -136,7 +136,7 @@ export default async function SettingsPage() {
               </div>
 
               <div className='mt-4 space-y-4 sm:mt-5'>
-                <div className='rounded-xl border border-sage/50 bg-paper/60 p-3.5 sm:p-4'>
+                <div className='rounded-xl  bg-paper/60 p-3.5 sm:p-4'>
                   <span className='block font-mono text-[10px] font-semibold uppercase tracking-wider text-ink/40'>
                     Primary Email
                   </span>
@@ -154,7 +154,7 @@ export default async function SettingsPage() {
             {/* 2. Inbox Address Section */}
             <AnimatedSection
               id='inbox'
-              className='scroll-mt-20 sm:scroll-mt-10 rounded-2xl border border-sage/60 bg-white p-5 sm:p-6 shadow-xs transition-all hover:shadow-md'
+              className='scroll-mt-20 sm:scroll-mt-10 rounded-2xl  bg-white p-5 sm:p-6 shadow-xs transition-all hover:shadow-md'
             >
               <div className='border-b border-sage/30 pb-3 sm:pb-4'>
                 <h2 className='font-display text-base font-bold text-ink sm:text-lg'>
@@ -173,7 +173,7 @@ export default async function SettingsPage() {
             {/* 3. Notifications Section */}
             <AnimatedSection
               id='notifications'
-              className='scroll-mt-20 sm:scroll-mt-10 rounded-2xl border border-sage/60 bg-white p-5 sm:p-6 shadow-xs transition-all hover:shadow-md'
+              className='scroll-mt-20 sm:scroll-mt-10 rounded-2xl  bg-white p-5 sm:p-6 shadow-xs transition-all hover:shadow-md'
             >
               <div className='border-b border-sage/30 pb-3 sm:pb-4'>
                 <h2 className='font-display text-base font-bold text-ink sm:text-lg'>
