@@ -207,7 +207,7 @@ export default function BleedLandingPage({
               variants={fadeInUp}
               className='text-lg sm:text-xl text-zinc-600 max-w-2xl font-normal leading-relaxed'
             >
-              No manual data entry. Forward receipts or type plain text — Bleed
+              No manual data entry. Forward receipts or type plain text - Bleed
               automatically extracts costs, tracks your real monthly spend, and
               nudges you right before you get charged.
             </motion.p>
