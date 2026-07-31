@@ -6,7 +6,6 @@ import { motion, Variants } from 'framer-motion';
 import {
   FiMail,
   FiZap,
-  FiArrowRight,
   FiCheck,
   FiCopy,
   FiBell,
@@ -295,8 +294,8 @@ export default function BleedLandingPage({
                 className='absolute -top-6 -left-12 sm:-left-20 w-[130%] h-[80%] rounded-2xl overflow-hidden hidden sm:block shadow-2xl'
               >
                 <Image
-                  src={desktopDashboard}
-                  alt='Bleed Desktop Dashboard'
+                  src={heroPhone}
+                  alt='Bleed Mobile App Interface'
                   fill
                   sizes='(max-width: 768px) 100vw, 50vw'
                   className='object-cover object-top'
@@ -474,7 +473,7 @@ export default function BleedLandingPage({
               variants={scaleIn}
               className='lg:col-span-6 flex justify-center'
             >
-              <div className='relative w-full max-w-[320px] aspect-9/18 rounded-[36px] overflow-hidden border-[6px] border-zinc-900 shadow-2xl bg-zinc-900'>
+              <div className='relative w-full max-w-[320px] aspect-9/18 rounded-[36px] overflow-hidden shadow-2xl'>
                 <Image
                   src={addModalPhone}
                   alt='Bleed Add Subscription Modal Interface'
@@ -512,12 +511,12 @@ export default function BleedLandingPage({
             </motion.div>
 
             <motion.div variants={scaleIn} className='lg:col-span-6 lg:order-1'>
-              <div className='relative w-full aspect-16/10 rounded-2xl overflow-hidden border border-zinc-200 shadow-2xl bg-zinc-50'>
+              <div className='relative w-full aspect-16/10 rounded-2xl overflow-hidden shadow-2xl bg-zinc-50'>
                 <Image
                   src={fullDashboard}
                   alt='Bleed Web Dashboard View'
                   fill
-                  className='object-contain object-top'
+                  className='object-contain'
                 />
               </div>
             </motion.div>
