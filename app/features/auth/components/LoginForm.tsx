@@ -110,7 +110,7 @@ export function LoginForm() {
       className='w-full max-w-md rounded-4xl border border-white/50 bg-white/75 p-10'
     >
       <div className='mb-5 flex flex-col gap-1 items-center text-center'>
-        <Image src={Logo} alt='Bleed logo' width={150} priority={true} />
+        <Image src={Logo} alt='Bleed logo' width={110} priority={true} />
         <p className='font-mini text-sm leading-6 text-ink/60'>
           Mange your subscriptions.
         </p>
