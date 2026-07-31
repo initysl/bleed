@@ -1,23 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Webhook } from 'svix';
 import { Resend } from 'resend';
-import { extractSubscription } from '@/lib/email/groq';
+import { extractSubscriptions } from '@/lib/email/groq';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Resend signs webhook deliveries via Svix. Verifying this is what stops anyone
-// who finds this URL from POSTing fabricated data straight into the database.
 function verifyWebhookSignature(rawBody: string, headers: Headers) {
   const webhook = new Webhook(process.env.RESEND_INBOUND_WEBHOOK_SECRET!);
-
   const svixHeaders = {
     'svix-id': headers.get('svix-id') ?? '',
     'svix-timestamp': headers.get('svix-timestamp') ?? '',
     'svix-signature': headers.get('svix-signature') ?? '',
   };
-
   return webhook.verify(rawBody, svixHeaders);
+}
+
+function nextGuessedRenewalDate(cycle: 'monthly' | 'yearly') {
+  const d = new Date();
+  if (cycle === 'yearly') d.setFullYear(d.getFullYear() + 1);
+  else d.setMonth(d.getMonth() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
+function defaultReminderAt(renewalDateStr: string) {
+  const d = new Date(renewalDateStr);
+  d.setDate(d.getDate() - 3);
+  d.setHours(9, 0, 0, 0);
+  return d.toISOString();
 }
 
 export async function POST(req: NextRequest) {
@@ -41,11 +51,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { email_id, subject, to } = payload.data;
-
-  // Which user does this belong to? Match the local-part of the "to" address
-  // (everything before @) against that user's stored inbound_address slug.
-  const toAddress = to?.[0] ?? '';
-  const localPart = toAddress.split('@')[0];
+  const localPart = (to?.[0] ?? '').split('@')[0];
 
   if (!localPart) {
     return NextResponse.json(
@@ -61,7 +67,6 @@ export async function POST(req: NextRequest) {
     .maybeSingle();
 
   if (!profile) {
-    // No user owns this address — could be a typo'd forward, or someone probing the endpoint.
     return NextResponse.json(
       { ok: false, reason: 'unknown recipient' },
       { status: 200 },
@@ -85,60 +90,50 @@ export async function POST(req: NextRequest) {
   const emailBody = email.text ?? email.html ?? '';
   const combined = `Subject: ${subject}\n\n${emailBody}`;
 
-  const extracted = await extractSubscription(combined);
+  // Always an array now — one item per distinct subscription found, so a
+  // single email describing several charges no longer silently loses all
+  // but one of them.
+  const items = await extractSubscriptions(combined);
 
-  if ('error' in extracted) {
-    // Couldn't confidently parse — surface this to the user instead of losing the email.
-    await supabaseAdmin.from('needs_review').insert({
+  let added = 0;
+  let flaggedForReview = 0;
+
+  for (const item of items) {
+    if ('error' in item) {
+      await supabaseAdmin.from('needs_review').insert({
+        user_id: profile.id,
+        subject,
+        raw_email_snippet: emailBody.slice(0, 500),
+        reason: item.error,
+      });
+      flaggedForReview++;
+      continue;
+    }
+
+    const renewalDate =
+      item.renewal_date ?? nextGuessedRenewalDate(item.billing_cycle);
+
+    const { error } = await supabaseAdmin.from('subscriptions').insert({
       user_id: profile.id,
-      subject,
+      name: item.name,
+      price: item.price,
+      currency: item.currency,
+      billing_cycle: item.billing_cycle,
+      renewal_date: renewalDate,
+      billing_anchor_date: renewalDate,
+      cycles_elapsed: 0,
+      reminder_at: defaultReminderAt(renewalDate),
+      source: 'email',
       raw_email_snippet: emailBody.slice(0, 500),
-      reason: extracted.error,
     });
-    return NextResponse.json(
-      { ok: false, reason: extracted.error },
-      { status: 200 },
-    );
+
+    if (error) {
+      console.error(`[inbound-email] insert failed for "${item.name}":`, error);
+      continue;
+    }
+
+    added++;
   }
 
-  const renewalDate =
-    extracted.renewal_date ?? nextGuessedRenewalDate(extracted.billing_cycle);
-
-  // Explicit user_id here since this is the admin client — no session to default from.
-  const { error } = await supabaseAdmin.from('subscriptions').insert({
-    user_id: profile.id,
-    name: extracted.name,
-    price: extracted.price,
-    currency: extracted.currency || 'USD',
-    billing_cycle: extracted.billing_cycle,
-    renewal_date: renewalDate,
-    billing_anchor_date: renewalDate,
-    cycles_elapsed: 0,
-    reminder_at: defaultReminderAt(renewalDate),
-    source: 'email',
-    raw_email_snippet: emailBody.slice(0, 500),
-  });
-
-  if (error) {
-    return NextResponse.json(
-      { ok: false, error: error.message },
-      { status: 500 },
-    );
-  }
-
-  return NextResponse.json({ ok: true });
-}
-
-function nextGuessedRenewalDate(cycle: 'monthly' | 'yearly') {
-  const d = new Date();
-  if (cycle === 'yearly') d.setFullYear(d.getFullYear() + 1);
-  else d.setMonth(d.getMonth() + 1);
-  return d.toISOString().slice(0, 10);
-}
-
-function defaultReminderAt(renewalDateStr: string) {
-  const d = new Date(renewalDateStr);
-  d.setDate(d.getDate() - 3);
-  d.setHours(9, 0, 0, 0);
-  return d.toISOString();
+  return NextResponse.json({ ok: true, added, flaggedForReview });
 }
