@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useForm } from '@tanstack/react-form';
-import { FiArrowLeft, FiMail } from 'react-icons/fi';
+import { FiArrowLeft } from 'react-icons/fi';
 import { createClient } from '@/lib/supabase/client';
 import { emailSchema } from '@/app/features/auth/schema';
 import Image from 'next/image';
@@ -65,7 +65,7 @@ export function ForgotPasswordForm() {
       >
         <div className='flex flex-col items-center text-center'>
           <div className='mx-auto mb-5 flex items-center justify-center'>
-            <Image src={Logo} alt='Bleed logo' width={150} priority={true} />
+            <Image src={Logo} alt='Bleed logo' width={110} priority={true} />
           </div>
 
           <h1 className='font-display text-3xl text-ink'>Check your inbox</h1>

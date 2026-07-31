@@ -49,7 +49,7 @@ export function ResetPasswordForm() {
     <div className='w-full max-w-md rounded-4xl bg-white p-10'>
       <div className='mb-8 text-center'>
         <div className='flex items-center justify-center'>
-          <Image src={Logo} alt='Bleed logo' width={150} priority={true} />
+          <Image src={Logo} alt='Bleed logo' width={110} priority={true} />
         </div>
         <p className='font-display mt-3 text-sm leading-6 text-ink/55'>
           Your new password must be different from the one you previously used.
