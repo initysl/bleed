@@ -14,7 +14,6 @@ import {
 
 import bleedLogo from '@/public/bleedlogo.svg';
 import heroPhone from '@/public/hero-phone.png';
-import desktopDashboard from '@/public/desktop-dashboard.png';
 import addModalPhone from '@/public/add-modal-phone.png';
 import fullDashboard from '@/public/full-dashboard.png';
 
@@ -282,7 +281,6 @@ export default function BleedLandingPage({
             className='lg:col-span-5 relative flex justify-center items-center'
           >
             <div className='relative w-full max-w-85 sm:max-w-95 aspect-9/18'>
-              {/* Desktop Dashboard Accent Background */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.85, rotate: -6 }}
                 animate={{ opacity: 1, scale: 0.9, rotate: -3 }}
@@ -291,7 +289,7 @@ export default function BleedLandingPage({
                   delay: 0.5,
                   ease: [0.22, 1, 0.36, 1],
                 }}
-                className='absolute -top-6 -left-12 sm:-left-20 w-[130%] h-[80%] rounded-2xl overflow-hidden hidden sm:block shadow-2xl'
+                className='absolute -top-6 -left-12 sm:-left-20 w-[130%] h-[80%] overflow-hidden hidden sm:block '
               >
                 <Image
                   src={heroPhone}
@@ -303,7 +301,7 @@ export default function BleedLandingPage({
               </motion.div>
 
               {/* Main Mobile Screen Display */}
-              <div className='relative z-10 w-full h-full rounded-[40px] overflow-hidden shadow-2xl'>
+              <div className='relative z-10 w-full h-full rounded-[40px] overflow-hidden'>
                 <Image
                   src={heroPhone}
                   alt='Bleed Mobile App Interface'
@@ -326,7 +324,7 @@ export default function BleedLandingPage({
                 className='absolute -bottom-6 -left-6 z-20 bg-white p-4 rounded-2xl border border-zinc-200 shadow-xl max-w-65 space-y-2'
               >
                 <div className='flex items-center gap-2 text-emerald-800 text-xs font-bold uppercase tracking-wider'>
-                  <FiBell className='w-4 h-4 animate-bounce' /> Proactive Nudge
+                  <FiBell className='w-4 h-4 animate-ping' /> Proactive Nudge
                 </div>
                 <p className='text-xs text-zinc-700 font-medium leading-snug'>
                   "Netflix renews in 3 days — $15.49/mo. Cancel or keep?"
@@ -473,13 +471,13 @@ export default function BleedLandingPage({
               variants={scaleIn}
               className='lg:col-span-6 flex justify-center'
             >
-              <div className='relative w-full max-w-[320px] aspect-9/18 rounded-[36px] overflow-hidden shadow-2xl'>
+              <div className='relative w-full max-w-[320px] aspect-9/18 overflow-hidden'>
                 <Image
                   src={addModalPhone}
                   alt='Bleed Add Subscription Modal Interface'
                   fill
                   sizes='(max-width: 768px) 100vw, 320px'
-                  className='object-cover'
+                  className='object-cover '
                 />
               </div>
             </motion.div>
