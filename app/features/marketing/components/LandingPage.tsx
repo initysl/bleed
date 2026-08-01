@@ -123,9 +123,7 @@ export default function BleedLandingPage({
 
   const ctaHref = isAuthenticated ? '/dashboard' : '/login';
   const ctaLabel = isAuthenticated ? 'Open Dashboard' : 'Get Started';
-  const heroCtaLabel = isAuthenticated
-    ? 'Open Dashboard'
-    : 'Start Tracking Free';
+  const heroCtaLabel = isAuthenticated ? 'Open Dashboard' : 'Start Tracking';
 
   // Smooth Scroll Click Handler
   const handleScrollTo = (
@@ -245,7 +243,7 @@ export default function BleedLandingPage({
               </div>
               <p className='text-xs text-zinc-500'>
                 Every real account gets its own private version of this address
-                — forward a receipt to it, and Bleed reads it automatically.
+                - forward a receipt to it, and Bleed reads it automatically.
               </p>
             </motion.div>
 
