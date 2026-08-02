@@ -80,6 +80,7 @@ export default function RootLayout({
   return (
     <html
       lang='en'
+      data-scroll-behavior='smooth'
       className={`${spaceGrotesk.variable} ${inter.variable} ${plexMono.variable} ${quantico.variable}`}
     >
       <body>
