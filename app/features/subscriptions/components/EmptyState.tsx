@@ -9,6 +9,7 @@ import { GhostTotal } from './GhostTotal';
 import { EnableNotifications } from '@/app/features/notifications/components/EnableNotifications';
 import { SubscriptionForm } from './SubscriptionForm';
 import { InboxAddress } from '../../inbox/components/InboxAddress';
+import { Modal } from '@/app/components/ui/Modal';
 
 export function EmptyState({ inboxAddress }: { inboxAddress: string }) {
   const shouldReduceMotion = useReducedMotion();
@@ -38,7 +39,7 @@ export function EmptyState({ inboxAddress }: { inboxAddress: string }) {
       {/* Header — Preserved Exactly As Is */}
       <motion.header
         variants={item}
-        className='sticky top-0 z-50 flex sm:p-0 p-5 w-full h-20 items-center justify-between backdrop-blur-xl rounded-2xl'
+        className='sticky top-0 flex sm:p-0 p-5 w-full h-20 items-center justify-between backdrop-blur-xl rounded-2xl'
       >
         <Image
           src='/bleedlogo.svg'
@@ -105,9 +106,9 @@ export function EmptyState({ inboxAddress }: { inboxAddress: string }) {
 
           <motion.div variants={item} className='w-full'>
             {showForm ? (
-              <div className='w-full pt-2'>
+              <Modal open={showForm} onClose={() => setShowForm(false)}>
                 <SubscriptionForm onDone={() => setShowForm(false)} />
-              </div>
+              </Modal>
             ) : (
               <button
                 onClick={() => setShowForm(true)}
