@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bleed
 
-## Getting Started
+**Stop paying for subscriptions you forgot about.**
 
-First, run the development server:
+Bleed is a subscription tracker that removes the one thing that makes every other tracker fail: manual entry. Forward a receipt, or type a plain-English note — Bleed reads it, logs the price, currency, and renewal date automatically, and reminds you before anything renews so cancelling is a choice, not an accident.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## How it works
+
+1. **Sign up** → get a private, auto-generated inbox address (`u-xxxxxxxxxx@yourdomain.com`)
+2. **Forward a receipt** (or type something like *"signed up for Spotify, $11.99/month"*)
+3. **Bleed reads it** — an LLM extraction layer pulls out the name, price, currency, billing cycle, and renewal date, validated at runtime before anything touches the database
+4. **See your real total** — grouped by currency, never silently blended into one misleading number
+5. **Get nudged before it renews** — email and/or push, on a schedule you control, recurring automatically every cycle with zero re-entry
+
+Anything the model can't confidently parse lands in a review queue instead of vanishing.
+
+## Features
+
+- **Zero-entry logging** — forward an email or type plain text; manual add is a fallback, not the primary flow
+- **Multi-subscription extraction** — one email describing several charges gets split into separate, correctly-priced entries, not merged or dropped
+- **Multi-currency, never blended** — totals are shown per-currency, not averaged into a false single number
+- **Drift-free renewals** — billing cycles are computed from a fixed anchor date, not chained off the previous cycle, so month-end dates (e.g. Jan 31) never silently drift
+- **Dual-channel reminders** — email and push, independently toggleable per subscription and account-wide
+- **Full account lifecycle** — sign-up, password reset, email change, account deletion, all with proper confirmation flows
+- **Multi-tenant by design** — every row is isolated at the database level via Postgres Row-Level Security, not just application logic
+
+
+## Project structure
+
+```
+bleed/
+├── app/                        # Routes (App Router) — thin, mostly server components
+├── features/                   # Domain logic: subscriptions, auth, notifications, inbox, needs-review
+│   └── <feature>/
+│       ├── api/                # Client-side fetch wrappers
+│       ├── components/
+│       ├── hooks/               # TanStack Query hooks
+│       └── types.ts / schema.ts
+├── lib/
+│   ├── supabase/                # client / server / admin / middleware
+│   ├── email/                   # Groq extraction, Resend sending
+│   ├── notifications/           # Web Push
+│   └── utils/                   # dates, currency, brand colors
+├── components/ui/               # Shared primitives (Modal, etc.)
+└── supabase/
+    └── migrations/               # Sequential SQL migrations
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## License
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Personal project — not currently licensed for reuse.
