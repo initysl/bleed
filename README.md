@@ -29,4 +29,4 @@ Anything the model can't confidently parse lands in a review queue instead of va
 
 ## License
 
-Personal project — not currently licensed for reuse.
+MIT.
