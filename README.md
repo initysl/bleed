@@ -26,7 +26,3 @@ Anything the model can't confidently parse lands in a review queue instead of va
 - **Full account lifecycle** — sign-up, password reset, email change, account deletion, all with proper confirmation flows
 - **Multi-tenant by design** — every row is isolated at the database level via Postgres Row-Level Security, not just application logic
 
-
-## License
-
-MIT.
