@@ -27,27 +27,6 @@ Anything the model can't confidently parse lands in a review queue instead of va
 - **Multi-tenant by design** — every row is isolated at the database level via Postgres Row-Level Security, not just application logic
 
 
-## Project structure
-
-```
-bleed/
-├── app/                        # Routes (App Router) — thin, mostly server components
-├── features/                   # Domain logic: subscriptions, auth, notifications, inbox, needs-review
-│   └── <feature>/
-│       ├── api/                # Client-side fetch wrappers
-│       ├── components/
-│       ├── hooks/               # TanStack Query hooks
-│       └── types.ts / schema.ts
-├── lib/
-│   ├── supabase/                # client / server / admin / middleware
-│   ├── email/                   # Groq extraction, Resend sending
-│   ├── notifications/           # Web Push
-│   └── utils/                   # dates, currency, brand colors
-├── components/ui/               # Shared primitives (Modal, etc.)
-└── supabase/
-    └── migrations/               # Sequential SQL migrations
-```
-
 ## License
 
 Personal project — not currently licensed for reuse.
