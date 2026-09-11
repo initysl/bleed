@@ -31,6 +31,42 @@ export const createSubscriptionLimiter = new Ratelimit({
   prefix: 'ratelimit:create-subscription',
 });
 
+// Edits and deletes. Higher than creates because correcting a row several times
+// in a row is normal behaviour, unlike creating sixty subscriptions.
+export const mutateSubscriptionLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(60, '1 h'),
+  prefix: 'ratelimit:mutate-subscription',
+});
+
+// Inbound email, keyed by RECIPIENT rather than by session — this path has no
+// session, and that is exactly the problem it guards. An inbound address is
+// shown in plaintext in the UI and pasted into mail-forwarding rules, so it
+// leaks easily; anyone holding one can mail it in a loop and drive unbounded
+// row inserts, unbounded Groq spend and unbounded Resend fetches against
+// somebody else's account.
+export const inboundEmailLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(30, '1 h'),
+  prefix: 'ratelimit:inbound-email',
+});
+
+// Account deletion. One legitimate use, ever — this only exists to stop a
+// scripted hammer against the confirmation check.
+export const accountLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, '1 h'),
+  prefix: 'ratelimit:account',
+});
+
+// Push device registration. A browser re-registers on permission change and on
+// service-worker update, so this needs headroom, but not unbounded.
+export const pushSubscribeLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(30, '1 h'),
+  prefix: 'ratelimit:push-subscribe',
+});
+
 // Returns a ready-to-send 429 response if the limit was hit, or null if the
 // caller should proceed. Identified by user ID rather than IP, since every
 // route this protects already requires an authenticated session.
@@ -42,10 +78,12 @@ export async function checkRateLimit(
 
   if (success) return null;
 
+  // Same { ok, error } shape every other API failure uses, so the fetch client
+  // has exactly one place to read a message from.
   return NextResponse.json(
     {
       ok: false,
-      message: 'Too many requests. Try again in a few minutes.',
+      error: 'Too many requests. Try again in a few minutes.',
     },
     {
       status: 429,

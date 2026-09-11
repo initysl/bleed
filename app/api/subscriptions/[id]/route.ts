@@ -1,6 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { subscriptionUpdateSchema } from '@/app/features/subscriptions/schema';
+import {
+  apiError,
+  apiOk,
+  notFound,
+  readJson,
+  serverError,
+  unauthorized,
+  validationError,
+} from '@/lib/api/response';
+import { checkRateLimit, mutateSubscriptionLimiter } from '@/lib/rate-limit';
 
 async function requireUser() {
   const supabase = await createClient();
@@ -17,22 +27,20 @@ export async function PATCH(
   const { id } = await params;
   const { supabase, user } = await requireUser();
 
-  if (!user) {
-    return NextResponse.json(
-      { ok: false, error: 'unauthorized' },
-      { status: 401 },
-    );
-  }
+  if (!user) return unauthorized();
 
-  const body = await req.json();
+  const rateLimitResponse = await checkRateLimit(
+    mutateSubscriptionLimiter,
+    user.id,
+  );
+  if (rateLimitResponse) return rateLimitResponse;
+
+  const body = await readJson(req);
+  if (body === null) return apiError('Expected a JSON body.', 400);
+
   const parsed = subscriptionUpdateSchema.safeParse(body);
 
-  if (!parsed.success) {
-    return NextResponse.json(
-      { ok: false, error: parsed.error.flatten() },
-      { status: 400 },
-    );
-  }
+  if (!parsed.success) return validationError(parsed.error);
 
   // If channel flags are being partially updated, check the merged result
   // against the row as it currently stands — but RLS already guarantees this
@@ -53,13 +61,7 @@ export async function PATCH(
       const nextEmail = parsed.data.notify_email ?? current.notify_email;
       const nextPush = parsed.data.notify_push ?? current.notify_push;
       if (!nextEmail && !nextPush) {
-        return NextResponse.json(
-          {
-            ok: false,
-            error: 'At least one reminder channel must stay enabled',
-          },
-          { status: 400 },
-        );
+        return apiError('At least one reminder channel must stay enabled.', 400);
       }
     }
   }
@@ -85,23 +87,13 @@ export async function PATCH(
     .eq('id', id)
     .select('id');
 
-  if (error) {
-    return NextResponse.json(
-      { ok: false, error: error.message },
-      { status: 500 },
-    );
-  }
+  if (error) return serverError('updating subscription', error);
 
   // RLS silently matches 0 rows if this id belongs to someone else, rather than erroring —
   // surface that as a 404 so the client isn't told "ok" for something that didn't happen.
-  if (!data || data.length === 0) {
-    return NextResponse.json(
-      { ok: false, error: 'not found' },
-      { status: 404 },
-    );
-  }
+  if (!data || data.length === 0) return notFound('Subscription not found.');
 
-  return NextResponse.json({ ok: true });
+  return apiOk();
 }
 
 export async function DELETE(
@@ -111,12 +103,13 @@ export async function DELETE(
   const { id } = await params;
   const { supabase, user } = await requireUser();
 
-  if (!user) {
-    return NextResponse.json(
-      { ok: false, error: 'unauthorized' },
-      { status: 401 },
-    );
-  }
+  if (!user) return unauthorized();
+
+  const rateLimitResponse = await checkRateLimit(
+    mutateSubscriptionLimiter,
+    user.id,
+  );
+  if (rateLimitResponse) return rateLimitResponse;
 
   const { data, error } = await supabase
     .from('subscriptions')
@@ -124,19 +117,9 @@ export async function DELETE(
     .eq('id', id)
     .select('id');
 
-  if (error) {
-    return NextResponse.json(
-      { ok: false, error: error.message },
-      { status: 500 },
-    );
-  }
+  if (error) return serverError('deleting subscription', error);
 
-  if (!data || data.length === 0) {
-    return NextResponse.json(
-      { ok: false, error: 'not found' },
-      { status: 404 },
-    );
-  }
+  if (!data || data.length === 0) return notFound('Subscription not found.');
 
-  return NextResponse.json({ ok: true });
+  return apiOk();
 }

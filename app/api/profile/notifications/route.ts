@@ -1,5 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
+import {
+  apiOk,
+  readJson,
+  serverError,
+  unauthorized,
+  validationError,
+} from '@/lib/api/response';
+
+const notificationPrefsSchema = z.object({
+  email_notifications_enabled: z.boolean(),
+});
 
 export async function GET() {
   const supabase = await createClient();
@@ -8,12 +20,7 @@ export async function GET() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    return NextResponse.json(
-      { ok: false, error: 'unauthorized' },
-      { status: 401 },
-    );
-  }
+  if (!user) return unauthorized();
 
   const { data, error } = await supabase
     .from('profiles')
@@ -21,14 +28,9 @@ export async function GET() {
     .eq('id', user.id)
     .single();
 
-  if (error) {
-    return NextResponse.json(
-      { ok: false, error: error.message },
-      { status: 500 },
-    );
-  }
+  if (error) return serverError('reading notification preferences', error);
 
-  return NextResponse.json({ ok: true, data });
+  return apiOk(data);
 }
 
 export async function PATCH(req: NextRequest) {
@@ -38,33 +40,21 @@ export async function PATCH(req: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    return NextResponse.json(
-      { ok: false, error: 'unauthorized' },
-      { status: 401 },
-    );
-  }
+  if (!user) return unauthorized();
 
-  const body = await req.json();
+  const body = await readJson(req);
+  const parsed = notificationPrefsSchema.safeParse(body);
 
-  if (typeof body.email_notifications_enabled !== 'boolean') {
-    return NextResponse.json(
-      { ok: false, error: 'invalid payload' },
-      { status: 400 },
-    );
-  }
+  if (!parsed.success) return validationError(parsed.error);
 
   const { error } = await supabase
     .from('profiles')
-    .update({ email_notifications_enabled: body.email_notifications_enabled })
+    .update({
+      email_notifications_enabled: parsed.data.email_notifications_enabled,
+    })
     .eq('id', user.id);
 
-  if (error) {
-    return NextResponse.json(
-      { ok: false, error: error.message },
-      { status: 500 },
-    );
-  }
+  if (error) return serverError('updating notification preferences', error);
 
-  return NextResponse.json({ ok: true });
+  return apiOk();
 }
