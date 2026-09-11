@@ -1,9 +1,15 @@
 'use client';
 
+import { useId, useState } from 'react';
 import { useForm } from '@tanstack/react-form';
-import { FiTrash2 } from 'react-icons/fi';
+import { FiAlertCircle, FiTrash2 } from 'react-icons/fi';
 import { ReminderPicker } from './ReminderPicker';
-import { toDatetimeLocalValue, defaultReminderAt } from '@/lib/utils/dates';
+import {
+  toDatetimeLocalValue,
+  defaultReminderAt,
+  formatDateOnly,
+  parseDateOnly,
+} from '@/lib/utils/dates';
 import { CURRENCIES } from '@/lib/utils/currency';
 import { subscriptionCreateSchema } from '@/app/features/subscriptions/schema';
 import { useCreateSubscription } from '@/app/features/subscriptions/hooks/useCreateSubscription';
@@ -11,8 +17,16 @@ import { useUpdateSubscription } from '@/app/features/subscriptions/hooks/useUpd
 import { useDeleteSubscription } from '@/app/features/subscriptions/hooks/useDeleteSubscription';
 import type { Subscription } from '@/app/features/subscriptions/types';
 
-const today = new Date();
-const initialRenewalDate = today.toISOString().slice(0, 10);
+// Computed per render, not once at module scope. A module-level `new Date()` is
+// evaluated at first import, so a tab left open across midnight kept offering
+// yesterday as the default renewal date.
+//
+// formatDateOnly rather than toISOString().slice(0, 10): the latter reports the
+// UTC day, so a user in Los Angeles opening the form at 5pm got tomorrow's date
+// pre-filled.
+function todayAsDateOnly() {
+  return formatDateOnly(new Date());
+}
 
 interface SubscriptionFormProps {
   onDone?: () => void;
@@ -29,6 +43,10 @@ function firstErrorMessage(errors: unknown[]): string | null {
 
 export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
   const isEditing = Boolean(existing);
+  const initialRenewalDate = todayAsDateOnly();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const errorId = useId();
 
   const createMutation = useCreateSubscription();
   const updateMutation = useUpdateSubscription();
@@ -43,7 +61,9 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
       renewal_date: existing?.renewal_date ?? initialRenewalDate,
       reminder_at: existing?.reminder_at
         ? toDatetimeLocalValue(new Date(existing.reminder_at))
-        : toDatetimeLocalValue(defaultReminderAt(new Date(initialRenewalDate))),
+        : toDatetimeLocalValue(
+            defaultReminderAt(parseDateOnly(initialRenewalDate)),
+          ),
       notify_email: existing?.notify_email ?? true,
       notify_push: existing?.notify_push ?? true,
     },
@@ -58,22 +78,55 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
         reminder_at: new Date(value.reminder_at).toISOString(),
       };
 
-      if (isEditing) {
-        await updateMutation.mutateAsync({ id: existing!.id, input: payload });
-      } else {
-        await createMutation.mutateAsync(payload);
+      // Caught, not allowed to propagate. TanStack Form re-throws whatever the
+      // submit handler rejects with, and form.handleSubmit() is called
+      // un-awaited from the onSubmit below — so an uncaught rejection here
+      // became an unhandled promise rejection and the user saw the button
+      // simply return to its resting state with no explanation.
+      try {
+        setSubmitError(null);
+        if (isEditing) {
+          await updateMutation.mutateAsync({ id: existing!.id, input: payload });
+        } else {
+          await createMutation.mutateAsync(payload);
+        }
+        onDone?.();
+      } catch (err) {
+        setSubmitError(
+          err instanceof Error
+            ? err.message
+            : 'Something went wrong. Please try again.',
+        );
       }
-      onDone?.();
     },
   });
 
   const submitting = createMutation.isPending || updateMutation.isPending;
   const deleting = deleteMutation.isPending;
+  const busy = submitting || deleting;
 
   async function handleDelete() {
     if (!existing) return;
-    await deleteMutation.mutateAsync(existing.id);
-    onDone?.();
+
+    // Destructive and irreversible, and it used to fire on a single click with
+    // no undo and no confirmation at all.
+    if (!confirmingDelete) {
+      setConfirmingDelete(true);
+      return;
+    }
+
+    try {
+      setSubmitError(null);
+      await deleteMutation.mutateAsync(existing.id);
+      onDone?.();
+    } catch (err) {
+      setConfirmingDelete(false);
+      setSubmitError(
+        err instanceof Error
+          ? err.message
+          : 'Could not remove this subscription.',
+      );
+    }
   }
 
   return (
@@ -91,6 +144,10 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
       <form.Field name='name'>
         {(field) => {
           const error = firstErrorMessage(field.state.meta.errors);
+          // aria-describedby links the message to the input, and aria-invalid
+          // marks the field itself — without both, the error text was visible
+          // but entirely invisible to a screen reader.
+          const msgId = `${errorId}-name`;
           return (
             <label className='flex flex-col gap-1 text-sm text-ink font-mono'>
               Name
@@ -100,9 +157,15 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
                 placeholder='Netflix'
-                className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink outline-none focus:border-pine'
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? msgId : undefined}
+                className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink focus:border-pine'
               />
-              {error && <span className='text-xs text-rust'>{error}</span>}
+              {error && (
+                <span id={msgId} className='text-xs text-rust'>
+                  {error}
+                </span>
+              )}
             </label>
           );
         }}
@@ -115,6 +178,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
             {(field) => {
               const error = firstErrorMessage(field.state.meta.errors);
 
+              const msgId = `${errorId}-price`;
               return (
                 <label className='flex flex-1 flex-col gap-1 text-sm text-ink'>
                   Price
@@ -122,15 +186,34 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
                     type='number'
                     step='0.01'
                     min='0'
-                    value={field.state.value}
-                    onChange={(e) =>
-                      field.handleChange(e.target.valueAsNumber || 0)
+                    // Empty renders as an empty box rather than a literal 0.
+                    // Previously `valueAsNumber || 0` coerced a cleared field to
+                    // 0, so the input looked empty while holding a value that
+                    // then failed validation with "Price must be greater than
+                    // 0" — an error about something the user could not see.
+                    value={
+                      Number.isFinite(field.state.value) &&
+                      field.state.value !== 0
+                        ? field.state.value
+                        : (field.state.value === 0 && field.state.meta.isDirty
+                            ? 0
+                            : '')
                     }
+                    onChange={(e) => {
+                      const n = e.target.valueAsNumber;
+                      field.handleChange(Number.isNaN(n) ? 0 : n);
+                    }}
                     onBlur={field.handleBlur}
                     placeholder='15.49'
-                    className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink outline-none focus:border-pine'
+                    aria-invalid={error ? true : undefined}
+                    aria-describedby={error ? msgId : undefined}
+                    className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink focus:border-pine'
                   />
-                  {error && <span className='text-xs text-rust'>{error}</span>}
+                  {error && (
+                    <span id={msgId} className='text-xs text-rust'>
+                      {error}
+                    </span>
+                  )}
                 </label>
               );
             }}
@@ -143,7 +226,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
                 <select
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink outline-none focus:border-pine'
+                  className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink focus:border-pine'
                 >
                   {CURRENCIES.map((c) => (
                     <option key={c} value={c}>
@@ -166,7 +249,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
                 onChange={(e) =>
                   field.handleChange(e.target.value as 'monthly' | 'yearly')
                 }
-                className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink outline-none focus:border-pine'
+                className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink focus:border-pine'
               >
                 <option value='monthly'>Monthly</option>
                 <option value='yearly'>Yearly</option>
@@ -190,14 +273,18 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
                 if (!isEditing) {
                   form.setFieldValue(
                     'reminder_at',
+                    // parseDateOnly: <input type="date"> yields "YYYY-MM-DD",
+                    // which new Date() reads as UTC midnight — west of UTC that
+                    // is the previous calendar day, so the suggested reminder
+                    // came out a day early.
                     toDatetimeLocalValue(
-                      defaultReminderAt(new Date(e.target.value)),
+                      defaultReminderAt(parseDateOnly(e.target.value)),
                     ),
                   );
                 }
               }}
               onBlur={field.handleBlur}
-              className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink outline-none focus:border-pine'
+              className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink focus:border-pine'
             />
           </label>
         )}
@@ -247,6 +334,21 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
         )}
       </form.Field>
 
+      {/* The form's own failure state. role='alert' so it is announced rather
+          than silently appearing, and aria-live='assertive' because the user is
+          waiting on this specific result. */}
+      {submitError && (
+        <div
+          id={errorId}
+          role='alert'
+          aria-live='assertive'
+          className='flex items-start gap-2 rounded-md border border-rust/40 bg-rust/10 px-3 py-2 text-sm text-rust'
+        >
+          <FiAlertCircle className='mt-0.5 h-4 w-4 shrink-0' aria-hidden='true' />
+          <span>{submitError}</span>
+        </div>
+      )}
+
       <div className='flex gap-2'>
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
@@ -254,8 +356,10 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
           {([canSubmit, isSubmitting]) => (
             <button
               type='submit'
-              disabled={!canSubmit || submitting || deleting}
-              className='flex-1 rounded-md bg-pine px-4 py-2 text-sm font-medium font-body text-paper transition-colors hover:bg-pine/90 disabled:opacity-60'
+              disabled={!canSubmit || busy}
+              aria-busy={isSubmitting || submitting}
+              aria-describedby={submitError ? errorId : undefined}
+              className='flex-1 rounded-md bg-pine px-4 py-2 text-sm font-medium font-body text-paper transition-colors hover:bg-pine/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pine disabled:opacity-60'
             >
               {isSubmitting || submitting
                 ? 'Saving…'
@@ -270,11 +374,22 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
           <button
             type='button'
             onClick={handleDelete}
-            disabled={submitting || deleting}
-            className='flex items-center gap-1.5 rounded-md border border-rust px-4 py-2 text-sm font-medium font-body text-rust transition-colors hover:bg-rust/10 disabled:opacity-60'
+            onBlur={() => setConfirmingDelete(false)}
+            // `busy` rather than `submitting || deleting` so a delete can't be
+            // triggered while a save is already in flight.
+            disabled={busy}
+            className={`flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium font-body transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-60 ${
+              confirmingDelete
+                ? 'border-rust bg-rust text-paper hover:bg-rust/90 focus-visible:outline-rust'
+                : 'border-rust text-rust hover:bg-rust/10 focus-visible:outline-rust'
+            }`}
           >
-            <FiTrash2 className='h-4 w-4' />
-            {deleting ? 'Removing…' : 'Remove'}
+            <FiTrash2 className='h-4 w-4' aria-hidden='true' />
+            {deleting
+              ? 'Removing…'
+              : confirmingDelete
+                ? 'Tap again to confirm'
+                : 'Remove'}
           </button>
         )}
       </div>
