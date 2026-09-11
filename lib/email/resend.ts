@@ -1,5 +1,8 @@
 import { Resend } from 'resend';
 import type { Subscription } from '@/app/features/subscriptions/types';
+import { escapeHtml } from '@/lib/utils/html';
+import { formatMoney } from '@/lib/utils/currency';
+import { formatDate } from '@/lib/utils/dates';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -7,13 +10,29 @@ export async function sendRenewalReminderEmail(
   to: string,
   subscription: Subscription,
 ) {
+  // Every interpolated value is escaped: `name` in particular is attacker-
+  // controllable via the inbound address, and this message is sent from a
+  // domain the recipient trusts. See lib/utils/html.ts.
+  const name = escapeHtml(subscription.name);
+  const amount = escapeHtml(
+    formatMoney(subscription.price, subscription.currency),
+  );
+  const renewsOn = escapeHtml(formatDate(subscription.renewal_date));
+  const cycle = escapeHtml(subscription.billing_cycle);
+
   const { data, error } = await resend.emails.send({
     from: `Bleed <${process.env.RESEND_FROM_ADDRESS}>`,
     to,
-    subject: `${subscription.name} renews in a few days — $${subscription.price}`,
+    // The subject is plain text, so it takes the unescaped values — but it
+    // still uses formatMoney rather than a hardcoded "$", which reported an
+    // NGN subscription as "$15000".
+    subject: `${subscription.name} renews in a few days — ${formatMoney(
+      subscription.price,
+      subscription.currency,
+    )}`,
     html: `
-      <p><strong>${subscription.name}</strong> renews on ${subscription.renewal_date}.</p>
-      <p>You'll be charged <strong>$${subscription.price}</strong> (${subscription.billing_cycle}).</p>
+      <p><strong>${name}</strong> renews on ${renewsOn}.</p>
+      <p>You'll be charged <strong>${amount}</strong> (${cycle}).</p>
       <p>Decide now: cancel it, or let it renew.</p>
       <p style="color:#888; font-size:12px; margin-top:24px;">
         This is an automated message — replies to this address aren't monitored.

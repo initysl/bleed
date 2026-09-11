@@ -5,13 +5,22 @@ import type {
 
 async function parseOrThrow(res: Response) {
   const body = await res.json().catch(() => ({}));
+
   if (!res.ok) {
-    const message =
+    // Every API route now answers failures as { ok: false, error: string }
+    // (see lib/api/response.ts), so there is exactly one place to look.
+    //
+    // The previous version also probed `body.error.formErrors[0]`, a shape zod
+    // v4 never emits — treeifyError returns { errors, properties }. Every
+    // validation failure therefore fell through to the literal string
+    // 'Request failed' and the user was told nothing about what was wrong.
+    throw new Error(
       typeof body.error === 'string'
         ? body.error
-        : (body.error?.formErrors?.[0] ?? body.message ?? 'Request failed');
-    throw new Error(message);
+        : 'Something went wrong. Please try again.',
+    );
   }
+
   return body;
 }
 
