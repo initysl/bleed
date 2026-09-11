@@ -112,7 +112,7 @@ export function LoginForm() {
       <div className='mb-5 flex flex-col gap-1 items-center text-center'>
         <Image src={Logo} alt='Bleed logo' width={110} priority={true} />
         <p className='font-mini text-sm leading-6 text-ink/60'>
-          Mange your subscriptions.
+          Manage your subscriptions.
         </p>
       </div>
 
@@ -140,7 +140,7 @@ export function LoginForm() {
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  className='font-display h-14 w-full rounded-full border border-sage/50 bg-paper px-5 text-sm outline-none transition focus:border-pine focus:ring-4 focus:ring-pine/10'
+                  className='font-display h-14 w-full rounded-full border border-sage/50 bg-paper px-5 text-sm transition focus:border-pine focus:ring-4 focus:ring-pine/10'
                 />
 
                 {error && <p className='mt-2 text-xs text-rust'>{error}</p>}
@@ -167,7 +167,7 @@ export function LoginForm() {
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
-                    className='font-display h-14 w-full rounded-full border border-sage/50 bg-paper px-5 pr-14 text-sm outline-none transition focus:border-pine focus:ring-4 focus:ring-pine/10'
+                    className='font-display h-14 w-full rounded-full border border-sage/50 bg-paper px-5 pr-14 text-sm transition focus:border-pine focus:ring-4 focus:ring-pine/10'
                   />
 
                   <button
@@ -207,13 +207,19 @@ export function LoginForm() {
         >
           {([canSubmit, isSubmitting]) => (
             <motion.button
+              type='submit'
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              disabled={!canSubmit}
+              disabled={!canSubmit || Boolean(isSubmitting)}
+              aria-busy={Boolean(isSubmitting)}
               className='font-display h-14 w-full rounded-full bg-pine font-medium text-paper shadow-lg transition hover:bg-pine/90 disabled:opacity-50'
             >
+              {/* Signing up used to say "Signing in..." while it created the
+                  account. */}
               {isSubmitting
-                ? 'Signing in...'
+                ? mode === 'signup'
+                  ? 'Creating account...'
+                  : 'Signing in...'
                 : mode === 'signup'
                   ? 'Create Account'
                   : 'Sign In'}
@@ -221,15 +227,11 @@ export function LoginForm() {
           )}
         </form.Subscribe>
 
-        <div className='flex items-center gap-4 pt-2'>
-          <div className='h-px flex-1 bg-sage' />
-          <span className='font-mini text-xs uppercase tracking-wider text-ink/45'>
-            OR
-          </span>
-          <div className='h-px flex-1 bg-sage' />
-        </div>
+        {/* The "OR" divider that used to sit here was removed: it visually
+            promises an alternative sign-in method, and the only thing following
+            it is the mode-toggle sentence below. There is no social auth. */}
 
-        <p className='font-mini text-center text-sm text-ink/55'>
+        <p className='font-mini text-center text-sm text-ink/70'>
           {mode === 'signup'
             ? 'Already have an account? '
             : "Don't have an account? "}
