@@ -52,7 +52,7 @@ export function DeleteAccountButton({ email }: { email: string }) {
 
       <Modal open={open} onClose={handleClose} title='Delete account'>
         <div className='flex flex-col gap-3'>
-          <p className='font-mini text-sm text-ink'>
+          <p className='text-sm text-ink'>
             This permanently deletes your account, every subscription you&apos;ve
             tracked, and all reminder history. This can&apos;t be undone.
           </p>

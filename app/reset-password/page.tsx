@@ -6,7 +6,7 @@ import { ResetPasswordForm } from '@/app/features/auth/components/ResetPasswordF
 // existing verifyOtp() logic in app/auth/confirm/route.ts.
 export default function ResetPasswordPage() {
   return (
-    <main className='flex min-h-screen flex-col items-center justify-center gap-8 px-6'>
+    <main className='flex min-h-screen flex-col items-center justify-center gap-8 bg-paper px-6 py-10'>
       <ResetPasswordForm />
     </main>
   );
