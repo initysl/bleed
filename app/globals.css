@@ -1,69 +1,144 @@
 @import 'tailwindcss';
 
+/* ---------------------------------------------------------------------------
+   Bleed — interface tokens
+
+   The product measures money leaving at a rate, so the interface is built to
+   read as an instrument: mono for every number and label, hairlines instead of
+   shadows, one tight radius, and a single accent.
+--------------------------------------------------------------------------- */
+
 @theme {
+  /* --- Ground and ink ---------------------------------------------------- */
   --color-paper: #f7f8f6;
   --color-ink: #1c2321;
-  --color-pine: #2f6f5e;
-  --color-sage: #dce5e0;
-  --color-rust: #b4573f;
 
-  --font-display: var(--font-space-grotesk), sans-serif;
-  --font-body: var(--font-inter), sans-serif;
-  --font-mono: var(--font-plex-mono), monospace;
-  --font-mini: var(--font-quantico), sans-serif;
+  /* Panels sit on paper; sunken fields sit inside panels. */
+  --color-surface: #ffffff;
+  --color-sunken: #fbfcfb;
+
+  /* --- Accent ------------------------------------------------------------ */
+  /* One accent, three states. Hover and active are darker rather than
+     lighter, so a pressed control reads as pushed into the surface. */
+  --color-pine: #2f6f5e;
+  --color-pine-hover: #285f51;
+  --color-pine-active: #1f4d40;
+
+  /* Tints of the same hue, for proportion bars and secondary marks. Derived
+     in oklch so they sit on one curve rather than being eyeballed. */
+  --color-pine-60: #5e9080;
+  --color-pine-35: #9bbbb0;
+  --color-pine-20: #c6d8d1;
+
+  /* --- Structure --------------------------------------------------------- */
+  /* `sage` is kept as the historical name for the panel-edge hairline; `line`
+     and `line-soft` say what they are actually for. */
+  --color-sage: #dce5e0;
+  --color-line: #dce5e0;
+  --color-line-strong: #c6d3cc;
+  --color-line-soft: #eef2f0;
+
+  /* --- Alert ------------------------------------------------------------- */
+  --color-rust: #b4573f;
+  --color-rust-line: #e0b8ac;
+  --color-rust-tint: #fbf2ef;
+
+  /* --- Type -------------------------------------------------------------- */
+  /* Two faces. Space Grotesk is loaded at 500 and 700 ONLY, so never reach
+     for font-semibold (600) or font-extrabold (800) — the browser
+     synthesises those, which is what made the old headings look smeared.
+     Plex Mono is loaded at 400 and 500.
+
+     `--font-body` and `--font-mini` are aliases kept so existing class names
+     keep rendering correctly during the redesign; both now resolve to the
+     display face. Quantico and Inter are no longer loaded at all. */
+  --font-display: var(--font-space-grotesk), 'Helvetica Neue', Arial, sans-serif;
+  --font-body: var(--font-space-grotesk), 'Helvetica Neue', Arial, sans-serif;
+  --font-mini: var(--font-space-grotesk), 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Named steps for the three type roles that repeat everywhere. */
+  --text-label: 0.625rem; /* 10px — mono section labels */
+  --text-label--line-height: 1.2;
+  --text-label--letter-spacing: 0.16em;
+
+  --text-tag: 0.5625rem; /* 9px — inline chips */
+  --text-tag--line-height: 1.2;
+  --text-tag--letter-spacing: 0.08em;
+
+  --text-meter: 3.25rem; /* 52px — the headline number */
+  --text-meter--line-height: 1;
+  --text-meter--letter-spacing: -0.02em;
+
+  /* --- Radius ------------------------------------------------------------ */
+  /* Deliberately collapsed. The app previously mixed six radii up to
+     rounded-4xl; one tight radius is what makes a surface read as machined
+     rather than soft. The whole scale is overridden so existing rounded-*
+     classes land on the new value without touching every call site.
+     `rounded-full` is not part of this scale and stays circular — correct for
+     avatars and status dots, wrong for pills, which the passes below fix. */
+  --radius-xs: 1px; /* bars, switch thumbs */
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 2px;
+  --radius-2xl: 2px;
+  --radius-3xl: 2px;
+  --radius-4xl: 2px;
+
+  /* --- Motion ------------------------------------------------------------ */
+  /* One curve for anything the user initiated: decelerating, never bouncing
+     back. Mirrored in lib/motion.ts for framer-motion. */
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 html {
   scroll-behavior: smooth;
 
-  /* The app has no dark theme. Declaring the scheme explicitly stops the
-     browser rendering its own controls dark: without this, a visitor whose OS
-     is in dark mode got dark <select>, <input type="date"> and
-     <input type="datetime-local"> widgets sitting inside white cards, and the
-     datetime picker in particular was close to unreadable. */
+  /* The app has no dark theme. Declaring the scheme stops the browser
+     rendering its own controls dark: without it, a visitor whose OS is in
+     dark mode got dark <select> and <input type="date"> widgets inside white
+     cards, and the datetime picker was close to unreadable. */
   color-scheme: light;
 }
 
 body {
   background: var(--color-paper);
   color: var(--color-ink);
-  font-family: var(--font-body);
+  font-family: var(--font-display);
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Every figure that can be compared down a column is tabular. */
+.tnum,
+[data-numeric] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
 }
 
 /* ---------------------------------------------------------------------------
    Focus visibility
 
-   Of the focus-related declarations previously in the app, all but two were
-   `outline-none` on an input paired with `focus:border-pine` — a 1px border
-   moving from #DCE5E0 to #2F6F5E, which is not a sufficient non-text contrast
-   change under WCAG 2.4.11. Everything else relied on the browser default,
-   which those same rules had already removed elsewhere.
-
-   One rule here restores a consistent, visible indicator for every interactive
-   element at once, instead of needing a utility class remembered per call site.
-   :focus-visible (not :focus) means it appears for keyboard and programmatic
-   focus without drawing a ring on every mouse click.
+   One rule for the whole interface. Of the focus declarations previously in
+   the app, all but two were `outline-none` on an input paired with a 1px
+   border tint, which is not a sufficient non-text contrast change under WCAG
+   2.4.11. :focus-visible (not :focus) keeps the ring off mouse clicks.
 --------------------------------------------------------------------------- */
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--color-pine);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
-/* On the rust-coloured destructive controls a pine ring reads as unrelated. */
-:where(.focus-ring-rust):focus-visible {
+/* Destructive controls take the ring in their own colour. */
+:where(.focus-rust):focus-visible {
   outline-color: var(--color-rust);
 }
 
 /* ---------------------------------------------------------------------------
-   Scrollbars
-
-   `scrollbar-none` and `scrollbar-thin` were already in use in three places,
-   but they come from the `tailwind-scrollbar` plugin, which is not installed
-   and was never registered here — so all of them were silently no-ops and the
-   horizontal currency strip and settings nav showed full-height native bars.
-   Defining them as real utilities is less disruptive than removing the class
-   names from the markup.
+   Scrollbars — `scrollbar-thin` / `scrollbar-none` are used in the app but
+   come from a plugin that is not installed, so both were silently no-ops.
 --------------------------------------------------------------------------- */
 @utility scrollbar-none {
   scrollbar-width: none;
@@ -76,7 +151,7 @@ body {
 
 @utility scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--color-pine) 65%, transparent)
+  scrollbar-color: color-mix(in srgb, var(--color-pine) 55%, transparent)
     transparent;
 
   &::-webkit-scrollbar {
@@ -89,24 +164,33 @@ body {
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: color-mix(in srgb, var(--color-pine) 65%, transparent);
+    background-color: color-mix(in srgb, var(--color-pine) 55%, transparent);
     border-radius: 3px;
   }
 }
 
+/* The mono section label that opens every panel: `01  MONTHLY BLEED`. */
+@utility section-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: var(--text-label--letter-spacing);
+  color: color-mix(in srgb, var(--color-ink) 55%, transparent);
+}
+
 /* ---------------------------------------------------------------------------
    Motion preferences
+
+   framer-motion is configured with reducedMotion="user" in
+   providers/MotionProvider.tsx, which covers transform and layout animation.
+   This block covers the CSS side — transitions and keyframes, which nothing
+   in JS touches.
 --------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
 
-  /* framer-motion's useReducedMotion only covers components that ask for it,
-     and nothing in JS touches the ~40 CSS transitions and the infinite
-     `animate-ping` in the marketing page. This collapses all of them.
-     Durations are near-zero rather than zero so transitionend/animationend
-     listeners still fire. */
   *,
   *::before,
   *::after {
