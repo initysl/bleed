@@ -187,16 +187,16 @@ export function SubscriptionList({
                       </button>
                     </div>
 
-                    {/* No max-height. This was `max-h-40 overflow-y-auto`,
-                        which forced a ~400px form through a 160-pixel window —
-                        users scrolled an inner pane to reach the save button,
-                        inside a card that itself scrolls. The drawer animates
-                        to `height: auto`, so it can simply be as tall as the
-                        form. */}
-                    <SubscriptionForm
-                      existing={sub}
-                      onDone={() => setEditingId(null)}
-                    />
+                    {/* Capped height with an inner scroll, by preference: the
+                        drawer stays a compact panel inside the row rather than
+                        growing to the full height of the form and pushing the
+                        rest of the list far down the page. */}
+                    <div className='max-h-40 overflow-y-auto scrollbar-thin'>
+                      <SubscriptionForm
+                        existing={sub}
+                        onDone={() => setEditingId(null)}
+                      />
+                    </div>
                   </div>
                 </motion.div>
               )}
