@@ -1,7 +1,5 @@
 'use client';
 
-import { Switch } from '@/app/components/ui/Switch';
-
 interface ReminderPickerProps {
   reminderAt: string;
   notifyEmail: boolean;
@@ -19,48 +17,53 @@ export function ReminderPicker({
   notifyPush,
   onChange,
 }: ReminderPickerProps) {
-  // The last enabled channel is locked rather than silently rejected — and
-  // the Switch renders the reason instead of merely going dim, so a keyboard
-  // user reaches it and hears why.
-  const emailIsLast = notifyEmail && !notifyPush;
-  const pushIsLast = notifyPush && !notifyEmail;
-  const lockCopy = 'One channel stays on. Enable the other to switch this off.';
+  const isLastChannel = (channel: 'email' | 'push') =>
+    channel === 'email' ? !notifyPush : !notifyEmail;
 
   return (
-    <fieldset className='m-0 rounded-sm border border-line bg-surface p-4'>
-      <legend className='section-label float-none m-0 px-1.5'>REMIND ME</legend>
+    <fieldset className='flex flex-col gap-3 rounded-lg border border-sage p-4'>
+      <legend className='px-1 text-xs font-medium uppercase tracking-wide text-ink/50'>
+        Remind me
+      </legend>
 
-      <label className='mt-1 block'>
-        <span className='mb-1.5 block font-mono text-label tracking-[0.14em] text-ink/55'>
-          DATE &amp; TIME
-        </span>
+      <label className='flex flex-col gap-1 text-sm text-ink'>
+        Date & time
         <input
           type='datetime-local'
           value={reminderAt}
           onChange={(e) => onChange({ reminderAt: e.target.value })}
           required
-          className='w-full cursor-pointer rounded-sm border border-line bg-sunken px-3 py-2.5 font-mono text-[14px] text-ink transition-colors hover:border-line-strong focus:border-pine focus:bg-surface'
+          className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink focus:border-pine'
         />
       </label>
 
-      <div className='mt-2 flex flex-col'>
-        <div className='border-t border-line-soft'>
-          <Switch
-            label='Email'
+      <div className='flex flex-col gap-2'>
+        <label className='flex items-center gap-2 text-sm text-ink'>
+          <input
+            type='checkbox'
             checked={notifyEmail}
-            lockedReason={emailIsLast ? lockCopy : null}
-            onChange={(next) => onChange({ notifyEmail: next })}
+            disabled={notifyEmail && isLastChannel('email')}
+            onChange={(e) => onChange({ notifyEmail: e.target.checked })}
+            className='h-4 w-4 accent-pine'
           />
-        </div>
-        <div className='border-t border-line-soft'>
-          <Switch
-            label='Push notification'
+          Email
+        </label>
+
+        <label className='flex items-center gap-2 text-sm text-ink'>
+          <input
+            type='checkbox'
             checked={notifyPush}
-            lockedReason={pushIsLast ? lockCopy : null}
-            onChange={(next) => onChange({ notifyPush: next })}
+            disabled={notifyPush && isLastChannel('push')}
+            onChange={(e) => onChange({ notifyPush: e.target.checked })}
+            className='h-4 w-4 accent-pine'
           />
-        </div>
+          Push notification
+        </label>
       </div>
+
+      <p className='text-xs text-ink/40'>
+        At least one channel has to stay on.
+      </p>
     </fieldset>
   );
 }

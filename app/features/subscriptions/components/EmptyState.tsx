@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { FiSettings, FiLogOut, FiPlus } from 'react-icons/fi';
-import { riseIn, staggerContainer, press } from '@/lib/motion';
+import Image from 'next/image';
 import { GhostTotal } from './GhostTotal';
 import { EnableNotifications } from '@/app/features/notifications/components/EnableNotifications';
 import { SubscriptionForm } from './SubscriptionForm';
@@ -12,79 +12,96 @@ import { InboxAddress } from '../../inbox/components/InboxAddress';
 import { Modal } from '@/app/components/ui/Modal';
 
 export function EmptyState({ inboxAddress }: { inboxAddress: string }) {
+  const shouldReduceMotion = useReducedMotion();
   const [showForm, setShowForm] = useState(false);
 
-  // Reduced motion is applied globally by MotionConfig, so no local guard.
-  const container = staggerContainer;
-  const item = riseIn;
+  const container = {
+    hidden: {},
+    show: { transition: { staggerChildren: shouldReduceMotion ? 0 : 0.1 } },
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 12 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.4, ease: 'easeOut' as const },
+    },
+  };
 
   return (
     <motion.div
       variants={container}
       initial='hidden'
       animate='show'
-      className='mx-auto flex min-h-screen w-full max-w-6xl flex-col'
+      className='mx-auto flex w-full max-w-6xl flex-col min-h-screen px-4 sm:px-8 py-4 gap-8'
     >
       {/* Header — Preserved Exactly As Is */}
       <motion.header
         variants={item}
-        className='sticky top-0 z-30 flex h-16 w-full items-center justify-between gap-6 border-b border-line bg-paper/90 px-4 backdrop-blur-xl sm:px-8'
+        className='sticky top-0 flex sm:p-0 p-5 w-full h-20 items-center justify-between backdrop-blur-xl rounded-2xl'
       >
-        <h1 className='m-0 flex items-baseline gap-3.5 font-display text-[19px] font-bold tracking-[0.14em]'>
-          BLEED
-          <span className='hidden font-mono text-label font-medium text-ink/45 sm:inline'>
-            SUBSCRIPTION METER
-          </span>
-        </h1>
+        <Image
+          src='/bleedlogo.svg'
+          alt='Bleed logo'
+          width={100}
+          height={32}
+          priority={true}
+        />
 
-        <div className='flex items-center gap-2'>
+        <div className='flex items-center gap-4'>
           <Link
             href='/settings'
-            className='group inline-flex items-center gap-1.5 rounded-sm px-3 py-2 font-mono text-[11px] tracking-[0.1em] text-ink/65 transition-colors hover:bg-line-soft hover:text-ink'
+            className='group flex items-center gap-1 text-xs text-ink/50 transition hover:text-ink'
           >
-            <FiSettings aria-hidden='true' size={13} />
-            <span className='hidden sm:inline'>SETTINGS</span>
+            <FiSettings size={18} />
+
+            <span className='relative hidden font-display sm:inline'>
+              Settings
+              <span className='absolute bottom-0 left-0 h-px w-0 bg-current transition-all duration-300 group-hover:w-full' />
+            </span>
           </Link>
 
-          <form action='/auth/signout' method='post' className='inline-flex'>
-            <button
-              type='submit'
-              className='inline-flex items-center gap-1.5 rounded-sm px-3 py-2 font-mono text-[11px] tracking-[0.1em] text-ink/65 transition-colors hover:bg-rust-tint hover:text-rust'
-            >
-              <FiLogOut aria-hidden='true' size={13} />
-              <span className='hidden sm:inline'>SIGN OUT</span>
+          <form action='/auth/signout' method='post'>
+            <button className='group flex items-center gap-1 text-xs text-ink/50 transition hover:text-ink'>
+              <FiLogOut size={18} />
+
+              <span className='relative hidden font-display sm:inline'>
+                Sign out
+                <span className='absolute bottom-0 left-0 h-px w-0 bg-current transition-all duration-300 group-hover:w-full' />
+              </span>
             </button>
           </form>
 
-          <motion.button
-            type='button'
+          <button
             onClick={() => setShowForm(true)}
-            {...press}
-            className='inline-flex cursor-pointer items-center gap-1.5 rounded-sm border-0 bg-pine px-4 py-2.5 font-mono text-[11px] tracking-[0.1em] text-paper transition-colors hover:bg-pine-hover'
+            className='flex items-center gap-2 rounded-xl bg-pine px-4 py-2 text-xs font-medium text-paper transition hover:bg-pine/90'
           >
-            <FiPlus aria-hidden='true' size={13} />
-            <span className='hidden sm:inline'>LOG SUBSCRIPTION</span>
-          </motion.button>
+            <FiPlus size={18} />
+
+            <span className='hidden font-display sm:inline'>
+              Add subscription
+            </span>
+          </button>
         </div>
       </motion.header>
 
       {/* Main Responsive Grid Layout */}
-      <div className='my-auto grid flex-1 grid-cols-1 items-start gap-10 px-4 py-10 sm:px-8 lg:grid-cols-12'>
+      <div className='flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start my-auto'>
         {/* Left Primary Hero Section (8 Columns on Desktop) */}
         <div className='lg:col-span-7 xl:col-span-8 flex flex-col justify-center space-y-6'>
           <motion.div variants={item} className='space-y-2'>
-            <h1 className='m-0 font-display text-[34px] font-bold tracking-[-0.02em] text-ink sm:text-[40px]'>
-              Forward one receipt. That&rsquo;s the setup.
+            <h1 className='font-display text-3xl sm:text-4xl font-bold tracking-tight text-ink'>
+              Nothing logged yet.
             </h1>
-            <p className='mt-4 max-w-[52ch] text-[16px] leading-relaxed text-ink/68'>
-              Bleed reads the amount, the billing cycle and the renewal date
-              out of the email, logs it, and warns you three days before the
-              money leaves.
+            <p className='font-mini text-base text-ink/60 max-w-lg'>
+              Forward your first receipt below and watch your subscription
+              metrics fill in automatically.
             </p>
           </motion.div>
 
           <motion.div variants={item} className='w-full'>
-            <InboxAddress address={inboxAddress} index='01' />
+            <InboxAddress address={inboxAddress} />
           </motion.div>
 
           <motion.div variants={item} className='w-full'>
@@ -98,7 +115,7 @@ export function EmptyState({ inboxAddress }: { inboxAddress: string }) {
             <button
               type='button'
               onClick={() => setShowForm(true)}
-              className='cursor-pointer border-0 bg-transparent p-0 font-mono text-[11px] tracking-[0.1em] text-pine underline decoration-pine/40 underline-offset-4 transition-colors hover:text-pine-hover'
+              className='font-mini text-sm text-ink/70 underline decoration-ink/30 underline-offset-4 transition-colors hover:text-ink'
             >
               Or add one manually
             </button>

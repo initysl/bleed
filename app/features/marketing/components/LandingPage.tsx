@@ -1,474 +1,646 @@
 'use client';
 
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { EASE_OUT_EXPO, press, riseIn, staggerContainer } from '@/lib/motion';
+import React, { useState } from 'react';
+import Image from 'next/image';
+import { motion, Variants } from 'framer-motion';
+import {
+  FiMail,
+  FiZap,
+  FiCheck,
+  FiCopy,
+  FiBell,
+  FiTrendingUp,
+} from 'react-icons/fi';
+
+import bleedLogo from '@/public/bleedlogo.svg';
+import heroPhone from '@/public/hero-phone.png';
+import addModalPhone from '@/public/add-modal-phone.png';
+import fullDashboard from '@/public/full-dashboard.png';
 
 interface LandingPageProps {
   isAuthenticated: boolean;
 }
 
-interface Step {
-  readonly index: string;
+interface FeatureItem {
+  readonly id: string;
+  readonly icon: React.ReactNode;
   readonly title: string;
-  readonly body: string;
+  readonly description: string;
+  readonly tag: string;
+  // The interface was declared but never applied to FEATURE_LIST, so it drifted
+  // out of step with the data and lint flagged it as unused. Applying it means
+  // the next field added to an entry has to be declared here too.
+  readonly theme: {
+    readonly bg: string;
+    readonly hoverText: string;
+    readonly hoverGlow: string;
+  };
 }
 
-const STEPS: readonly Step[] = [
+const FEATURE_LIST: readonly FeatureItem[] = [
   {
-    index: '01',
-    title: 'Forward a receipt',
-    body: 'Any subscription confirmation or invoice, from any vendor, to your private Bleed address. Or set a mail filter and never think about it again.',
+    id: 'frictionless-logging',
+    icon: <FiMail className='w-5 h-5' />,
+    title: 'Frictionless Logging',
+    description:
+      'Forward any receipt or confirmation email directly to your custom Bleed inbox, or type plain text like "signed up for Spotify premium, $11.99/month".',
+    tag: 'Auto-Extraction',
+    theme: {
+      bg: 'bg-emerald-50 text-emerald-600',
+      hoverText: 'group-hover:text-emerald-600',
+      hoverGlow: 'hover:shadow-[0_20px_40px_rgba(16,185,129,0.12)]',
+    },
   },
   {
-    index: '02',
-    title: 'Bleed reads it',
-    body: "Amount, currency, monthly or yearly, next renewal date. Anything it can't read confidently goes to a review queue with the email attached — never silently dropped.",
+    id: 'real-bleed-dashboard',
+    icon: <FiTrendingUp className='w-5 h-5' />,
+    title: 'Real Bleed Dashboard',
+    description:
+      'View your total monthly and yearly spend with live metrics. Subscriptions are sorted by cost with automatic flags for unused services.',
+    tag: 'Live Analytics',
+    theme: {
+      bg: 'bg-violet-50 text-violet-600',
+      hoverText: 'group-hover:text-violet-600',
+      hoverGlow: 'hover:shadow-[0_20px_40px_rgba(139,92,246,0.12)]',
+    },
   },
   {
-    index: '03',
-    title: 'You get warned',
-    body: 'Three days before each charge, by email and on your phone, at 9am in your own timezone. Then you decide: keep it, or go and cancel it.',
+    id: 'proactive-nudges',
+    icon: <FiBell className='w-5 h-5' />,
+    title: 'Proactive Nudges',
+    description:
+      'Get email and push notifications days before your card is charged: &ldquo;Netflix renews in 3 days — $15.49/mo. Cancel or keep?&rdquo;',
+    tag: 'Smart Alerts',
+    theme: {
+      bg: 'bg-amber-50 text-amber-600',
+      hoverText: 'group-hover:text-amber-600',
+      hoverGlow: 'hover:shadow-[0_20px_40px_rgba(245,158,11,0.12)]',
+    },
+  },
+  {
+    id: 'zero-effort-cycles',
+    icon: <FiZap className='w-5 h-5' />,
+    title: 'Zero-Effort Cycles',
+    description:
+      'After every renewal, Bleed automatically updates the next billing cycle. Set it once or forward a receipt, and never touch it again.',
+    tag: 'Automated',
+    theme: {
+      bg: 'bg-sky-50 text-sky-600',
+      hoverText: 'group-hover:text-sky-600',
+      hoverGlow: 'hover:shadow-[0_20px_40px_rgba(14,165,233,0.12)]',
+    },
   },
 ];
 
-const FAQ = [
-  {
-    q: 'Do I have to forward every receipt by hand?',
-    a: 'Only the first one. After that, set a rule in Gmail or Outlook that auto-forwards anything from your subscription vendors, and the ledger maintains itself.',
-  },
-  {
-    q: 'What if it reads a receipt wrongly?',
-    a: "Anything it isn't confident about goes to a review queue with the original email attached, so you can see what it saw and correct it in one step. Nothing is dropped silently.",
-  },
-  {
-    q: 'Does it cancel subscriptions for me?',
-    a: "No. Bleed tells you what's about to charge you and what you've stopped using; cancelling stays between you and the vendor.",
-  },
-  {
-    q: 'Which currencies are supported?',
-    a: 'Naira, cedi, shilling and rand alongside dollars, pounds, euros, Canadian and Australian dollars, and yen. Each subscription keeps the currency it actually bills in.',
-  },
-  {
-    q: 'Can I use it without notifications?',
-    a: 'Yes. Email reminders are on by default and push is opt-in; you can switch either off per subscription, as long as one channel stays on.',
-  },
-] as const;
+const EXAMPLE_INBOX_ADDRESS = 'you@bleed-demo.resend.app';
 
-/** Section wrapper. Reveals once, on scroll, and never again. */
-function Reveal({
-  children,
-  className,
-  id,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  id?: string;
-}) {
-  return (
-    <motion.section
-      id={id}
-      variants={riseIn}
-      initial='hidden'
-      whileInView='show'
-      viewport={{ once: true, margin: '-80px' }}
-      className={className}
-    >
-      {children}
-    </motion.section>
-  );
-}
+// --- Animation Variants ---
+const fadeInUp: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+  },
+};
 
-export default function LandingPage({ isAuthenticated }: LandingPageProps) {
+const staggerContainer: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const scaleIn: Variants = {
+  hidden: { opacity: 0, scale: 0.92 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+export default function BleedLandingPage({
+  isAuthenticated,
+}: LandingPageProps): React.JSX.Element {
+  const [copiedInbox, setCopiedInbox] = useState<boolean>(false);
+
   const ctaHref = isAuthenticated ? '/dashboard' : '/login';
-  const ctaLabel = isAuthenticated ? 'OPEN DASHBOARD' : 'START TRACKING';
+  const ctaLabel = isAuthenticated ? 'Open Dashboard' : 'Get Started';
+  const heroCtaLabel = isAuthenticated ? 'Open Dashboard' : 'Start Tracking';
+
+  // Smooth Scroll Click Handler
+  const handleScrollTo = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    targetId: string,
+  ) => {
+    e.preventDefault();
+    const element = document.getElementById(targetId);
+    if (element) {
+      // Offsets scrolling position slightly to account for fixed header height
+      const headerOffset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition =
+        elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  const handleCopyInbox = async (): Promise<void> => {
+    try {
+      await navigator.clipboard.writeText(EXAMPLE_INBOX_ADDRESS);
+      setCopiedInbox(true);
+      setTimeout(() => setCopiedInbox(false), 2500);
+    } catch (err) {
+      console.error('Failed to copy to clipboard', err);
+    }
+  };
 
   return (
-    <div className='min-h-screen bg-paper'>
-      {/* ===== Header ===== */}
-      <header className='sticky top-0 z-30 flex h-[72px] items-center justify-between gap-6 border-b border-line bg-paper/92 px-5 backdrop-blur-xl sm:px-10'>
-        <span className='font-display text-[19px] font-bold tracking-[0.14em]'>
-          BLEED
-        </span>
+    <div className='min-h-screen bg-white text-zinc-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 overflow-x-hidden scroll-smooth'>
+      {/* Top Banner Navigation */}
+      <header className='font-mono sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-zinc-100 px-6'>
+        <div className='max-w-7xl mx-auto h-20 flex items-center justify-between'>
+          <div className='flex items-center gap-3'>
+            <Image src={bleedLogo} alt='Bleed Logo' width={100} priority />
+          </div>
 
-        <nav className='flex items-center gap-1'>
-          <a
-            href='#how'
-            className='hidden rounded-sm px-3 py-2.5 font-mono text-[11px] tracking-[0.1em] text-ink/65 transition-colors hover:bg-line-soft hover:text-ink sm:block'
-          >
-            HOW IT WORKS
-          </a>
-          <a
-            href='#faq'
-            className='hidden rounded-sm px-3 py-2.5 font-mono text-[11px] tracking-[0.1em] text-ink/65 transition-colors hover:bg-line-soft hover:text-ink sm:block'
-          >
-            FAQ
-          </a>
-
-          {/* A sign-in link, which the page previously had at no breakpoint —
-              returning users had to scroll into the hero to find a way in. */}
-          {!isAuthenticated && (
-            <Link
-              href='/login'
-              className='rounded-sm px-3 py-2.5 font-mono text-[11px] tracking-[0.1em] text-ink transition-colors hover:bg-line-soft'
+          <nav className='hidden md:flex items-center gap-8 text-sm font-medium text-zinc-600'>
+            <a
+              href='#how-it-works'
+              onClick={(e) => handleScrollTo(e, 'how-it-works')}
+              className='hover:text-emerald-800 transition-colors'
             >
-              SIGN&nbsp;IN
-            </Link>
-          )}
-
-          <Link
-            href={ctaHref}
-            className='ml-1.5 rounded-sm bg-pine px-4 py-3 font-mono text-[11px] tracking-[0.1em] text-paper transition-colors hover:bg-pine-hover'
-          >
-            {ctaLabel}
-          </Link>
-        </nav>
+              How it Works
+            </a>
+            <a
+              href='#features'
+              onClick={(e) => handleScrollTo(e, 'features')}
+              className='hover:text-emerald-800 transition-colors'
+            >
+              Features
+            </a>
+          </nav>
+        </div>
       </header>
 
-      {/* ===== Hero =====
-          The headline animates TRANSFORM ONLY, never opacity. It is the LCP
-          element, and an opacity-0 initial state is server-rendered as
-          `style="opacity:0"` — so the text cannot paint until the JS bundle
-          hydrates, which left the old page blank below the fold whenever
-          scripting was slow or blocked. */}
-      <section className='mx-auto grid max-w-[1240px] grid-cols-1 items-center gap-14 px-5 py-16 sm:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:py-24'>
-        <div>
-          <span className='font-mono text-label tracking-[0.18em] text-ink/50'>
-            SUBSCRIPTION METER
-          </span>
-
-          <motion.h1
-            initial={{ y: 14 }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.6, ease: EASE_OUT_EXPO }}
-            className='mt-5 mb-0 font-display text-[44px] leading-[1.05] font-bold tracking-[-0.03em] text-balance sm:text-[60px]'
+      {/* Hero Section */}
+      <section className='font-display relative overflow-hidden '>
+        <div className='max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center'>
+          {/* Hero Content */}
+          <motion.div
+            initial='hidden'
+            animate='visible'
+            variants={staggerContainer}
+            className='lg:col-span-7 space-y-8'
           >
-            Stop paying for things you forgot you bought.
-          </motion.h1>
-
-          <motion.p
-            initial={{ y: 12 }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.6, delay: 0.06, ease: EASE_OUT_EXPO }}
-            className='mt-6 max-w-[52ch] text-[17px] leading-relaxed text-ink/70 text-pretty'
-          >
-            Forward one receipt. Bleed reads the amount, the billing cycle and
-            the renewal date out of the email, logs it, and warns you three days
-            before the money leaves &mdash; in your currency, at 9am your time.
-          </motion.p>
-
-          <div className='mt-9 flex flex-wrap items-center gap-3'>
-            <motion.div {...press}>
-              <Link
-                href={ctaHref}
-                className='inline-block rounded-sm bg-pine px-7 py-4 font-mono text-[12px] tracking-[0.12em] text-paper transition-colors hover:bg-pine-hover'
-              >
-                {ctaLabel}
-              </Link>
-            </motion.div>
-            <a
-              href='#how'
-              className='rounded-sm border border-line bg-surface px-6 py-4 font-mono text-[12px] tracking-[0.12em] text-ink transition-colors hover:bg-line-soft'
+            <motion.h1
+              variants={fadeInUp}
+              className='text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-zinc-900 leading-[1.12]'
             >
-              SEE HOW IT WORKS
-            </a>
-          </div>
+              Stop recurring charges from draining your money.
+            </motion.h1>
 
-          <p className='mt-4 font-mono text-[11px] text-ink/50'>
-            No card. No bank connection. No browser extension.
-          </p>
-        </div>
+            <motion.p
+              variants={fadeInUp}
+              className='text-lg sm:text-xl text-zinc-600 max-w-2xl font-normal leading-relaxed'
+            >
+              No manual data entry. Forward receipts or type plain text - Bleed
+              automatically extracts costs, tracks your real monthly spend, and
+              nudges you right before you get charged.
+            </motion.p>
 
-        {/* A real screen rather than a stock illustration. */}
-        <motion.div
-          variants={staggerContainer}
-          initial='hidden'
-          animate='show'
-          className='overflow-hidden rounded-sm border border-line-strong bg-surface'
-        >
-          <div className='flex items-center justify-between border-b border-line px-4 py-3 font-mono text-label tracking-[0.14em] text-ink/50'>
-            <span>MONTHLY BLEED</span>
-            <span>NGN</span>
-          </div>
-
-          <div className='p-6'>
-            <div className='flex items-baseline gap-[3px]'>
-              <span className='font-mono text-[20px] text-ink/40 tnum'>
-                &#8358;
-              </span>
-              <span className='font-display text-[48px] leading-none font-bold tracking-[-0.02em] tnum'>
-                11,400
-              </span>
-              <span className='font-display text-[24px] text-ink/35 tnum'>
-                .00
-              </span>
-            </div>
-
-            <div className='my-5 flex h-1.5 gap-0.5'>
-              {[
-                { w: 79, c: 'var(--color-pine)' },
-                { w: 22, c: 'var(--color-pine-60)' },
-                { w: 13, c: 'var(--color-pine-35)' },
-              ].map((seg, i) => (
-                <motion.div
-                  key={seg.c}
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{
-                    duration: 0.76,
-                    delay: 0.25 + i * 0.09,
-                    ease: EASE_OUT_EXPO,
-                  }}
-                  className='origin-left rounded-xs'
-                  style={{ flexGrow: seg.w, background: seg.c }}
-                />
-              ))}
-            </div>
-
-            {[
-              { name: 'Claude Pro', when: '2 DAYS', urgent: true },
-              { name: 'Netflix', when: '5 DAYS', urgent: false },
-              { name: 'Spotify Premium', when: 'UNUSED 74D', urgent: true },
-            ].map((row) => (
-              <div
-                key={row.name}
-                className='flex items-center gap-3 border-t border-line-soft py-2.5'
-              >
-                <span
-                  className='h-5 w-[3px] rounded-xs'
-                  style={{
-                    background: row.urgent
-                      ? 'var(--color-rust)'
-                      : 'var(--color-pine)',
-                  }}
-                />
-                <span className='flex-grow text-[13px]'>{row.name}</span>
-                <span
-                  className={`rounded-xs px-[7px] py-[3px] font-mono text-tag ${
-                    row.urgent
-                      ? 'bg-rust-tint text-rust'
-                      : 'bg-line-soft text-ink/55'
-                  }`}
-                >
-                  {row.when}
-                </span>
+            {/* Live Interactive Forwarding Card Preview */}
+            <motion.div
+              variants={fadeInUp}
+              className='p-4 sm:p-5 rounded-2xl bg-zinc-50 border border-zinc-200/80 max-w-xl space-y-3 shadow-sm'
+            >
+              <div className='flex items-center justify-between text-xs font-semibold text-zinc-500 uppercase tracking-wide'>
+                <span>Example Forwarding Address</span>
+                <span>Frictionless Sync</span>
               </div>
+              <div className='flex items-center justify-between gap-3 bg-white px-4 py-3 rounded-xl border border-zinc-200 shadow-xs'>
+                <code className='text-sm font-mono text-zinc-800 truncate'>
+                  {EXAMPLE_INBOX_ADDRESS}
+                </code>
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleCopyInbox}
+                  type='button'
+                  className='px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-800 text-white hover:bg-emerald-900 transition-colors flex items-center gap-1.5 shrink-0'
+                >
+                  {copiedInbox ? (
+                    <>
+                      <FiCheck className='w-3.5 h-3.5' /> Copied!
+                    </>
+                  ) : (
+                    <>
+                      <FiCopy className='w-3.5 h-3.5' /> Copy
+                    </>
+                  )}
+                </motion.button>
+              </div>
+              <p className='text-xs text-zinc-500'>
+                Every real account gets its own private version of this address
+                - forward a receipt to it, and Bleed reads it automatically.
+              </p>
+            </motion.div>
+
+            <motion.div
+              variants={fadeInUp}
+              className='flex flex-wrap gap-4 pt-2'
+            >
+              <motion.a
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                href={ctaHref}
+                className='px-7 py-3.5 rounded-xl font-semibold bg-emerald-800 text-white hover:bg-emerald-900 transition-all shadow-md hover:shadow-lg flex items-center gap-2'
+              >
+                {heroCtaLabel}
+              </motion.a>
+              <motion.a
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                href='#how-it-works'
+                onClick={(e) => handleScrollTo(e, 'how-it-works')}
+                className='px-7 py-3.5 rounded-xl font-semibold bg-zinc-100 text-zinc-800 hover:bg-zinc-200 transition-colors'
+              >
+                See How It Works
+              </motion.a>
+            </motion.div>
+          </motion.div>
+
+          {/* Hero App Mockup Stack */}
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className='lg:col-span-5 relative flex justify-center items-center'
+          >
+            <div className='relative w-full max-w-85 sm:max-w-95 aspect-9/18'>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.85, rotate: -6 }}
+                animate={{ opacity: 1, scale: 0.9, rotate: -3 }}
+                transition={{
+                  duration: 0.9,
+                  delay: 0.5,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className='absolute -top-6 -left-12 sm:-left-20 w-[130%] h-[80%] overflow-hidden hidden sm:block '
+              >
+                <Image
+                  src={heroPhone}
+                  alt='Bleed Mobile App Interface'
+                  fill
+                  sizes='(max-width: 768px) 100vw, 50vw'
+                  className='object-cover object-top'
+                />
+              </motion.div>
+
+              {/* Main Mobile Screen Display */}
+              <div className='relative z-10 w-full h-full rounded-[40px] overflow-hidden'>
+                <Image
+                  src={heroPhone}
+                  alt='Bleed Mobile App Interface'
+                  fill
+                  sizes='(max-width: 768px) 100vw, 380px'
+                  priority
+                  className='object-cover'
+                />
+              </div>
+
+              {/* Floating Live Alert Card Badge */}
+              <motion.div
+                initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{
+                  duration: 0.6,
+                  delay: 0.8,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className='absolute -bottom-6 -left-6 z-20 bg-white p-4 rounded-2xl border border-zinc-200 shadow-xl max-w-65 space-y-2'
+              >
+                <div className='flex items-center gap-2 text-emerald-800 text-xs font-bold uppercase tracking-wider'>
+                  <FiBell className='w-4 h-4' aria-hidden='true' /> Proactive Nudge
+                </div>
+                <p className='text-xs text-zinc-700 font-medium leading-snug'>
+                  &ldquo;Netflix renews in 3 days — $15.49/mo. Cancel or keep?&rdquo;
+                </p>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Real Spend Highlight Strip */}
+      <section
+        id='how-it-works'
+        className='py-20 bg-zinc-50/50 border-b border-zinc-100 scroll-mt-20'
+      >
+        <div className='max-w-7xl mx-auto px-6'>
+          <motion.div
+            initial='hidden'
+            whileInView='visible'
+            viewport={{ once: true, margin: '-60px' }}
+            variants={fadeInUp}
+            className='text-center max-w-3xl mx-auto space-y-4 mb-16'
+          >
+            <h2 className='font-mini text-xs font-bold text-emerald-800 uppercase tracking-widest'>
+              How Bleed Operates
+            </h2>
+            <h3 className='font-display text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight'>
+              Turn &ldquo;forgot I was paying for this&rdquo; into timely decisions.
+            </h3>
+            <p className='font-display text-zinc-600 text-base sm:text-lg'>
+              Designed from the ground up to eliminate repetitive management and
+              protect your monthly cash flow.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial='hidden'
+            whileInView='visible'
+            viewport={{ once: true, margin: '-60px' }}
+            variants={staggerContainer}
+            className='grid grid-cols-1 md:grid-cols-3 gap-6'
+          >
+            {[
+              {
+                step: '01',
+                tag: 'Input Layer',
+                title: 'Forward or Type',
+                text: 'Send any subscription receipt or invoice to your dedicated address, or type plain text directly into the quick logger.',
+              },
+              {
+                step: '02',
+                tag: 'Automation',
+                title: 'Auto-Extract & Dashboard',
+                text: 'Bleed reads price, recurring billing cycles, and next renewal dates automatically. Animated counters reveal your real monthly spend.',
+              },
+              {
+                step: '03',
+                tag: 'Notification',
+                title: 'Get Nudged Before Charge',
+                text: 'Receive proactive reminders via email and push notification days before renewal so you can cancel unused services effortlessly.',
+              },
+            ].map((item, idx) => (
+              <motion.div
+                key={idx}
+                variants={fadeInUp}
+                whileHover={{ y: -4 }}
+                transition={{ duration: 0.25 }}
+                className='group bg-white p-7 rounded-2xl border border-slate-100 shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.08)] hover:border-slate-200/80 transition-all flex flex-col justify-between'
+              >
+                <div className='space-y-4'>
+                  {/* Header: Step Icon + Stacked Header */}
+                  <div className='flex items-start gap-4'>
+                    <div className='font-mini w-12 h-12 rounded-full bg-pine text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-sm'>
+                      {item.step}
+                    </div>
+
+                    <div className='space-y-0.5 pt-0.5'>
+                      <h4 className='font-display text-lg font-bold text-slate-900 leading-snug'>
+                        {item.title}
+                      </h4>
+                      <p className='font-display text-xs font-medium text-slate-400 tracking-wide'>
+                        {item.tag}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <p className='text-slate-500 text-sm leading-relaxed pt-1'>
+                    {item.text}
+                  </p>
+                </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Feature Section with Live Screenshots */}
+      <section
+        id='features'
+        className='py-24 bg-white border-b border-zinc-100 scroll-mt-20'
+      >
+        <div className='max-w-7xl mx-auto px-6 space-y-28'>
+          {/* Feature 1: Frictionless Modal Form */}
+          <motion.div
+            initial='hidden'
+            whileInView='visible'
+            viewport={{ once: true, margin: '-80px' }}
+            variants={staggerContainer}
+            className='grid grid-cols-1 lg:grid-cols-12 gap-12 items-center'
+          >
+            <motion.div variants={fadeInUp} className='lg:col-span-6 space-y-6'>
+              <span className='font-mini px-3 py-1 rounded-md bg-emerald-50 text-emerald-800 text-xs font-semibold uppercase tracking-wider'>
+                Zero Friction
+              </span>
+              <h3 className='font-display text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight'>
+                No endless form fields or tedious typing.
+              </h3>
+              <p className='font-display text-zinc-600 text-base sm:text-lg leading-relaxed'>
+                Whether adding manually or through email parsing, Bleed
+                configures exact renewal dates, reminder schedules, and
+                notification preference toggles in seconds.
+              </p>
+
+              <ul className='font-mini space-y-3 pt-2 text-zinc-700 font-medium'>
+                {[
+                  'Automatic detection of billing currencies and cycles',
+                  'Customizable reminder lead times (e.g., 3 days prior)',
+                  'Dual channel alerts: Email + Mobile Push',
+                ].map((text, i) => (
+                  <motion.li
+                    key={i}
+                    variants={fadeInUp}
+                    className='flex items-center gap-3'
+                  >
+                    <FiCheck className='w-5 h-5 text-emerald-700 shrink-0' />
+                    {text}
+                  </motion.li>
+                ))}
+              </ul>
+            </motion.div>
+
+            <motion.div
+              variants={scaleIn}
+              className='lg:col-span-6 flex justify-center'
+            >
+              <div className='relative w-full max-w-[320px] aspect-9/18 overflow-hidden'>
+                <Image
+                  src={addModalPhone}
+                  alt='Bleed Add Subscription Modal Interface'
+                  fill
+                  sizes='(max-width: 768px) 100vw, 320px'
+                  className='object-cover '
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Feature 2: Full Web Dashboard Showcase */}
+          <motion.div
+            initial='hidden'
+            whileInView='visible'
+            viewport={{ once: true, margin: '-80px' }}
+            variants={staggerContainer}
+            className='grid grid-cols-1 lg:grid-cols-12 gap-12 items-center'
+          >
+            <motion.div
+              variants={fadeInUp}
+              className='lg:col-span-6 lg:order-2 space-y-6'
+            >
+              <span className='font-mini px-3 py-1 rounded-md bg-emerald-50 text-emerald-800 text-xs font-semibold uppercase tracking-wider'>
+                Complete Visibility
+              </span>
+              <h3 className='font-display text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight'>
+                Understand your true monthly and annual expenditure.
+              </h3>
+              <p className='font-display text-zinc-600 text-base sm:text-lg leading-relaxed'>
+                Get a single, clean overview of upcoming bills, total monthly
+                bleed, and active recurring services. Know exactly what you pay
+                for and when.
+              </p>
+            </motion.div>
+
+            <motion.div variants={scaleIn} className='lg:col-span-6 lg:order-1'>
+              <div className='relative w-full aspect-16/10 rounded-2xl overflow-hidden shadow-2xl bg-zinc-50'>
+                <Image
+                  src={fullDashboard}
+                  alt='Bleed Web Dashboard View'
+                  fill
+                  className='object-contain'
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Grid Features Listing */}
+      <section className='py-24 bg-slate-50/50'>
+        <div className='max-w-7xl mx-auto px-6'>
+          <motion.div
+            initial='hidden'
+            whileInView='visible'
+            viewport={{ once: true, margin: '-60px' }}
+            variants={staggerContainer}
+            className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[minmax(220px,auto)]'
+          >
+            {FEATURE_LIST.map((feature, idx) => {
+              // Assign specific Bento grid classes based on index
+              const bentoSpanClass =
+                idx === 0
+                  ? 'lg:col-span-2' // Card 1: Wide horizontal feature
+                  : idx === 1
+                    ? 'lg:row-span-1' // Card 2: Tall vertical feature
+                    : 'lg:col-span-1'; // Cards 3 & 4: Standard bento blocks
+
+              return (
+                <motion.div
+                  key={feature.id}
+                  variants={fadeInUp}
+                  whileHover={{ y: -4 }}
+                  transition={{ duration: 0.25 }}
+                  className={`group relative bg-white p-7 rounded-2xl border border-slate-100 shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.08)] hover:border-slate-200/80 transition-all flex flex-col justify-between ${bentoSpanClass}`}
+                >
+                  {/* Top Content Area */}
+                  <div className='space-y-4'>
+                    <div className='flex items-start gap-4'>
+                      {/* Unique Colored Icon Container */}
+                      <div
+                        className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform ${feature.theme.bg}`}
+                      >
+                        {feature.icon}
+                      </div>
+
+                      {/* Stacked Title & Category/Tag */}
+                      <div className='space-y-0.5 pt-0.5'>
+                        <h4 className='font-display text-lg font-bold text-slate-900 leading-snug group-hover:text-emerald-600 transition-colors'>
+                          {feature.title}
+                        </h4>
+                        <p className='font-mini text-xs font-medium text-slate-400 tracking-wide uppercase'>
+                          {feature.tag}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <p className='font-display text-slate-500 text-sm leading-relaxed pt-1 max-w-2xl'>
+                      {feature.description}
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Call to Action Footer Section */}
+      <section className='py-24 bg-zinc-900 text-white relative overflow-hidden'>
+        <motion.div
+          initial='hidden'
+          whileInView='visible'
+          viewport={{ once: true, margin: '-60px' }}
+          variants={staggerContainer}
+          className='max-w-5xl mx-auto px-6 text-center space-y-8 relative z-10'
+        >
+          <motion.h2
+            variants={fadeInUp}
+            className='font-display text-3xl sm:text-5xl font-extrabold tracking-tight'
+          >
+            Ready to stop the subscription bleed?
+          </motion.h2>
+          <motion.p
+            variants={fadeInUp}
+            className='font-mono text-zinc-400 text-lg max-w-2xl mx-auto'
+          >
+            Forward your first receipt and see your real monthly spend in under
+            a minute.
+          </motion.p>
+          <motion.div
+            variants={fadeInUp}
+            className='flex flex-wrap gap-4 justify-center pt-4'
+          >
+            <motion.a
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              href={ctaHref}
+              className='font-mono px-8 py-4 rounded-xl font-semibold bg-emerald-700 text-white hover:bg-emerald-800 transition-all shadow-lg flex items-center gap-2'
+            >
+              {ctaLabel}
+            </motion.a>
+          </motion.div>
         </motion.div>
       </section>
 
-      {/* ===== How it works ===== */}
-      <Reveal id='how' className='mx-auto max-w-[1240px] px-5 pb-20 sm:px-10'>
-        <span className='font-mono text-label tracking-[0.18em] text-ink/50'>
-          HOW IT WORKS
-        </span>
-        <h2 className='mt-4 max-w-[20ch] font-display text-[32px] font-bold tracking-[-0.02em] text-balance sm:text-[38px]'>
-          Three steps, and only one of them is yours.
-        </h2>
-
-        <div className='mt-11 grid grid-cols-1 gap-5 md:grid-cols-3'>
-          {STEPS.map((step) => (
-            <motion.div
-              key={step.index}
-              whileHover={{ y: -2 }}
-              transition={{ duration: 0.2, ease: EASE_OUT_EXPO }}
-              className='rounded-sm border border-line bg-surface p-7 transition-colors hover:border-line-strong'
-            >
-              <span className='font-mono text-[12px] text-pine tnum'>
-                {step.index}
-              </span>
-              <h3 className='mt-3.5 font-display text-[19px] font-bold'>
-                {step.title}
-              </h3>
-              <p className='mt-2.5 text-[14px] leading-relaxed text-ink/68'>
-                {step.body}
-              </p>
-            </motion.div>
-          ))}
-        </div>
-      </Reveal>
-
-      {/* ===== Multi-currency ===== */}
-      <Reveal className='mx-auto max-w-[1240px] px-5 pb-20 sm:px-10'>
-        <div className='grid grid-cols-1 items-center gap-14 border-t border-line pt-18 lg:grid-cols-2'>
-          <div>
-            <span className='font-mono text-label tracking-[0.18em] text-ink/50'>
-              MULTI-CURRENCY
-            </span>
-            <h2 className='mt-4 max-w-[22ch] font-display text-[30px] font-bold tracking-[-0.02em] text-balance sm:text-[34px]'>
-              Your tools bill in dollars. You don&apos;t earn in dollars.
-            </h2>
-            <p className='mt-5 max-w-[50ch] text-[16px] leading-relaxed text-ink/70 text-pretty'>
-              Bleed keeps every subscription in the currency it actually
-              charges. Naira, cedi, shilling and rand alongside dollars, pounds
-              and euros &mdash; not converted away and forgotten.
-            </p>
+      {/* Footer Navigation */}
+      <footer className='font-mono py-12 bg-white border-t border-zinc-100 text-sm text-zinc-500'>
+        <div className='max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6'>
+          <div className='flex items-center gap-3'>
+            <Image
+              src={bleedLogo}
+              alt='Bleed Logo Footer'
+              width={100}
+              className='grayscale opacity-80'
+            />
           </div>
 
-          <div className='rounded-sm border border-line bg-surface p-6'>
-            {[
-              { code: 'USD', count: '4 subscriptions', total: '$114.99' },
-              { code: 'NGN', count: '3 subscriptions', total: '₦11,400' },
-            ].map((row) => (
-              <div
-                key={row.code}
-                className='flex items-center justify-between border-b border-line-soft py-3.5 last:border-b-0'
-              >
-                <span className='font-mono text-[12px] tracking-[0.06em]'>
-                  {row.code}
-                </span>
-                <span className='ml-4 flex-grow text-[13px] text-ink/60'>
-                  {row.count}
-                </span>
-                <span className='font-mono text-[16px] tnum'>{row.total}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Reveal>
-
-      {/* ===== Trust =====
-          Only claims that are true of the system as built. A retention and
-          model-access statement belongs here too, but it has to come from the
-          actual data policy rather than be drafted — see the design canvas,
-          where that gap is marked. */}
-      <Reveal className='mx-auto max-w-[1240px] px-5 pb-20 sm:px-10'>
-        <div className='border-t border-line pt-18'>
-          <span className='font-mono text-label tracking-[0.18em] text-ink/50'>
-            YOUR EMAIL
-          </span>
-          <h2 className='mt-4 max-w-[24ch] font-display text-[30px] font-bold tracking-[-0.02em] text-balance sm:text-[34px]'>
-            You&apos;re forwarding us your receipts. Here&apos;s what happens to
-            them.
-          </h2>
-
-          <div className='mt-10 grid grid-cols-1 gap-5 md:grid-cols-2'>
-            {[
-              {
-                title: 'NO BANK ACCESS',
-                body: 'Bleed never connects to your bank or card. It reads emails you choose to forward, and nothing else.',
-              },
-              {
-                title: 'ONE ADDRESS, YOURS',
-                body: 'Your inbound address is randomly generated and tied to your account — not derived from your email, so it cannot be guessed from it.',
-              },
-            ].map((item) => (
-              <div key={item.title} className='border-l-2 border-pine py-1 pl-5'>
-                <h3 className='m-0 font-mono text-[11px] tracking-[0.12em]'>
-                  {item.title}
-                </h3>
-                <p className='mt-2.5 text-[14px] leading-relaxed text-ink/68'>
-                  {item.body}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Reveal>
-
-      {/* ===== FAQ — native details/summary, so it works with no script ===== */}
-      <Reveal id='faq' className='mx-auto max-w-[1240px] px-5 pb-20 sm:px-10'>
-        <div className='grid grid-cols-1 gap-14 border-t border-line pt-18 lg:grid-cols-[280px_minmax(0,1fr)]'>
-          <div>
-            <span className='font-mono text-label tracking-[0.18em] text-ink/50'>
-              FAQ
-            </span>
-            <h2 className='mt-4 font-display text-[30px] font-bold tracking-[-0.02em]'>
-              Questions.
-            </h2>
-          </div>
-
-          <div>
-            {FAQ.map((entry, i) => (
-              <details
-                key={entry.q}
-                open={i === 0}
-                className='group border-b border-line'
-              >
-                <summary className='flex cursor-pointer list-none items-center justify-between gap-5 py-5 text-[16px] [&::-webkit-details-marker]:hidden'>
-                  {entry.q}
-                  <span
-                    aria-hidden='true'
-                    className='relative h-3 w-3 shrink-0'
-                  >
-                    <span className='absolute top-[5px] left-0 h-0.5 w-3 bg-pine' />
-                    <span className='absolute top-0 left-[5px] h-3 w-0.5 bg-pine transition-transform duration-200 ease-[var(--ease-out-expo)] group-open:rotate-90 group-open:opacity-0' />
-                  </span>
-                </summary>
-                <p className='mt-0 mb-5 max-w-[78ch] text-[15px] leading-relaxed text-ink/70'>
-                  {entry.a}
-                </p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </Reveal>
-
-      {/* ===== Closing CTA ===== */}
-      <section className='bg-ink text-paper'>
-        <Reveal className='mx-auto max-w-[1240px] px-5 py-20 text-center sm:px-10'>
-          <h2 className='m-0 font-display text-[34px] font-bold tracking-[-0.02em] text-balance sm:text-[42px]'>
-            Find out what you&apos;re actually paying.
-          </h2>
-          <p className='mx-auto mt-4 max-w-[48ch] text-[16px] leading-relaxed text-paper/62'>
-            One forwarded receipt is the whole setup. Most people are surprised
-            by the second one.
+          <p className='text-xs'>
+            © {new Date().getFullYear()} Bleed. All rights reserved.
           </p>
-          <motion.div {...press} className='mt-8 inline-block'>
-            <Link
-              href={ctaHref}
-              className='inline-block rounded-sm bg-pine px-8 py-4 font-mono text-[12px] tracking-[0.12em] text-paper transition-colors hover:bg-pine-hover'
-            >
-              {ctaLabel}
-            </Link>
-          </motion.div>
-        </Reveal>
-      </section>
-
-      {/* ===== Footer ===== */}
-      <footer className='border-t border-line'>
-        <div className='mx-auto flex max-w-[1240px] flex-wrap items-start justify-between gap-12 px-5 py-12 sm:px-10'>
-          <div>
-            <span className='font-display text-[17px] font-bold tracking-[0.14em]'>
-              BLEED
-            </span>
-            <p className='mt-3 font-mono text-[11px] text-ink/45'>
-              &copy; {new Date().getFullYear()} &middot; Built by Yusuf Lawal
-            </p>
-          </div>
-
-          <div className='flex flex-wrap gap-14'>
-            <div className='flex flex-col gap-2.5'>
-              <span className='font-mono text-label tracking-[0.14em] text-ink/40'>
-                PRODUCT
-              </span>
-              <a
-                href='#how'
-                className='font-mono text-[12px] text-ink/70 hover:text-pine'
-              >
-                How it works
-              </a>
-              <a
-                href='#faq'
-                className='font-mono text-[12px] text-ink/70 hover:text-pine'
-              >
-                FAQ
-              </a>
-            </div>
-
-            <div className='flex flex-col gap-2.5'>
-              <span className='font-mono text-label tracking-[0.14em] text-ink/40'>
-                ACCOUNT
-              </span>
-              <Link
-                href='/login'
-                className='font-mono text-[12px] text-ink/70 hover:text-pine'
-              >
-                Sign in
-              </Link>
-            </div>
-          </div>
         </div>
       </footer>
     </div>

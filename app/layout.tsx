@@ -1,30 +1,34 @@
 import type { Metadata } from 'next';
-import { Space_Grotesk, IBM_Plex_Mono } from 'next/font/google';
+import {
+  Space_Grotesk,
+  Inter,
+  IBM_Plex_Mono,
+  Quantico,
+} from 'next/font/google';
 import './globals.css';
 import { QueryProvider } from '@/providers/QueryProvider';
-import { MotionProvider } from '@/providers/MotionProvider';
 
-// Two faces, down from four.
-//
-// Inter was the declared body font and was overridden by nearly every element
-// that used it; Quantico is a squared display face that was carrying body copy
-// at 14-16px. Dropping both removes two font families from every page load and
-// leaves one voice for the interface and one for its numbers.
-//
-// The loaded weights are the ONLY ones available: asking for 600 or 800 makes
-// the browser synthesise a fake bold, which is what smeared the old headings.
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-space-grotesk',
   weight: ['500', '700'],
-  display: 'swap',
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
 });
 
 const plexMono = IBM_Plex_Mono({
   subsets: ['latin'],
   variable: '--font-plex-mono',
   weight: ['400', '500'],
-  display: 'swap',
+});
+
+const quantico = Quantico({
+  subsets: ['latin'],
+  variable: '--font-quantico',
+  weight: ['400', '700'],
 });
 
 export const metadata: Metadata = {
@@ -77,12 +81,10 @@ export default function RootLayout({
     <html
       lang='en'
       data-scroll-behavior='smooth'
-      className={`${spaceGrotesk.variable} ${plexMono.variable}`}
+      className={`${spaceGrotesk.variable} ${inter.variable} ${plexMono.variable} ${quantico.variable}`}
     >
       <body>
-        <MotionProvider>
-          <QueryProvider>{children}</QueryProvider>
-        </MotionProvider>
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   );

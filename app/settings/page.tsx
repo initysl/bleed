@@ -54,17 +54,17 @@ export default async function SettingsPage() {
         {/* Header Navigation */}
         <div className='mb-6 flex items-center justify-between sm:mb-8'>
           <div>
-            <h1 className='m-0 font-display text-[19px] font-bold tracking-[0.14em] text-ink sm:text-[22px]'>
+            <h1 className='font-display text-xl font-bold text-ink sm:text-3xl'>
               Settings
             </h1>
-            <p className='mt-1.5 text-[13px] leading-relaxed text-ink/65'>
+            <p className='mt-0.5 font-mono text-[11px] text-ink/50 sm:text-xs'>
               Manage your Bleed account, inbox routing, and preferences.
             </p>
           </div>
 
           <Link
             href='/dashboard'
-            className='group inline-flex shrink-0 items-center gap-1.5 rounded-sm border border-line bg-surface px-3 py-2 font-mono text-[11px] tracking-[0.1em] text-ink transition-colors hover:bg-line-soft'
+            className='group inline-flex shrink-0 items-center gap-1.5 rounded-full border border-sage/60 bg-white px-3 py-1.5 text-xs font-semibold text-ink shadow-sm transition-all hover:border-sage hover:bg-sage/10'
           >
             <FiArrowLeft
               className='transition-transform duration-200 group-hover:-translate-x-0.5'
@@ -83,8 +83,8 @@ export default async function SettingsPage() {
                 href={item.href}
                 className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-xs font-medium shadow-xs transition-all active:scale-95 ${
                   item.danger
-                    ? 'border-rust-line bg-rust-tint text-rust'
-                    : 'border-line bg-surface text-ink/70 hover:border-line-strong hover:text-ink'
+                    ? 'border-red-200 bg-red-50/80 text-red-600 active:bg-red-100'
+                    : 'border-sage/60 bg-white text-ink/70 hover:border-sage hover:text-ink active:bg-sage/20'
                 }`}
               >
                 <item.icon size={13} />
@@ -124,19 +124,19 @@ export default async function SettingsPage() {
             {/* 1. Account Section */}
             <AnimatedSection
               id='account'
-              className='scroll-mt-20 rounded-sm border border-line bg-surface p-[22px] sm:scroll-mt-10'
+              className='scroll-mt-20 sm:scroll-mt-10 rounded-2xl bg-white p-5 sm:p-6 shadow-xs transition-all hover:shadow-md'
             >
-              <div className='border-b border-line-soft pb-3.5'>
-                <h2 className='section-label m-0 text-ink/70'>
+              <div className='border-b border-sage/30 pb-3 sm:pb-4'>
+                <h2 className='font-display text-base font-bold text-ink sm:text-lg'>
                   Account Details
                 </h2>
-                <p className='mt-1.5 text-[13px] leading-relaxed text-ink/65'>
+                <p className='mt-0.5 font-mono text-[11px] text-ink/50 sm:text-xs'>
                   Your current login credentials and email settings.
                 </p>
               </div>
 
               <div className='mt-4 space-y-4 sm:mt-5'>
-                <div className='rounded-sm border border-line bg-sunken p-4'>
+                <div className='rounded-xl border border-sage/40 bg-paper/60 p-3.5 sm:p-4'>
                   <span className='block font-mono text-[10px] font-semibold uppercase tracking-wider text-ink/40'>
                     Primary Email
                   </span>
@@ -154,13 +154,13 @@ export default async function SettingsPage() {
             {/* 2. Inbox Address Section */}
             <AnimatedSection
               id='inbox'
-              className='scroll-mt-20 rounded-sm border border-line bg-surface p-[22px] sm:scroll-mt-10'
+              className='scroll-mt-20 sm:scroll-mt-10 rounded-2xl border border-sage/50 bg-white p-5 sm:p-6 shadow-xs transition-all hover:shadow-md'
             >
-              <div className='border-b border-line-soft pb-3.5'>
-                <h2 className='section-label m-0 text-ink/70'>
+              <div className='border-b border-sage/30 pb-3 sm:pb-4'>
+                <h2 className='font-display text-base font-bold text-ink sm:text-lg'>
                   Inbound Receipt Address
                 </h2>
-                <p className='mt-1.5 text-[13px] leading-relaxed text-ink/65'>
+                <p className='mt-0.5 font-mono text-[11px] text-ink/50 sm:text-xs'>
                   Forward subscription receipts or invoices to auto-log charges.
                 </p>
               </div>
@@ -173,13 +173,13 @@ export default async function SettingsPage() {
             {/* 3. Notifications Section */}
             <AnimatedSection
               id='notifications'
-              className='scroll-mt-20 rounded-sm border border-line bg-surface p-[22px] sm:scroll-mt-10'
+              className='scroll-mt-20 sm:scroll-mt-10 rounded-2xl border border-sage/50 bg-white p-5 sm:p-6 shadow-xs transition-all hover:shadow-md'
             >
-              <div className='border-b border-line-soft pb-3.5'>
-                <h2 className='section-label m-0 text-ink/70'>
+              <div className='border-b border-sage/30 pb-3 sm:pb-4'>
+                <h2 className='font-display text-base font-bold text-ink sm:text-lg'>
                   Notification Preferences
                 </h2>
-                <p className='mt-1.5 text-[13px] leading-relaxed text-ink/65'>
+                <p className='mt-0.5 font-mono text-[11px] text-ink/50 sm:text-xs'>
                   Choose when and how Bleed alerts you before upcoming renewals.
                 </p>
               </div>

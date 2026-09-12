@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useForm } from '@tanstack/react-form';
 import { createClient } from '@/lib/supabase/client';
 import { newPasswordSchema } from '@/app/features/auth/schema';
+import Image from 'next/image';
+import Logo from '@/public/bleedlogo.svg';
 
 function firstErrorMessage(errors: unknown[]): string | null {
   if (!errors.length) return null;
@@ -44,10 +46,10 @@ export function ResetPasswordForm() {
   });
 
   return (
-    <div className='w-full max-w-[440px] rounded-sm border border-line bg-surface p-8 sm:p-10'>
+    <div className='w-full max-w-md rounded-4xl bg-white p-10'>
       <div className='mb-8 text-center'>
         <div className='flex items-center justify-center'>
-          <span className='font-display text-[19px] font-bold tracking-[0.14em]'>BLEED</span>
+          <Image src={Logo} alt='Bleed logo' width={110} priority={true} />
         </div>
         <p className='font-display mt-3 text-sm leading-6 text-ink/55'>
           Your new password must be different from the one you previously used.
@@ -75,7 +77,7 @@ export function ResetPasswordForm() {
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  className='w-full rounded-sm border border-line bg-sunken px-4 py-3.5 font-mono text-[15px] text-ink transition-colors hover:border-line-strong focus:border-pine focus:bg-surface'
+                  className='font-display h-14 w-full rounded-full border border-sage/40 bg-[#F7F7F7] px-6 text-sm transition focus:border-pine focus:bg-white'
                 />
 
                 {error && <p className='mt-2 text-xs text-rust'>{error}</p>}
@@ -97,7 +99,7 @@ export function ResetPasswordForm() {
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  className='w-full rounded-sm border border-line bg-sunken px-4 py-3.5 font-mono text-[15px] text-ink transition-colors hover:border-line-strong focus:border-pine focus:bg-surface'
+                  className='font-display h-14 w-full rounded-full border border-sage/40 bg-[#F7F7F7] px-6 text-sm transition focus:border-pine focus:bg-white'
                 />
 
                 {error && <p className='mt-2 text-xs text-rust'>{error}</p>}
@@ -107,7 +109,7 @@ export function ResetPasswordForm() {
         </form.Field>
 
         {formError && (
-          <div className='rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-rust'>
+          <div className='font-mini rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-rust'>
             {formError}
           </div>
         )}
@@ -119,7 +121,7 @@ export function ResetPasswordForm() {
             <button
               type='submit'
               disabled={!canSubmit}
-              className='w-full cursor-pointer rounded-sm border-0 bg-pine py-4 font-mono text-[12px] tracking-[0.12em] text-paper transition-colors hover:bg-pine-hover disabled:cursor-not-allowed disabled:opacity-50'
+              className='font-display h-14 w-full rounded-full bg-pine font-medium text-paper transition hover:bg-pine/90 disabled:cursor-not-allowed disabled:opacity-60'
             >
               {isSubmitting ? 'Saving...' : 'Update Password'}
             </button>
