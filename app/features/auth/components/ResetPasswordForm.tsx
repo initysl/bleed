@@ -77,7 +77,7 @@ export function ResetPasswordForm() {
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  className='font-display h-14 w-full rounded-full border border-sage/40 bg-[#F7F7F7] px-6 text-sm outline-none transition focus:border-pine focus:bg-white'
+                  className='font-display h-14 w-full rounded-full border border-sage/40 bg-[#F7F7F7] px-6 text-sm transition focus:border-pine focus:bg-white'
                 />
 
                 {error && <p className='mt-2 text-xs text-rust'>{error}</p>}
@@ -99,7 +99,7 @@ export function ResetPasswordForm() {
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  className='font-display h-14 w-full rounded-full border border-sage/40 bg-[#F7F7F7] px-6 text-sm outline-none transition focus:border-pine focus:bg-white'
+                  className='font-display h-14 w-full rounded-full border border-sage/40 bg-[#F7F7F7] px-6 text-sm transition focus:border-pine focus:bg-white'
                 />
 
                 {error && <p className='mt-2 text-xs text-rust'>{error}</p>}

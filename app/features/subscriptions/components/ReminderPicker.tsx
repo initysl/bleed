@@ -33,7 +33,7 @@ export function ReminderPicker({
           value={reminderAt}
           onChange={(e) => onChange({ reminderAt: e.target.value })}
           required
-          className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink outline-none focus:border-pine'
+          className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink focus:border-pine'
         />
       </label>
 

@@ -41,3 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 note.txt
+
+# design canvas artboards — working files for the Claude Design canvas, not
+# part of the app build. Kept locally rather than in the repo.
+/design/

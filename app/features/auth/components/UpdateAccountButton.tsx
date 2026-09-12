@@ -15,12 +15,17 @@ export function UpdateAccountButton({
 
   return (
     <>
+      {/* Icon-only, so it needs a name of its own — without one a screen
+          reader announces nothing but "button". The title gives sighted
+          mouse users the same label on hover. */}
       <button
+        type='button'
         onClick={() => setOpen(true)}
-        className='font-mini flex items-center gap-2 rounded-md border border-sage px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-sage/30'
+        aria-label='Update account email and password'
+        title='Update account'
+        className='flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-md text-ink transition-colors hover:bg-sage/30'
       >
-        <FiEdit2 size={18} />
-        Update
+        <FiEdit2 size={18} aria-hidden='true' />
       </button>
 
       <Modal

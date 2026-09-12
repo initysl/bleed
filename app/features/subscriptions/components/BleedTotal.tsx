@@ -1,24 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { animate } from 'framer-motion';
+import { useState } from 'react';
 import type { Subscription } from '@/app/features/subscriptions/types';
 import { formatMoney } from '@/lib/utils/currency';
-
-function CountUp({ target }: { target: number }) {
-  const [display, setDisplay] = useState(0);
-
-  useEffect(() => {
-    const controls = animate(0, target, {
-      duration: 0.8,
-      ease: 'easeOut',
-      onUpdate: (value) => setDisplay(value),
-    });
-    return () => controls.stop();
-  }, [target]);
-
-  return display;
-}
+import { useCountUp } from '@/app/features/subscriptions/hooks/useCountUp';
 
 // Split currency into main integer string and muted decimal string
 function FormattedAmount({
@@ -28,7 +13,7 @@ function FormattedAmount({
   amount: number;
   currency: string;
 }) {
-  const animatedValue = CountUp({ target: amount });
+  const animatedValue = useCountUp(amount);
   const formatted = formatMoney(animatedValue, currency);
 
   // Match currency string parts (e.g., "$80,883.59" -> "$80,883" & ".59")
@@ -66,19 +51,23 @@ export function BleedTotal({
   }, {});
 
   const currencies = Object.keys(totalsByCurrency);
-  const [activeCurrency, setActiveCurrency] = useState<string>(
-    currencies[0] ?? 'USD',
-  );
 
-  // Fallback sync when subscriptions array changes
-  useEffect(() => {
-    if (currencies.length > 0 && !currencies.includes(activeCurrency)) {
-      setActiveCurrency(currencies[0]);
-    }
-  }, [currencies, activeCurrency]);
+  // The user's *preference*, which may not be present in the current data —
+  // derived rather than synced. This used to be state kept in step by an effect
+  // whose dependency array contained `currencies`, a fresh array identity on
+  // every render, so the effect re-ran after every single render and called
+  // setState from inside it (the react-hooks/set-state-in-effect error).
+  // Deriving needs no effect and cannot fall out of step.
+  const [preferredCurrency, setPreferredCurrency] = useState<string | null>(
+    null,
+  );
+  const activeCurrency =
+    preferredCurrency && currencies.includes(preferredCurrency)
+      ? preferredCurrency
+      : (currencies[0] ?? 'USD');
 
   const handleCurrencySelect = (currency: string) => {
-    setActiveCurrency(currency);
+    setPreferredCurrency(currency);
     if (onCurrencyChange) onCurrencyChange(currency);
   };
 
@@ -117,13 +106,18 @@ export function BleedTotal({
                 key={curr}
                 type='button'
                 onClick={() => handleCurrencySelect(curr)}
+                // These are a toggle set, not plain buttons — without
+                // aria-pressed a screen reader gives no indication which
+                // currency is currently shown. The inactive text was ink/50
+                // (~3:1); ink/70 clears 4.5:1 against the sage tint.
+                aria-pressed={isActive}
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all ${
                   isActive
                     ? 'bg-paper text-ink shadow-sm'
-                    : 'bg-sage/20 text-ink/50 hover:bg-sage/40 hover:text-ink'
+                    : 'bg-sage/20 text-ink/70 hover:bg-sage/40 hover:text-ink'
                 }`}
               >
-                <span>{getFlag(curr)}</span>
+                <span aria-hidden='true'>{getFlag(curr)}</span>
                 <span className='uppercase'>{curr}</span>
               </button>
             );
@@ -137,7 +131,7 @@ export function BleedTotal({
 
         {/* Metric Subtitle */}
         <div className='flex items-center gap-2 pt-1'>
-          <span className='text-xs text-ink/50 font-medium'>Monthly bleed</span>
+          <span className='text-xs text-ink/70 font-medium'>Monthly bleed</span>
           <span className='inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-600'>
             <span className='h-1.5 w-1.5 rounded-full bg-emerald-500' />
             {currentData.count}{' '}

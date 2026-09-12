@@ -2,12 +2,43 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { sendRenewalReminderEmail } from '@/lib/email/resend';
 import { sendRenewalPushNotification } from '@/lib/notifications/webpush';
-import { advanceToNextRenewal } from '@/lib/utils/dates';
+import {
+  advanceToNextRenewal,
+  formatDateOnly,
+  parseDateOnly,
+} from '@/lib/utils/dates';
+import { isAuthorizedCronRequest } from '@/lib/api/cron-auth';
+import { apiError, serverError } from '@/lib/api/response';
+import type { Subscription } from '@/app/features/subscriptions/types';
+
+// PostgREST caps a response at 1000 rows by default. Both queries below used to
+// take whatever that cap returned and call it "all of them", so past ~1000 due
+// reminders the surplus was silently never sent and never advanced. Page
+// explicitly instead.
+const PAGE_SIZE = 500;
+
+async function fetchAllPages<T>(
+  build: (from: number, to: number) => PromiseLike<{
+    data: T[] | null;
+    error: { message: string } | null;
+  }>,
+): Promise<T[]> {
+  const all: T[] = [];
+
+  for (let offset = 0; ; offset += PAGE_SIZE) {
+    const { data, error } = await build(offset, offset + PAGE_SIZE - 1);
+    if (error) throw new Error(error.message);
+    if (!data || data.length === 0) break;
+    all.push(...data);
+    if (data.length < PAGE_SIZE) break;
+  }
+
+  return all;
+}
 
 export async function GET(req: NextRequest) {
-  const auth = req.headers.get('authorization');
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  if (!isAuthorizedCronRequest(req)) {
+    return apiError('Not authorized.', 401);
   }
 
   const now = new Date();
@@ -15,37 +46,103 @@ export async function GET(req: NextRequest) {
   const today = nowIso.slice(0, 10);
 
   // ---- Phase 1: dispatch any reminders whose time has come ----
-  const { data: dueSubscriptions, error: dueError } = await supabaseAdmin
-    .from('subscriptions')
-    .select('*')
-    .lte('reminder_at', nowIso);
-
-  if (dueError) {
-    return NextResponse.json(
-      { ok: false, error: dueError.message },
-      { status: 500 },
+  let dueSubscriptions: Subscription[];
+  try {
+    dueSubscriptions = await fetchAllPages<Subscription>((from, to) =>
+      supabaseAdmin
+        .from('subscriptions')
+        .select('*')
+        .lte('reminder_at', nowIso)
+        .order('id', { ascending: true })
+        .range(from, to),
     );
+  } catch (err) {
+    return serverError('cron: loading due subscriptions', err);
+  }
+
+  // Which of these have already been sent? One query for the whole batch
+  // rather than one per subscription inside the loop.
+  const alreadySent = new Set<string>();
+  if (dueSubscriptions.length > 0) {
+    const { data: logRows, error: logError } = await supabaseAdmin
+      .from('reminder_log')
+      .select('subscription_id, reminder_at')
+      .in(
+        'subscription_id',
+        dueSubscriptions.map((s) => s.id),
+      );
+
+    if (logError) return serverError('cron: loading reminder log', logError);
+
+    for (const row of logRows ?? []) {
+      alreadySent.add(`${row.subscription_id}@${row.reminder_at}`);
+    }
+  }
+
+  const pending = dueSubscriptions.filter(
+    (sub) => !alreadySent.has(`${sub.id}@${sub.reminder_at}`),
+  );
+
+  // Same again for the profile lookup, which used to run once per subscription
+  // inside the dispatch loop.
+  const profilesById = new Map<
+    string,
+    { email: string | null; email_notifications_enabled: boolean }
+  >();
+  const emailUserIds = [
+    ...new Set(pending.filter((s) => s.notify_email).map((s) => s.user_id)),
+  ];
+
+  if (emailUserIds.length > 0) {
+    const { data: profiles, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('id, email, email_notifications_enabled')
+      .in('id', emailUserIds);
+
+    if (profileError) return serverError('cron: loading profiles', profileError);
+
+    for (const p of profiles ?? []) {
+      profilesById.set(p.id, {
+        email: p.email,
+        email_notifications_enabled: p.email_notifications_enabled,
+      });
+    }
   }
 
   let sent = 0;
-  for (const sub of dueSubscriptions ?? []) {
-    const { data: alreadySent } = await supabaseAdmin
-      .from('reminder_log')
-      .select('id')
-      .eq('subscription_id', sub.id)
-      .eq('reminder_at', sub.reminder_at)
-      .maybeSingle();
+  let failed = 0;
 
-    if (alreadySent) continue;
+  for (const sub of pending) {
+    // Claim the reminder BEFORE dispatching it.
+    //
+    // The log insert used to happen after Promise.all(dispatches). A crash, a
+    // timeout, or a Railway restart in that window left the reminder unlogged
+    // but already delivered, so the next hourly run sent it again — and the
+    // one after that. The unique (subscription_id, reminder_at) constraint
+    // makes this insert the atomic claim: whoever wins it owns the dispatch,
+    // and a concurrent or retried run skips it.
+    //
+    // This trades at-least-once for at-most-once. For a renewal reminder that
+    // is the right trade: a missed nudge is a minor annoyance, whereas
+    // repeatedly emailing someone the same warning is what makes people mute
+    // an app or unsubscribe entirely.
+    const { error: claimError } = await supabaseAdmin
+      .from('reminder_log')
+      .insert({ subscription_id: sub.id, reminder_at: sub.reminder_at });
+
+    if (claimError) {
+      // Almost certainly the unique constraint: another run claimed it first.
+      console.warn(
+        `[cron] skipping subscription ${sub.id} — could not claim reminder:`,
+        claimError.message,
+      );
+      continue;
+    }
 
     const dispatches: Promise<unknown>[] = [];
 
     if (sub.notify_email) {
-      const { data: profile } = await supabaseAdmin
-        .from('profiles')
-        .select('email, email_notifications_enabled')
-        .eq('id', sub.user_id)
-        .single();
+      const profile = profilesById.get(sub.user_id);
 
       // Two gates, both must pass: the per-subscription toggle (sub.notify_email,
       // checked above) AND the account-wide email preference set in Settings.
@@ -56,6 +153,7 @@ export async function GET(req: NextRequest) {
               `[cron] email dispatch failed for subscription ${sub.id}:`,
               err,
             );
+            failed++;
           }),
         );
       }
@@ -68,16 +166,12 @@ export async function GET(req: NextRequest) {
             `[cron] push dispatch failed for subscription ${sub.id}:`,
             err,
           );
+          failed++;
         }),
       );
     }
 
     await Promise.all(dispatches);
-
-    await supabaseAdmin
-      .from('reminder_log')
-      .insert({ subscription_id: sub.id, reminder_at: sub.reminder_at });
-
     sent++;
   }
 
@@ -87,25 +181,35 @@ export async function GET(req: NextRequest) {
   // reminder has already necessarily fired earlier in a previous run.
   // Advancing here computes the NEXT reminder_at, so future reminders keep
   // firing every cycle without the user re-entering anything.
-  const { data: passedRenewals, error: passedError } = await supabaseAdmin
-    .from('subscriptions')
-    .select('*')
-    .lte('renewal_date', today);
-
-  if (passedError) {
-    return NextResponse.json(
-      { ok: false, sent, error: passedError.message },
-      { status: 500 },
+  //
+  // Strictly less-than today, not lte: a subscription renewing TODAY has not
+  // renewed yet as far as the user is concerned, and advancing it on the first
+  // run of the day made the dashboard skip straight past "renews today" to
+  // next month's date.
+  let passedRenewals: Subscription[];
+  try {
+    passedRenewals = await fetchAllPages<Subscription>((from, to) =>
+      supabaseAdmin
+        .from('subscriptions')
+        .select('*')
+        .lt('renewal_date', today)
+        .order('id', { ascending: true })
+        .range(from, to),
     );
+  } catch (err) {
+    return serverError('cron: loading passed renewals', err);
   }
 
   let advanced = 0;
-  for (const sub of passedRenewals ?? []) {
+  for (const sub of passedRenewals) {
+    // parseDateOnly for the two `date` columns, plain Date for reminder_at,
+    // which is a timestamptz and therefore a real instant. Mixing those up is
+    // what shifts a renewal by a day outside UTC.
     const result = advanceToNextRenewal({
-      billingAnchorDate: new Date(sub.billing_anchor_date),
+      billingAnchorDate: parseDateOnly(sub.billing_anchor_date),
       billingCycle: sub.billing_cycle,
       cyclesElapsed: sub.cycles_elapsed,
-      currentRenewalDate: new Date(sub.renewal_date),
+      currentRenewalDate: parseDateOnly(sub.renewal_date),
       currentReminderAt: new Date(sub.reminder_at),
       now,
     });
@@ -113,7 +217,7 @@ export async function GET(req: NextRequest) {
     const { error: updateError } = await supabaseAdmin
       .from('subscriptions')
       .update({
-        renewal_date: result.renewalDate.toISOString().slice(0, 10),
+        renewal_date: formatDateOnly(result.renewalDate),
         reminder_at: result.reminderAt.toISOString(),
         cycles_elapsed: result.cyclesElapsed,
       })
@@ -130,5 +234,5 @@ export async function GET(req: NextRequest) {
     advanced++;
   }
 
-  return NextResponse.json({ ok: true, sent, advanced });
+  return NextResponse.json({ ok: true, sent, failed, advanced });
 }

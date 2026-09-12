@@ -1,9 +1,41 @@
 import { addMonths, addYears, format } from 'date-fns';
 import type { BillingCycle } from '@/app/features/subscriptions/types';
 
+const pad = (n: number) => String(n).padStart(2, '0');
+
+// Parses a date-only string ("2025-01-31", exactly what a Postgres `date`
+// column returns) as LOCAL midnight.
+//
+// This is not a nicety. `new Date('2025-01-31')` is specified to parse a
+// date-only form as UTC, but every method used to read it back — getDate(),
+// getMonth(), and date-fns's addMonths, which is built on them — works in local
+// time. West of UTC those disagree by a day, so:
+//
+//   formatDate('2025-01-31')            -> "Jan 30, 2025"   (New York)
+//   addBillingCycles('2025-01-31', 1)   -> 2025-03-01       (should be Feb 28)
+//
+// The second one is worse than it looks: it silently defeats the month-end
+// clamping that addBillingCycles exists to provide. Parsing to local midnight
+// makes the calendar day the user sees the same one the arithmetic operates on.
+export function parseDateOnly(dateStr: string): Date {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+
+  // Anything carrying a time (a reminder_at timestamptz, say) is a real instant
+  // and must keep its normal parsing.
+  if (!match) return new Date(dateStr);
+
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+}
+
+// Serialises a Date back to a date-only string using its LOCAL calendar day —
+// the inverse of parseDateOnly. Using .toISOString().slice(0, 10) here would
+// reintroduce the same off-by-one in the other direction.
+export function formatDateOnly(date: Date): string {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
 // Formats a Date as the string <input type="datetime-local"> expects (local time, no timezone suffix).
 export function toDatetimeLocalValue(date: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(
     date.getHours(),
   )}:${pad(date.getMinutes())}`;
@@ -44,7 +76,7 @@ export function addBillingCycle(anchorDate: Date, cycle: BillingCycle): Date {
 
 // Whole days between now and a given date (can be negative if already past).
 export function daysUntil(dateStr: string): number {
-  const target = new Date(dateStr);
+  const target = parseDateOnly(dateStr);
   const now = new Date();
   target.setHours(0, 0, 0, 0);
   now.setHours(0, 0, 0, 0);
@@ -57,7 +89,7 @@ export function daysUntil(dateStr: string): number {
 // (e.g. "18/07/2026"), which breaks React hydration since the server-rendered
 // HTML has to match the client's first render exactly.
 export function formatDate(dateStr: string): string {
-  return format(new Date(dateStr), 'MMM d, yyyy');
+  return format(parseDateOnly(dateStr), 'MMM d, yyyy');
 }
 
 interface AdvanceRenewalInput {
