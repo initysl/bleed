@@ -58,7 +58,7 @@ export function ChangePasswordForm() {
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
-                className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink focus:border-pine'
+                className='font-mini rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink focus:border-pine'
               />
               {error && <span className='text-xs text-rust'>{error}</span>}
             </label>
@@ -78,7 +78,7 @@ export function ChangePasswordForm() {
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
-                className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink focus:border-pine'
+                className='font-mini rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink focus:border-pine'
               />
               {error && <span className='text-xs text-rust'>{error}</span>}
             </label>
@@ -96,7 +96,7 @@ export function ChangePasswordForm() {
           <button
             type='submit'
             disabled={!canSubmit}
-            className='self-start rounded-md bg-pine px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-pine/90 disabled:opacity-60'
+            className='font-mini self-start rounded-md bg-pine px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-pine/90 disabled:opacity-60'
           >
             {isSubmitting ? 'Saving…' : 'Update password'}
           </button>

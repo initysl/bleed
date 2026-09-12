@@ -38,11 +38,11 @@ export function NeedsReviewList({ items }: { items: NeedsReviewItem[] }) {
     // heading was a <p>.
     <section
       aria-labelledby={headingId}
-      className='w-full rounded-sm border border-rust-line bg-rust-tint p-4'
+      className='w-full rounded-lg border border-rust/30 bg-rust/5 p-4'
     >
       <h2
         id={headingId}
-        className='m-0 font-mono text-label tracking-[0.14em] text-rust'
+        className='text-xs font-medium uppercase tracking-wide text-rust'
       >
         Needs review &mdash; couldn&apos;t auto-add{' '}
         {items.length > 1 ? `these ${items.length}` : 'this one'}
@@ -67,7 +67,7 @@ export function NeedsReviewList({ items }: { items: NeedsReviewItem[] }) {
           return (
             <li
               key={item.id}
-              className='rounded-sm border border-rust-line/50 bg-surface px-3 py-2.5'
+              className='rounded-md bg-white/60 px-3 py-2'
             >
               <div className='flex items-start justify-between gap-3'>
                 <div className='flex min-w-0 flex-col'>
@@ -120,7 +120,7 @@ export function NeedsReviewList({ items }: { items: NeedsReviewItem[] }) {
               {isExpanded && item.raw_email_snippet && (
                 <pre
                   id={panelId}
-                  className='mt-2 max-h-48 overflow-auto rounded-sm border border-line bg-sunken p-2.5 font-mono text-[11px] leading-relaxed break-words whitespace-pre-wrap text-ink/80 scrollbar-thin'
+                  className='mt-2 max-h-48 overflow-auto whitespace-pre-wrap break-words rounded border border-sage/50 bg-paper p-2 font-mono text-[11px] leading-relaxed text-ink/80'
                 >
                   {item.raw_email_snippet}
                 </pre>
