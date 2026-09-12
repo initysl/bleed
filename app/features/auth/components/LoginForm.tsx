@@ -8,8 +8,8 @@ import { useForm } from '@tanstack/react-form';
 import { FiEye, FiEyeOff, FiCheckCircle } from 'react-icons/fi';
 import { createClient } from '@/lib/supabase/client';
 import { loginSchema } from '@/app/features/auth/schema';
-import Image from 'next/image';
-import Logo from '@/public/bleedlogo.svg';
+import { SegmentedControl } from '@/app/components/ui/SegmentedControl';
+import { modalPanel, alertIn, press } from '@/lib/motion';
 
 function firstErrorMessage(errors: unknown[]): string | null {
   if (!errors.length) return null;
@@ -73,10 +73,10 @@ export function LoginForm() {
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
-        className='w-full max-w-md rounded-4xl border border-white/50 bg-white/80 p-10'
+        className='w-full max-w-[440px] rounded-sm border border-line bg-surface p-8 sm:p-10'
       >
         <div className='flex flex-col items-center text-center'>
-          <div className='mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-pine/10'>
+          <div className='mb-6 flex h-16 w-16 items-center justify-center rounded-sm bg-pine/10'>
             <FiCheckCircle className='text-pine' size={34} />
           </div>
 
@@ -93,7 +93,7 @@ export function LoginForm() {
               setMode('signin');
               setCheckEmail(null);
             }}
-            className='mt-8 rounded-full bg-pine px-6 py-3 text-paper transition hover:bg-pine/90'
+            className='mt-8 cursor-pointer rounded-sm bg-pine px-6 py-3 font-mono text-[11px] tracking-[0.1em] text-paper transition-colors hover:bg-pine-hover'
           >
             Back to Sign In
           </button>
@@ -104,17 +104,31 @@ export function LoginForm() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45 }}
-      className='w-full max-w-md rounded-4xl border border-white/50 bg-white/75 p-10'
+      variants={modalPanel}
+      initial='hidden'
+      animate='show'
+      className='w-full max-w-[440px] rounded-sm border border-line bg-surface p-8 sm:p-10'
     >
-      <div className='mb-5 flex flex-col gap-1 items-center text-center'>
-        <Image src={Logo} alt='Bleed logo' width={110} priority={true} />
-        <p className='font-mini text-sm leading-6 text-ink/60'>
-          Manage your subscriptions.
-        </p>
-      </div>
+      {/* One switch instead of a sentence at the bottom of the form: the two
+          modes are peers, and the indicator travelling between them says so. */}
+      <SegmentedControl
+        label='Sign in or create an account'
+        value={mode}
+        onChange={setMode}
+        segments={[
+          { value: 'signin' as const, label: 'SIGN IN' },
+          { value: 'signup' as const, label: 'CREATE ACCOUNT' },
+        ]}
+      />
+
+      <h1 className='mt-8 mb-2 font-display text-[28px] font-bold tracking-[-0.02em] text-ink'>
+        {mode === 'signup' ? 'Create your account' : 'Welcome back'}
+      </h1>
+      <p className='mb-7 text-[15px] leading-relaxed text-ink/65'>
+        {mode === 'signup'
+          ? 'One address to forward receipts to, and a running total you can act on.'
+          : 'Manage your subscriptions and see what renews next.'}
+      </p>
 
       <form
         onSubmit={(e) => {
@@ -132,18 +146,26 @@ export function LoginForm() {
 
             return (
               <div>
+                <label
+                  htmlFor={field.name}
+                  className='mb-1.5 block font-mono text-label tracking-[0.14em] text-ink/55'
+                >
+                  EMAIL
+                </label>
                 <input
+                  id={field.name}
                   type='email'
                   autoComplete='email'
                   name={field.name}
-                  placeholder='Email'
+                  placeholder='you@example.com'
+                  aria-invalid={error ? true : undefined}
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  className='font-display h-14 w-full rounded-full border border-sage/50 bg-paper px-5 text-sm transition focus:border-pine focus:ring-4 focus:ring-pine/10'
+                  className='w-full rounded-sm border border-line bg-sunken px-4 py-3.5 font-mono text-[15px] text-ink transition-colors hover:border-line-strong focus:border-pine focus:bg-surface'
                 />
 
-                {error && <p className='mt-2 text-xs text-rust'>{error}</p>}
+                {error && <p className='mt-2 font-mono text-[11px] text-rust'>{error}</p>}
               </div>
             );
           }}
@@ -156,34 +178,48 @@ export function LoginForm() {
 
             return (
               <div>
+                <label
+                  htmlFor={field.name}
+                  className='mb-1.5 block font-mono text-label tracking-[0.14em] text-ink/55'
+                >
+                  PASSWORD
+                </label>
                 <div className='relative'>
                   <input
+                    id={field.name}
+                    aria-invalid={error ? true : undefined}
                     type={showPassword ? 'text' : 'password'}
                     autoComplete={
                       mode === 'signup' ? 'new-password' : 'current-password'
                     }
-                    placeholder='Password'
+                    placeholder='At least 8 characters'
                     name={field.name}
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
-                    className='font-display h-14 w-full rounded-full border border-sage/50 bg-paper px-5 pr-14 text-sm transition focus:border-pine focus:ring-4 focus:ring-pine/10'
+                    className='w-full rounded-sm border border-line bg-sunken px-4 py-3.5 pr-20 font-mono text-[15px] text-ink transition-colors hover:border-line-strong focus:border-pine focus:bg-surface'
                   />
 
+                  {/* Named and stateful: this was an unlabelled button, so a
+                      screen reader announced it as "button" with no hint of
+                      what it did or whether the password was showing. */}
                   <button
                     type='button'
                     onClick={() => setShowPassword(!showPassword)}
-                    className='absolute right-5 top-1/2 -translate-y-1/2 text-ink/40 hover:text-pine'
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-pressed={showPassword}
+                    className='absolute top-1/2 right-2 flex -translate-y-1/2 cursor-pointer items-center gap-1.5 rounded-sm px-2.5 py-2 font-mono text-[10px] tracking-[0.1em] text-pine transition-colors hover:bg-line-soft'
                   >
                     {showPassword ? (
-                      <FiEyeOff size={18} />
+                      <FiEyeOff size={14} aria-hidden='true' />
                     ) : (
-                      <FiEye size={18} />
+                      <FiEye size={14} aria-hidden='true' />
                     )}
+                    {showPassword ? 'HIDE' : 'SHOW'}
                   </button>
                 </div>
 
-                {error && <p className='mt-2 text-xs text-rust'>{error}</p>}
+                {error && <p className='mt-2 font-mono text-[11px] text-rust'>{error}</p>}
               </div>
             );
           }}
@@ -193,14 +229,24 @@ export function LoginForm() {
           <div className='flex justify-end'>
             <Link
               href='/forgot-password'
-              className='font-mini text-sm text-ink/55 transition hover:text-pine'
+              className='font-mono text-[11px] tracking-[0.06em] text-ink/60 transition-colors hover:text-pine'
             >
-              Forgot Password?
+              Forgot your password?
             </Link>
           </div>
         )}
 
-        {formError && <div className='text-sm text-rust'>{formError}</div>}
+        {formError && (
+          <motion.div
+            variants={alertIn}
+            initial='hidden'
+            animate='show'
+            role='alert'
+            className='rounded-sm border border-rust-line bg-rust-tint px-3 py-2.5 text-[13px] leading-snug text-rust'
+          >
+            {formError}
+          </motion.div>
+        )}
 
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
@@ -208,21 +254,20 @@ export function LoginForm() {
           {([canSubmit, isSubmitting]) => (
             <motion.button
               type='submit'
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              {...press}
               disabled={!canSubmit || Boolean(isSubmitting)}
               aria-busy={Boolean(isSubmitting)}
-              className='font-display h-14 w-full rounded-full bg-pine font-medium text-paper shadow-lg transition hover:bg-pine/90 disabled:opacity-50'
+              className='w-full cursor-pointer rounded-sm border-0 bg-pine py-4 font-mono text-[12px] tracking-[0.12em] text-paper transition-colors hover:bg-pine-hover disabled:cursor-not-allowed disabled:opacity-50'
             >
               {/* Signing up used to say "Signing in..." while it created the
                   account. */}
               {isSubmitting
                 ? mode === 'signup'
-                  ? 'Creating account...'
-                  : 'Signing in...'
+                  ? 'CREATING ACCOUNT...'
+                  : 'SIGNING IN...'
                 : mode === 'signup'
-                  ? 'Create Account'
-                  : 'Sign In'}
+                  ? 'CREATE ACCOUNT'
+                  : 'SIGN IN'}
             </motion.button>
           )}
         </form.Subscribe>
@@ -231,18 +276,8 @@ export function LoginForm() {
             promises an alternative sign-in method, and the only thing following
             it is the mode-toggle sentence below. There is no social auth. */}
 
-        <p className='font-mini text-center text-sm text-ink/70'>
-          {mode === 'signup'
-            ? 'Already have an account? '
-            : "Don't have an account? "}
-
-          <button
-            type='button'
-            onClick={() => setMode(mode === 'signup' ? 'signin' : 'signup')}
-            className='font-medium text-pine hover:underline'
-          >
-            {mode === 'signup' ? 'Sign In' : 'Create one'}
-          </button>
+        <p className='text-center font-mono text-[11px] leading-relaxed text-ink/45'>
+          By continuing you agree to the Terms and Privacy Policy.
         </p>
       </form>
     </motion.div>
