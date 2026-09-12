@@ -1,9 +1,8 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FiLogOut, FiPlus, FiSettings, FiMenu, FiX } from 'react-icons/fi';
 import type { NeedsReviewItem } from '@/app/features/needs-review/types';
 import type { Subscription } from '@/app/features/subscriptions/types';
@@ -18,6 +17,7 @@ import { BleedTotal } from './BleedTotal';
 import { SubscriptionForm } from './SubscriptionForm';
 import { SubscriptionList } from './SubscriptionList';
 import { UpcomingStrip } from './UpcomingStrip';
+import { riseIn, staggerContainer, SPRING, press } from '@/lib/motion';
 
 export function Dashboard({
   initialSubscriptions,
@@ -28,7 +28,6 @@ export function Dashboard({
   initialNeedsReview: NeedsReviewItem[];
   inboxAddress: string;
 }) {
-  const shouldReduceMotion = useReducedMotion();
   const [showForm, setShowForm] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   // Lifted out of SubscriptionList so UpcomingStrip can open an editor too.
@@ -45,193 +44,151 @@ export function Dashboard({
   const { data: subscriptions } = useSubscriptions(initialSubscriptions);
   const { data: needsReview } = useNeedsReview(initialNeedsReview);
 
-  const container = {
-    hidden: {},
-    show: {
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.08,
-      },
-    },
-  };
-
-  const item = {
-    hidden: {
-      opacity: 0,
-      y: shouldReduceMotion ? 0 : 10,
-    },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.35,
-        ease: 'easeOut' as const,
-      },
-    },
-  };
-
+  // No local reduced-motion guard: MotionConfig in providers/MotionProvider
+  // applies it globally, so transforms drop and opacity stays.
   return (
     <motion.main
-      variants={container}
+      variants={staggerContainer}
       initial='hidden'
       animate='show'
-      className='mx-auto flex w-full max-w-5xl flex-col gap-3 sm:gap-6 p-2'
+      className='mx-auto flex w-full max-w-6xl flex-col'
     >
-      {/* Sticky Header */}
+      {/* ===== Masthead ===== */}
       <motion.header
-        variants={item}
-        className='sticky top-0 z-30 flex w-full items-center justify-between px-3 py-2.5 backdrop-blur-xl rounded-xl'
+        variants={riseIn}
+        className='sticky top-0 z-30 flex h-16 w-full items-center justify-between gap-6 border-b border-line bg-paper/90 px-4 backdrop-blur-xl sm:px-8'
       >
-        <Image
-          src='/bleedlogo.svg'
-          alt='Bleed logo'
-          width={100}
-          height={32}
-          priority={true}
-        />
+        {/* A wordmark rather than bleedlogo.svg, which is a 245 KB file drawn
+            on eight surfaces. Type the app already loads costs nothing. */}
+        <h1 className='m-0 flex items-baseline gap-3.5 font-display text-[19px] font-bold tracking-[0.14em]'>
+          BLEED
+          <span className='hidden font-mono text-label font-medium text-ink/45 sm:inline'>
+            SUBSCRIPTION METER
+          </span>
+        </h1>
 
-        {/* Desktop Navigation (sm and up) */}
-        <div className='hidden sm:flex items-center rounded-full border border-sage/50 bg-white/70 p-1.5 shadow-xs backdrop-blur-md'>
+        <div className='hidden items-center gap-2 sm:flex'>
           <Link
             href='/settings'
-            className='group inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-xs font-medium text-ink/70 transition-all hover:bg-white hover:text-ink hover:shadow-2xs active:scale-95'
-            title='Settings'
+            className='group inline-flex items-center gap-1.5 rounded-sm px-3 py-2 font-mono text-[11px] tracking-[0.1em] text-ink/65 transition-colors hover:bg-line-soft hover:text-ink'
           >
             <FiSettings
-              className='text-ink/60 transition-transform duration-300 group-hover:rotate-45'
-              size={14}
+              aria-hidden='true'
+              className='transition-transform duration-300 group-hover:rotate-45'
+              size={13}
             />
-            <span>Settings</span>
+            SETTINGS
           </Link>
 
           <form action='/auth/signout' method='post' className='inline-flex'>
             <button
               type='submit'
-              className='group inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-xs font-medium text-ink/60 transition-all hover:bg-red-50 hover:text-red-600 active:scale-95'
-              title='Sign out'
+              className='group inline-flex items-center gap-1.5 rounded-sm px-3 py-2 font-mono text-[11px] tracking-[0.1em] text-ink/65 transition-colors hover:bg-rust-tint hover:text-rust'
             >
               <FiLogOut
-                className='text-ink/50 transition-transform duration-200 group-hover:-translate-x-0.5 group-hover:text-red-600'
-                size={14}
+                aria-hidden='true'
+                className='transition-transform duration-200 group-hover:-translate-x-0.5'
+                size={13}
               />
-              <span>Sign out</span>
+              SIGN OUT
             </button>
           </form>
 
-          {/* Embedded CTA inside the capsule */}
-          <button
+          <motion.button
             type='button'
             onClick={() => setShowForm(true)}
-            className='ml-1 inline-flex items-center gap-1.5 rounded-full bg-pine px-3.5 py-1 font-mono text-xs font-semibold text-paper transition-all hover:bg-pine/90 active:scale-95'
+            {...press}
+            className='ml-2 inline-flex cursor-pointer items-center gap-1.5 rounded-sm border-0 bg-pine px-4 py-2.5 font-mono text-[11px] tracking-[0.1em] text-paper transition-colors hover:bg-pine-hover'
           >
-            <FiPlus size={14} />
-            <span>Add</span>
-          </button>
+            <FiPlus aria-hidden='true' size={13} />
+            LOG SUBSCRIPTION
+          </motion.button>
         </div>
 
-        {/* Mobile Hamburger Trigger (below sm) */}
-        <div className='flex sm:hidden items-center gap-2'>
-          <button
-            type='button'
-            onClick={() => setMobileMenuOpen(true)}
-            aria-label='Open navigation menu'
-            aria-expanded={mobileMenuOpen}
-            className='inline-flex items-center justify-center rounded-full border border-sage/60 bg-white p-2.5 text-ink/80 shadow-xs transition-all active:scale-95'
-          >
-            <FiMenu size={20} />
-          </button>
-        </div>
+        <button
+          type='button'
+          onClick={() => setMobileMenuOpen(true)}
+          aria-label='Open navigation menu'
+          aria-expanded={mobileMenuOpen}
+          className='flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-line bg-surface text-ink/80 sm:hidden'
+        >
+          <FiMenu size={19} aria-hidden='true' />
+        </button>
       </motion.header>
 
-      {/* Slide-In Side Drawer Menu (Mobile) */}
+      {/* ===== Mobile drawer ===== */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <>
-            {/* Darkened Backdrop Overlay */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setMobileMenuOpen(false)}
-              className='fixed inset-0 z-40 bg-black/40 backdrop-blur-xs sm:hidden'
+              transition={{ duration: 0.18 }}
+              onClick={closeMobileMenu}
+              className='fixed inset-0 z-40 bg-ink/40 backdrop-blur-xs sm:hidden'
             />
 
-            {/* Sliding Panel from Right */}
             <motion.aside
               ref={drawerRef}
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={
-                shouldReduceMotion
-                  ? { duration: 0 }
-                  : { type: 'spring', damping: 25, stiffness: 220 }
-              }
-              // This drawer is as modal as the Modal is, and needs to say so.
-              // It previously had no role, no Escape handler, no scroll lock
-              // and no focus management at all.
+              transition={SPRING.panel}
               role='dialog'
               aria-modal='true'
               aria-label='Navigation menu'
               tabIndex={-1}
-              className='fixed top-0 right-0 bottom-0 z-50 flex w-4/5 max-w-xs flex-col justify-between border-l border-sage/60 bg-white p-6 shadow-2xl outline-none sm:hidden'
+              className='fixed inset-y-0 right-0 z-50 flex w-4/5 max-w-xs flex-col justify-between border-l border-line bg-surface p-6 outline-none sm:hidden'
             >
-              {/* Drawer Header with Close Icon */}
               <div className='space-y-6'>
-                <div className='flex items-center justify-between border-b border-sage/30 pb-4'>
-                  <Image
-                    src='/bleedlogo.svg'
-                    alt='Bleed logo'
-                    width={80}
-                    height={26}
-                  />
+                <div className='flex items-center justify-between border-b border-line pb-4'>
+                  <span className='font-display text-[17px] font-bold tracking-[0.14em]'>
+                    BLEED
+                  </span>
                   <button
                     type='button'
-                    onClick={() => setMobileMenuOpen(false)}
-                    className='rounded-full p-2 text-ink/60 hover:bg-sage/15 hover:text-ink transition-colors'
+                    onClick={closeMobileMenu}
+                    className='flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm text-ink/60 transition-colors hover:bg-line-soft hover:text-ink'
                     aria-label='Close menu'
                   >
-                    <FiX size={20} />
+                    <FiX size={19} aria-hidden='true' />
                   </button>
                 </div>
 
-                {/* Navigation Items */}
-                <nav className='flex flex-col gap-2'>
+                <nav className='flex flex-col gap-1'>
                   <button
                     type='button'
                     onClick={() => {
                       setMobileMenuOpen(false);
                       setShowForm(true);
                     }}
-                    className='flex w-full items-center gap-3 rounded-2xl bg-pine px-4 py-3 font-mono text-xs font-semibold text-paper shadow-sm active:scale-98 transition-all'
+                    className='flex min-h-11 cursor-pointer items-center gap-2.5 rounded-sm border-0 bg-pine px-4 font-mono text-[11px] tracking-[0.1em] text-paper'
                   >
-                    <FiPlus size={18} />
-                    <span>Add Subscription</span>
+                    <FiPlus size={14} aria-hidden='true' />
+                    LOG SUBSCRIPTION
                   </button>
 
                   <Link
                     href='/settings'
-                    onClick={() => setMobileMenuOpen(false)}
-                    className='flex items-center gap-3 rounded-2xl border border-sage/40 bg-paper/50 px-4 py-3 font-mono text-xs font-medium text-ink/80 hover:bg-sage/15 transition-colors'
+                    onClick={closeMobileMenu}
+                    className='flex min-h-11 items-center gap-2.5 rounded-sm px-4 font-mono text-[11px] tracking-[0.1em] text-ink/75 transition-colors hover:bg-line-soft'
                   >
-                    <FiSettings size={18} className='text-ink/60' />
-                    <span>Settings</span>
+                    <FiSettings size={14} aria-hidden='true' />
+                    SETTINGS
                   </Link>
                 </nav>
               </div>
 
-              {/* Bottom Sign Out Action */}
-              <div className='border-t border-sage/30 pt-4'>
-                <form action='/auth/signout' method='post' className='w-full'>
-                  <button
-                    type='submit'
-                    className='flex w-full items-center gap-3 rounded-2xl border border-red-200 bg-red-50/50 px-4 py-3 font-mono text-xs font-medium text-red-600 hover:bg-red-100/50 transition-colors'
-                  >
-                    <FiLogOut size={18} />
-                    <span>Sign out</span>
-                  </button>
-                </form>
-              </div>
+              <form action='/auth/signout' method='post'>
+                <button
+                  type='submit'
+                  className='flex min-h-11 w-full cursor-pointer items-center gap-2.5 rounded-sm border border-line px-4 font-mono text-[11px] tracking-[0.1em] text-ink/70 transition-colors hover:border-rust-line hover:bg-rust-tint hover:text-rust'
+                >
+                  <FiLogOut size={14} aria-hidden='true' />
+                  SIGN OUT
+                </button>
+              </form>
             </motion.aside>
           </>
         )}
@@ -240,48 +197,51 @@ export function Dashboard({
       <Modal
         open={showForm}
         onClose={() => setShowForm(false)}
-        title='Add a subscription'
+        title='Log a subscription'
       >
         <SubscriptionForm onDone={() => setShowForm(false)} />
       </Modal>
 
-      <motion.div variants={item}>
-        <NeedsReviewList items={needsReview} />
-      </motion.div>
+      <div className='flex flex-col gap-5 px-4 py-6 sm:px-8'>
+        <motion.div variants={riseIn}>
+          <NeedsReviewList items={needsReview} />
+        </motion.div>
 
-      {/* Dashboard Layout */}
-      <div className='grid gap-10 md:grid-cols-[420px_minmax(0,1fr)]'>
-        {/* Left Sidebar */}
-        <motion.aside
-          variants={item}
-          className='space-y-5 md:sticky md:top-24 md:self-start min-w-0'
-        >
-          <BleedTotal subscriptions={subscriptions} />
+        <div className='grid gap-6 md:grid-cols-[420px_minmax(0,1fr)]'>
+          <motion.aside
+            variants={riseIn}
+            className='flex min-w-0 flex-col gap-5 md:sticky md:top-24 md:self-start'
+          >
+            <BleedTotal subscriptions={subscriptions} />
 
-          {/* Clicking a card opens that subscription's editor in the list —
-              the point of the strip is to act on something about to renew. */}
-          <UpcomingStrip
-            subscriptions={subscriptions}
-            onSelect={(sub) => setEditingId(sub.id)}
-          />
+            {/* The ruler and the ledger are two views of the same data, so
+                they share one selection: picking a marker opens that row
+                below, and the marker grows to show which one is open. */}
+            <UpcomingStrip
+              subscriptions={subscriptions}
+              selectedId={editingId}
+              onSelect={(sub) =>
+                setEditingId(editingId === sub.id ? null : sub.id)
+              }
+            />
 
-          <InboxAddress address={inboxAddress} />
+            <InboxAddress address={inboxAddress} index='03' />
 
-          {/* Push is the product's headline feature, and this prompt only ever
-              rendered inside EmptyState — so once a user had a single
-              subscription they never saw it again outside Settings. It returns
-              null once permission is granted, so it costs nothing here. */}
-          <EnableNotifications />
-        </motion.aside>
+            {/* Push is the headline feature, and this prompt only ever
+                rendered inside EmptyState — so once a user had one
+                subscription they never saw it again outside Settings. It
+                returns null once permission is granted. */}
+            <EnableNotifications />
+          </motion.aside>
 
-        {/* Right Content */}
-        <motion.section variants={item} className='min-w-0'>
-          <SubscriptionList
-            subscriptions={subscriptions}
-            editingId={editingId}
-            onEditingChange={setEditingId}
-          />
-        </motion.section>
+          <motion.section variants={riseIn} className='min-w-0'>
+            <SubscriptionList
+              subscriptions={subscriptions}
+              editingId={editingId}
+              onEditingChange={setEditingId}
+            />
+          </motion.section>
+        </div>
       </div>
     </motion.main>
   );
