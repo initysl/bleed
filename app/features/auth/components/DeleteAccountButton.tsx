@@ -53,8 +53,8 @@ export function DeleteAccountButton({ email }: { email: string }) {
       <Modal open={open} onClose={handleClose} title='Delete account'>
         <div className='flex flex-col gap-3'>
           <p className='font-mini text-sm text-ink'>
-            This permanently deletes your account, every subscription you've
-            tracked, and all reminder history. This can't be undone.
+            This permanently deletes your account, every subscription you&apos;ve
+            tracked, and all reminder history. This can&apos;t be undone.
           </p>
           <label className='flex flex-col gap-1 text-sm text-ink'>
             Type <span className='font-mono font-medium'>{email}</span> to
@@ -63,7 +63,7 @@ export function DeleteAccountButton({ email }: { email: string }) {
               type='text'
               value={typedEmail}
               onChange={(e) => setTypedEmail(e.target.value)}
-              className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink outline-none focus:border-rust'
+              className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink focus:border-rust'
             />
           </label>
 

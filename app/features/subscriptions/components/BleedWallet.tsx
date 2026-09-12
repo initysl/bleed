@@ -1,35 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import {
-  motion,
-  useMotionValue,
-  animate,
-  AnimatePresence,
-} from 'framer-motion';
+import { useState } from 'react';
+import { motion, useMotionValue, AnimatePresence } from 'framer-motion';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import type { Subscription } from '@/app/features/subscriptions/types';
 import { formatMoney } from '@/lib/utils/currency';
+import { useCountUp } from '@/app/features/subscriptions/hooks/useCountUp';
 
 // A small muted palette for differentiating currency cards — deliberately NOT
 // the bright per-brand colors used for subscription rows elsewhere, since these
 // are "wallet" cards representing your own money, not third-party brands.
 const CARD_COLORS = ['#2F6F5E', '#B08D57', '#3A5568', '#6B4C3A', '#4A5D4E'];
-
-function CountUp({ target }: { target: number }) {
-  const [display, setDisplay] = useState(0);
-
-  useEffect(() => {
-    const controls = animate(0, target, {
-      duration: 0.6,
-      ease: 'easeOut',
-      onUpdate: (value) => setDisplay(value),
-    });
-    return () => controls.stop();
-  }, [target]);
-
-  return display;
-}
 
 interface StackCardProps {
   currency: string;
@@ -38,6 +19,7 @@ interface StackCardProps {
   index: number;
   total: number;
   onDragEnd: (offsetY: number, index: number) => void;
+  onActivate: () => void;
 }
 
 function StackCard({
@@ -47,6 +29,7 @@ function StackCard({
   index,
   total,
   onDragEnd,
+  onActivate,
 }: StackCardProps) {
   const yMotion = useMotionValue(0);
   const offset = index * 14;
@@ -72,6 +55,19 @@ function StackCard({
       whileHover={{ scale: scale + 0.02 }}
       whileTap={{ scale: Math.max(scale - 0.03, 0.9) }}
       transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+      // Reordering was drag-only, which made the currency switcher completely
+      // inoperable without a pointer. Click and Enter/Space now cycle the stack
+      // too, so it works from the keyboard and for anyone who can't drag.
+      role='button'
+      tabIndex={0}
+      aria-label={`${currency}: ${formatMoney(amount, currency)}. Activate to bring the next currency forward.`}
+      onClick={onActivate}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onActivate();
+        }
+      }}
       className='absolute left-1/2 top-0 flex h-20 w-[92%] -translate-x-1/2 cursor-grab items-center justify-between rounded-2xl px-5 text-paper shadow-md active:cursor-grabbing'
     >
       <span className='text-sm font-medium'>{currency}</span>
@@ -99,34 +95,41 @@ export function BleedWallet({
 
   const [stack, setStack] = useState<string[]>([]);
 
-  // Keep the stack's currency list in sync as subscriptions change, without
-  // resetting the user's current front-of-stack choice unnecessarily.
-  useEffect(() => {
-    const currencies = Object.keys(totalsByCurrency);
-    setStack((prev) => {
-      const stillValid = prev.filter((c) => currencies.includes(c));
-      const missing = currencies.filter((c) => !prev.includes(c));
-      return [...stillValid, ...missing];
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subscriptions]);
+  // Keep the stack's currency list in step with the data as subscriptions
+  // change, without resetting the user's current front-of-stack choice.
+  //
+  // Derived, not synced in an effect. `stack` holds only the user's chosen
+  // ORDER; which currencies actually exist comes from the data every render.
+  // The previous version wrote this into state from inside a useEffect, which
+  // cascades an extra render on every data change (and is the
+  // react-hooks/set-state-in-effect error).
+  const currencies = Object.keys(totalsByCurrency);
+  const orderedCurrencies = [
+    ...stack.filter((c) => currencies.includes(c)),
+    ...currencies.filter((c) => !stack.includes(c)),
+  ];
 
+  // Both write the FULL derived order back into state, so `stack` always
+  // stays a complete, valid ordering of the currencies that currently exist.
   function moveTopToBack() {
-    setStack((prev) => [...prev.slice(1), prev[0]]);
+    setStack([...orderedCurrencies.slice(1), orderedCurrencies[0]]);
   }
   function moveBackToTop() {
-    setStack((prev) => [prev[prev.length - 1], ...prev.slice(0, -1)]);
+    setStack([
+      orderedCurrencies[orderedCurrencies.length - 1],
+      ...orderedCurrencies.slice(0, -1),
+    ]);
   }
   function handleDragEnd(offsetY: number, index: number) {
     if (index === 0 && offsetY < -16) moveTopToBack();
-    if (index === stack.length - 1 && offsetY > 16) moveBackToTop();
+    if (index === orderedCurrencies.length - 1 && offsetY > 16) moveBackToTop();
   }
 
-  const frontCurrency = stack[0];
+  const frontCurrency = orderedCurrencies[0];
   const frontTotal = frontCurrency ? totalsByCurrency[frontCurrency] : 0;
-  const displayValue = CountUp({ target: hidden ? 0 : frontTotal });
+  const displayValue = useCountUp(hidden ? 0 : frontTotal, 0.6);
 
-  if (stack.length === 0) {
+  if (orderedCurrencies.length === 0) {
     return (
       <div className='w-full rounded-2xl bg-pine px-6 py-6 text-left'>
         <p className='text-xs uppercase tracking-wide text-paper/60'>
@@ -142,18 +145,19 @@ export function BleedWallet({
       {/* Card stack — only rendered above the wallet body when there's more than
           one currency to browse between. A single currency has nothing to drag
           to, so it skips straight to a plain card. */}
-      {stack.length > 1 && (
+      {orderedCurrencies.length > 1 && (
         <div className='relative z-10 h-16 px-1'>
           <AnimatePresence>
-            {stack.map((currency, index) => (
+            {orderedCurrencies.map((currency, index) => (
               <StackCard
                 key={currency}
                 currency={currency}
                 amount={totalsByCurrency[currency]}
                 color={CARD_COLORS[index % CARD_COLORS.length]}
                 index={index}
-                total={stack.length}
+                total={orderedCurrencies.length}
                 onDragEnd={handleDragEnd}
+                onActivate={moveTopToBack}
               />
             ))}
           </AnimatePresence>
@@ -162,7 +166,7 @@ export function BleedWallet({
 
       <div
         className={`flex flex-col items-center gap-1 rounded-2xl border border-dashed border-paper/30 bg-pine px-6 py-6 text-center ${
-          stack.length > 1 ? 'mt-4' : ''
+          orderedCurrencies.length > 1 ? 'mt-4' : ''
         }`}
       >
         <p className='font-mono text-4xl tabular-nums text-paper'>
@@ -170,7 +174,8 @@ export function BleedWallet({
         </p>
         <p className='text-xs uppercase tracking-wide text-paper/60'>
           {frontCurrency} monthly bleed
-          {stack.length > 1 && ` · ${stack.length} currencies`}
+          {orderedCurrencies.length > 1 &&
+            ` · ${orderedCurrencies.length} currencies`}
         </p>
 
         <button

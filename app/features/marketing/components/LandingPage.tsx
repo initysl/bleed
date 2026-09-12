@@ -27,9 +27,17 @@ interface FeatureItem {
   readonly title: string;
   readonly description: string;
   readonly tag: string;
+  // The interface was declared but never applied to FEATURE_LIST, so it drifted
+  // out of step with the data and lint flagged it as unused. Applying it means
+  // the next field added to an entry has to be declared here too.
+  readonly theme: {
+    readonly bg: string;
+    readonly hoverText: string;
+    readonly hoverGlow: string;
+  };
 }
 
-const FEATURE_LIST = [
+const FEATURE_LIST: readonly FeatureItem[] = [
   {
     id: 'frictionless-logging',
     icon: <FiMail className='w-5 h-5' />,
@@ -61,7 +69,7 @@ const FEATURE_LIST = [
     icon: <FiBell className='w-5 h-5' />,
     title: 'Proactive Nudges',
     description:
-      'Get email and push notifications days before your card is charged: "Netflix renews in 3 days — $15.49/mo. Cancel or keep?"',
+      'Get email and push notifications days before your card is charged: &ldquo;Netflix renews in 3 days — $15.49/mo. Cancel or keep?&rdquo;',
     tag: 'Smart Alerts',
     theme: {
       bg: 'bg-amber-50 text-amber-600',
@@ -322,10 +330,10 @@ export default function BleedLandingPage({
                 className='absolute -bottom-6 -left-6 z-20 bg-white p-4 rounded-2xl border border-zinc-200 shadow-xl max-w-65 space-y-2'
               >
                 <div className='flex items-center gap-2 text-emerald-800 text-xs font-bold uppercase tracking-wider'>
-                  <FiBell className='w-4 h-4 animate-ping' /> Proactive Nudge
+                  <FiBell className='w-4 h-4' aria-hidden='true' /> Proactive Nudge
                 </div>
                 <p className='text-xs text-zinc-700 font-medium leading-snug'>
-                  "Netflix renews in 3 days — $15.49/mo. Cancel or keep?"
+                  &ldquo;Netflix renews in 3 days — $15.49/mo. Cancel or keep?&rdquo;
                 </p>
               </motion.div>
             </div>
@@ -350,7 +358,7 @@ export default function BleedLandingPage({
               How Bleed Operates
             </h2>
             <h3 className='font-display text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight'>
-              Turn "forgot I was paying for this" into timely decisions.
+              Turn &ldquo;forgot I was paying for this&rdquo; into timely decisions.
             </h3>
             <p className='font-display text-zinc-600 text-base sm:text-lg'>
               Designed from the ground up to eliminate repetitive management and

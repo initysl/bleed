@@ -1,8 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { subscriptionCreateSchema } from '@/app/features/subscriptions/schema';
 import { checkRateLimit, createSubscriptionLimiter } from '@/lib/rate-limit';
-import z from 'zod';
+import {
+  apiError,
+  apiOk,
+  readJson,
+  serverError,
+  unauthorized,
+  validationError,
+} from '@/lib/api/response';
 
 // GET — list the current user's subscriptions. Added specifically so TanStack Query
 // has something to refetch from after a mutation invalidates its cache; the initial
@@ -14,12 +21,7 @@ export async function GET() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    return NextResponse.json(
-      { ok: false, error: 'unauthorized' },
-      { status: 401 },
-    );
-  }
+  if (!user) return unauthorized();
 
   // RLS scopes this to the current user automatically.
   const { data, error } = await supabase
@@ -27,14 +29,9 @@ export async function GET() {
     .select('*')
     .order('monthly_equivalent', { ascending: false });
 
-  if (error) {
-    return NextResponse.json(
-      { ok: false, error: error.message },
-      { status: 500 },
-    );
-  }
+  if (error) return serverError('listing subscriptions', error);
 
-  return NextResponse.json({ ok: true, data });
+  return apiOk(data);
 }
 
 export async function POST(req: NextRequest) {
@@ -44,12 +41,7 @@ export async function POST(req: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    return NextResponse.json(
-      { ok: false, error: 'unauthorized' },
-      { status: 401 },
-    );
-  }
+  if (!user) return unauthorized();
 
   const rateLimitResponse = await checkRateLimit(
     createSubscriptionLimiter,
@@ -57,18 +49,12 @@ export async function POST(req: NextRequest) {
   );
   if (rateLimitResponse) return rateLimitResponse;
 
-  const body = await req.json();
+  const body = await readJson(req);
+  if (body === null) return apiError('Expected a JSON body.', 400);
+
   const parsed = subscriptionCreateSchema.safeParse(body);
 
-  if (!parsed.success) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: z.treeifyError(parsed.error),
-      },
-      { status: 400 },
-    );
-  }
+  if (!parsed.success) return validationError(parsed.error);
 
   // No need to pass user_id explicitly — the column default (auth.uid()) fills it
   // in from this request's session, and the RLS "with check" clause enforces it.
@@ -82,12 +68,7 @@ export async function POST(req: NextRequest) {
     source: 'manual',
   });
 
-  if (error) {
-    return NextResponse.json(
-      { ok: false, error: error.message },
-      { status: 500 },
-    );
-  }
+  if (error) return serverError('creating subscription', error);
 
-  return NextResponse.json({ ok: true });
+  return apiOk();
 }

@@ -105,18 +105,29 @@ export function EmptyState({ inboxAddress }: { inboxAddress: string }) {
           </motion.div>
 
           <motion.div variants={item} className='w-full'>
-            {showForm ? (
-              <Modal open={showForm} onClose={() => setShowForm(false)}>
-                <SubscriptionForm onDone={() => setShowForm(false)} />
-              </Modal>
-            ) : (
-              <button
-                onClick={() => setShowForm(true)}
-                className='font-mini text-sm text-ink/50 underline decoration-ink/20 underline-offset-4 hover:text-ink/70 transition-colors'
-              >
-                Or add one manually
-              </button>
-            )}
+            {/* The Modal is rendered unconditionally and gated by `open`, not
+                mounted only while open. Unmounting it removed the element
+                AnimatePresence needs to animate out, so this modal vanished
+                instantly while the identical one in Dashboard faded — same
+                component, two different behaviours. The button stays visible
+                underneath, which is also what the Modal's focus-restore
+                expects to return focus to. */}
+            <button
+              type='button'
+              onClick={() => setShowForm(true)}
+              className='font-mini text-sm text-ink/70 underline decoration-ink/30 underline-offset-4 transition-colors hover:text-ink'
+            >
+              Or add one manually
+            </button>
+            <Modal
+              open={showForm}
+              onClose={() => setShowForm(false)}
+              // Was omitted, so aria-label resolved to undefined and this was
+              // an aria-modal dialog with no accessible name at all.
+              title='Add a subscription'
+            >
+              <SubscriptionForm onDone={() => setShowForm(false)} />
+            </Modal>
           </motion.div>
         </div>
 

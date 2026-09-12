@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
@@ -10,7 +10,9 @@ import type { Subscription } from '@/app/features/subscriptions/types';
 import { useNeedsReview } from '@/app/features/needs-review/hooks/useNeedsReview';
 import { useSubscriptions } from '@/app/features/subscriptions/hooks/useSubscriptions';
 import { Modal } from '@/app/components/ui/Modal';
+import { useDialogBehavior } from '@/app/components/ui/useDialogBehavior';
 import { InboxAddress } from '@/app/features/inbox/components/InboxAddress';
+import { EnableNotifications } from '@/app/features/notifications/components/EnableNotifications';
 import { NeedsReviewList } from '@/app/features/needs-review/components/NeedsReviewList';
 import { BleedTotal } from './BleedTotal';
 import { SubscriptionForm } from './SubscriptionForm';
@@ -29,6 +31,16 @@ export function Dashboard({
   const shouldReduceMotion = useReducedMotion();
   const [showForm, setShowForm] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // Lifted out of SubscriptionList so UpcomingStrip can open an editor too.
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Escape, focus trap, initial focus, focus restoration and scroll lock —
+  // the same behaviour the Modal gets, from the same hook.
+  const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
+  const drawerRef = useDialogBehavior<HTMLElement>(
+    mobileMenuOpen,
+    closeMobileMenu,
+  );
 
   const { data: subscriptions } = useSubscriptions(initialSubscriptions);
   const { data: needsReview } = useNeedsReview(initialNeedsReview);
@@ -121,8 +133,9 @@ export function Dashboard({
           <button
             type='button'
             onClick={() => setMobileMenuOpen(true)}
-            className='inline-flex items-center justify-center rounded-full  bg-white p-2.5 text-ink/80 shadow-xs transition-all active:scale-95'
             aria-label='Open navigation menu'
+            aria-expanded={mobileMenuOpen}
+            className='inline-flex items-center justify-center rounded-full border border-sage/60 bg-white p-2.5 text-ink/80 shadow-xs transition-all active:scale-95'
           >
             <FiMenu size={20} />
           </button>
@@ -145,11 +158,23 @@ export function Dashboard({
 
             {/* Sliding Panel from Right */}
             <motion.aside
+              ref={drawerRef}
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className='fixed top-0 right-0 bottom-0 z-50 flex w-4/5 max-w-xs flex-col justify-between border-l border-sage/60 bg-white p-6 shadow-2xl sm:hidden'
+              transition={
+                shouldReduceMotion
+                  ? { duration: 0 }
+                  : { type: 'spring', damping: 25, stiffness: 220 }
+              }
+              // This drawer is as modal as the Modal is, and needs to say so.
+              // It previously had no role, no Escape handler, no scroll lock
+              // and no focus management at all.
+              role='dialog'
+              aria-modal='true'
+              aria-label='Navigation menu'
+              tabIndex={-1}
+              className='fixed top-0 right-0 bottom-0 z-50 flex w-4/5 max-w-xs flex-col justify-between border-l border-sage/60 bg-white p-6 shadow-2xl outline-none sm:hidden'
             >
               {/* Drawer Header with Close Icon */}
               <div className='space-y-6'>
@@ -233,14 +258,29 @@ export function Dashboard({
         >
           <BleedTotal subscriptions={subscriptions} />
 
-          <UpcomingStrip subscriptions={subscriptions} />
+          {/* Clicking a card opens that subscription's editor in the list —
+              the point of the strip is to act on something about to renew. */}
+          <UpcomingStrip
+            subscriptions={subscriptions}
+            onSelect={(sub) => setEditingId(sub.id)}
+          />
 
           <InboxAddress address={inboxAddress} />
+
+          {/* Push is the product's headline feature, and this prompt only ever
+              rendered inside EmptyState — so once a user had a single
+              subscription they never saw it again outside Settings. It returns
+              null once permission is granted, so it costs nothing here. */}
+          <EnableNotifications />
         </motion.aside>
 
         {/* Right Content */}
         <motion.section variants={item} className='min-w-0'>
-          <SubscriptionList subscriptions={subscriptions} />
+          <SubscriptionList
+            subscriptions={subscriptions}
+            editingId={editingId}
+            onEditingChange={setEditingId}
+          />
         </motion.section>
       </div>
     </motion.main>

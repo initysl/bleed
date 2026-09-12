@@ -38,7 +38,7 @@ export function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
   if (sentTo) {
     return (
       <p className='font-display text-sm text-ink/60'>
-        Check {sentTo} for a confirmation link. Your email won't change until
+        Check {sentTo} for a confirmation link. Your email won&apos;t change until
         you click it.
       </p>
     );
@@ -65,7 +65,7 @@ export function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
                 placeholder={currentEmail}
-                className='font-mini rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink outline-none focus:border-pine'
+                className='font-mini rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink focus:border-pine'
               />
               {error && <span className='text-xs text-rust'>{error}</span>}
             </label>

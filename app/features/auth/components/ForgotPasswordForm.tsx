@@ -77,7 +77,7 @@ export function ForgotPasswordForm() {
           <p className='mt-2 font-medium text-pine'>{sentTo}</p>
 
           <p className='mt-4 text-sm text-ink/55'>
-            we've sent instructions to reset your password.
+            we&apos;ve sent instructions to reset your password.
           </p>
 
           <Link
@@ -114,7 +114,7 @@ export function ForgotPasswordForm() {
           <Image src={Logo} alt='Bleed logo' width={150} priority={true} />
         </div>
         <p className='font-display mt-3 text-sm leading-6 text-ink/60'>
-          Enter your email and we'll send you a secure link to reset your
+          Enter your email and we&apos;ll send you a secure link to reset your
           password.
         </p>
       </div>
@@ -139,7 +139,7 @@ export function ForgotPasswordForm() {
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  className='font-display h-14 w-full rounded-full border border-sage/50 bg-paper px-5 text-sm outline-none transition focus:border-pine focus:ring-4 focus:ring-pine/10'
+                  className='font-display h-14 w-full rounded-full border border-sage/50 bg-paper px-5 text-sm transition focus:border-pine focus:ring-4 focus:ring-pine/10'
                 />
 
                 {error && <p className='mt-2 text-xs text-rust'>{error}</p>}

@@ -13,19 +13,106 @@
   --font-mini: var(--font-quantico), sans-serif;
 }
 
+html {
+  scroll-behavior: smooth;
+
+  /* The app has no dark theme. Declaring the scheme explicitly stops the
+     browser rendering its own controls dark: without this, a visitor whose OS
+     is in dark mode got dark <select>, <input type="date"> and
+     <input type="datetime-local"> widgets sitting inside white cards, and the
+     datetime picker in particular was close to unreadable. */
+  color-scheme: light;
+}
+
 body {
   background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-body);
 }
 
-html {
-  scroll-behavior: smooth;
+/* ---------------------------------------------------------------------------
+   Focus visibility
+
+   Of the focus-related declarations previously in the app, all but two were
+   `outline-none` on an input paired with `focus:border-pine` — a 1px border
+   moving from #DCE5E0 to #2F6F5E, which is not a sufficient non-text contrast
+   change under WCAG 2.4.11. Everything else relied on the browser default,
+   which those same rules had already removed elsewhere.
+
+   One rule here restores a consistent, visible indicator for every interactive
+   element at once, instead of needing a utility class remembered per call site.
+   :focus-visible (not :focus) means it appears for keyboard and programmatic
+   focus without drawing a ring on every mouse click.
+--------------------------------------------------------------------------- */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-pine);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
-/* Optional: Respect user motion preferences */
+/* On the rust-coloured destructive controls a pine ring reads as unrelated. */
+:where(.focus-ring-rust):focus-visible {
+  outline-color: var(--color-rust);
+}
+
+/* ---------------------------------------------------------------------------
+   Scrollbars
+
+   `scrollbar-none` and `scrollbar-thin` were already in use in three places,
+   but they come from the `tailwind-scrollbar` plugin, which is not installed
+   and was never registered here — so all of them were silently no-ops and the
+   horizontal currency strip and settings nav showed full-height native bars.
+   Defining them as real utilities is less disruptive than removing the class
+   names from the markup.
+--------------------------------------------------------------------------- */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-pine) 65%, transparent)
+    transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: color-mix(in srgb, var(--color-pine) 65%, transparent);
+    border-radius: 3px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Motion preferences
+--------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  /* framer-motion's useReducedMotion only covers components that ask for it,
+     and nothing in JS touches the ~40 CSS transitions and the infinite
+     `animate-ping` in the marketing page. This collapses all of them.
+     Durations are near-zero rather than zero so transitionend/animationend
+     listeners still fire. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

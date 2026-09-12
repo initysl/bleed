@@ -58,7 +58,7 @@ export function ChangePasswordForm() {
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
-                className='font-mini rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink outline-none focus:border-pine'
+                className='font-mini rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink focus:border-pine'
               />
               {error && <span className='text-xs text-rust'>{error}</span>}
             </label>
@@ -78,7 +78,7 @@ export function ChangePasswordForm() {
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
-                className='font-mini rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink outline-none focus:border-pine'
+                className='font-mini rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink focus:border-pine'
               />
               {error && <span className='text-xs text-rust'>{error}</span>}
             </label>

@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { apiOk, serverError, unauthorized } from '@/lib/api/response';
 
 // GET — list the current user's unresolved needs-review items.
 export async function GET() {
@@ -9,12 +9,7 @@ export async function GET() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    return NextResponse.json(
-      { ok: false, error: 'unauthorized' },
-      { status: 401 },
-    );
-  }
+  if (!user) return unauthorized();
 
   const { data, error } = await supabase
     .from('needs_review')
@@ -22,12 +17,7 @@ export async function GET() {
     .eq('resolved', false)
     .order('created_at', { ascending: false });
 
-  if (error) {
-    return NextResponse.json(
-      { ok: false, error: error.message },
-      { status: 500 },
-    );
-  }
+  if (error) return serverError('listing needs-review items', error);
 
-  return NextResponse.json({ ok: true, data });
+  return apiOk(data);
 }
