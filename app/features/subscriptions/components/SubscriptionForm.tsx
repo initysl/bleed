@@ -149,8 +149,8 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
           // but entirely invisible to a screen reader.
           const msgId = `${errorId}-name`;
           return (
-            <label className='flex flex-col gap-1 text-sm text-ink font-mono'>
-              Name
+            <label className='flex flex-col gap-1.5'>
+              <span className='font-mono text-label tracking-[0.14em] text-ink/55'>SERVICE</span>
               <input
                 type='text'
                 value={field.state.value}
@@ -159,10 +159,10 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
                 placeholder='Netflix'
                 aria-invalid={error ? true : undefined}
                 aria-describedby={error ? msgId : undefined}
-                className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink focus:border-pine'
+                className='w-full rounded-sm border border-line bg-sunken px-3 py-2.5 text-[15px] text-ink transition-colors hover:border-line-strong focus:border-pine focus:bg-surface'
               />
               {error && (
-                <span id={msgId} className='text-xs text-rust'>
+                <span id={msgId} className='font-mono text-[11px] text-rust'>
                   {error}
                 </span>
               )}
@@ -180,8 +180,8 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
 
               const msgId = `${errorId}-price`;
               return (
-                <label className='flex flex-1 flex-col gap-1 text-sm text-ink'>
-                  Price
+                <label className='flex flex-1 flex-col gap-1.5'>
+                  <span className='font-mono text-label tracking-[0.14em] text-ink/55'>PRICE</span>
                   <input
                     type='number'
                     step='0.01'
@@ -207,10 +207,10 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
                     placeholder='15.49'
                     aria-invalid={error ? true : undefined}
                     aria-describedby={error ? msgId : undefined}
-                    className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink focus:border-pine'
+                    className='w-full rounded-sm border border-line bg-sunken px-3 py-2.5 font-mono text-[14px] text-ink transition-colors hover:border-line-strong focus:border-pine focus:bg-surface'
                   />
                   {error && (
-                    <span id={msgId} className='text-xs text-rust'>
+                    <span id={msgId} className='font-mono text-[11px] text-rust'>
                       {error}
                     </span>
                   )}
@@ -221,12 +221,12 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
 
           <form.Field name='currency'>
             {(field) => (
-              <label className='flex w-28 flex-col gap-1 text-sm text-ink'>
-                Currency
+              <label className='flex w-28 flex-col gap-1.5'>
+                <span className='font-mono text-label tracking-[0.14em] text-ink/55'>CURRENCY</span>
                 <select
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink focus:border-pine'
+                  className='w-full rounded-sm border border-line bg-sunken px-3 py-2.5 font-mono text-[14px] text-ink transition-colors hover:border-line-strong focus:border-pine focus:bg-surface'
                 >
                   {CURRENCIES.map((c) => (
                     <option key={c} value={c}>
@@ -242,14 +242,14 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
         {/* Billing Cycle */}
         <form.Field name='billing_cycle'>
           {(field) => (
-            <label className='flex flex-col gap-1 text-sm text-ink'>
-              Cycle
+            <label className='flex flex-col gap-1.5'>
+                <span className='font-mono text-label tracking-[0.14em] text-ink/55'>BILLING CYCLE</span>
               <select
                 value={field.state.value}
                 onChange={(e) =>
                   field.handleChange(e.target.value as 'monthly' | 'yearly')
                 }
-                className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink focus:border-pine'
+                className='w-full rounded-sm border border-line bg-sunken px-3 py-2.5 text-[15px] text-ink transition-colors hover:border-line-strong focus:border-pine focus:bg-surface'
               >
                 <option value='monthly'>Monthly</option>
                 <option value='yearly'>Yearly</option>
@@ -262,7 +262,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
       <form.Field name='renewal_date'>
         {(field) => (
           <label className='flex flex-col gap-1 text-sm text-ink font-mono'>
-            Renewal date
+            <span className='font-mono text-label tracking-[0.14em] text-ink/55'>NEXT RENEWAL</span>
             <input
               type='date'
               value={field.state.value}
@@ -284,7 +284,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
                 }
               }}
               onBlur={field.handleBlur}
-              className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink focus:border-pine'
+              className='w-full rounded-sm border border-line bg-sunken px-3 py-2.5 font-mono text-[14px] text-ink transition-colors hover:border-line-strong focus:border-pine focus:bg-surface'
             />
           </label>
         )}
@@ -321,7 +321,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
                         }}
                       />
                       {channelError && (
-                        <span className='text-xs text-rust'>
+                        <span className='font-mono text-[11px] text-rust'>
                           {channelError}
                         </span>
                       )}
@@ -342,7 +342,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
           id={errorId}
           role='alert'
           aria-live='assertive'
-          className='flex items-start gap-2 rounded-md border border-rust/40 bg-rust/10 px-3 py-2 text-sm text-rust'
+          className='flex items-start gap-2 rounded-sm border border-rust-line bg-rust-tint px-3 py-2.5 text-[13px] leading-snug text-rust'
         >
           <FiAlertCircle className='mt-0.5 h-4 w-4 shrink-0' aria-hidden='true' />
           <span>{submitError}</span>
@@ -359,7 +359,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
               disabled={!canSubmit || busy}
               aria-busy={isSubmitting || submitting}
               aria-describedby={submitError ? errorId : undefined}
-              className='flex-1 rounded-md bg-pine px-4 py-2 text-sm font-medium font-body text-paper transition-colors hover:bg-pine/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pine disabled:opacity-60'
+              className='flex-1 cursor-pointer rounded-sm border-0 bg-pine px-4 py-3 font-mono text-[11px] tracking-[0.12em] text-paper transition-colors hover:bg-pine-hover disabled:cursor-not-allowed disabled:opacity-60'
             >
               {isSubmitting || submitting
                 ? 'Saving…'
@@ -378,10 +378,10 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
             // `busy` rather than `submitting || deleting` so a delete can't be
             // triggered while a save is already in flight.
             disabled={busy}
-            className={`flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium font-body transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-60 ${
+            className={`focus-rust flex cursor-pointer items-center gap-1.5 rounded-sm border px-4 py-3 font-mono text-[11px] tracking-[0.1em] transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
               confirmingDelete
-                ? 'border-rust bg-rust text-paper hover:bg-rust/90 focus-visible:outline-rust'
-                : 'border-rust text-rust hover:bg-rust/10 focus-visible:outline-rust'
+                ? 'border-rust bg-rust text-paper'
+                : 'border-rust bg-transparent text-rust hover:bg-rust-tint'
             }`}
           >
             <FiTrash2 className='h-4 w-4' aria-hidden='true' />

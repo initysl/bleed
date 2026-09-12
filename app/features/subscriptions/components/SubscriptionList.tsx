@@ -2,27 +2,35 @@
 
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FiChevronDown } from 'react-icons/fi';
 
 import { SubscriptionForm } from './SubscriptionForm';
 import { getBrandStyle } from '@/lib/utils/brandColors';
 import { formatMoney } from '@/lib/utils/currency';
 import { formatDate, parseDateOnly } from '@/lib/utils/dates';
+import { SPRING, unfold, EASE_OUT_EXPO, DURATION } from '@/lib/motion';
 
 import type { Subscription } from '../types';
 
 const UNUSED_THRESHOLD_DAYS = 60;
 
+export type LedgerSort = 'cost' | 'renewal';
+
+const SORTS: { id: LedgerSort; label: string }[] = [
+  { id: 'cost', label: 'COST ↓' },
+  { id: 'renewal', label: 'RENEWAL' },
+];
+
+/** Shared by the header rule and every row, so columns cannot drift apart. */
+const COLUMNS =
+  'grid-cols-[minmax(0,1fr)_96px_132px_128px_20px] gap-4';
+
 function isLikelyUnused(sub: Subscription): boolean {
   if (!sub.last_used_at) return false;
-
-  // last_used_at is a `date` column, so it must be read as a local calendar day
-  // rather than as UTC midnight — see parseDateOnly.
-  const daysSinceUse =
-    (Date.now() - parseDateOnly(sub.last_used_at).getTime()) /
-    (1000 * 60 * 60 * 24);
-
-  return daysSinceUse > UNUSED_THRESHOLD_DAYS;
+  // last_used_at is a `date` column, so it must be read as a local calendar
+  // day rather than as UTC midnight — see parseDateOnly.
+  const days =
+    (Date.now() - parseDateOnly(sub.last_used_at).getTime()) / 86_400_000;
+  return days > UNUSED_THRESHOLD_DAYS;
 }
 
 export function SubscriptionList({
@@ -31,179 +39,175 @@ export function SubscriptionList({
   onEditingChange,
 }: {
   subscriptions: Subscription[];
-  // Optional controlled mode, so a sibling (UpcomingStrip) can open an editor.
-  // Uncontrolled by default, which keeps every existing call site working.
+  /** Optional controlled mode, so UpcomingStrip can open a row. */
   editingId?: string | null;
   onEditingChange?: (id: string | null) => void;
 }) {
-  const [uncontrolledEditingId, setUncontrolledEditingId] = useState<
-    string | null
-  >(null);
+  const [uncontrolledId, setUncontrolledId] = useState<string | null>(null);
+  const [sort, setSort] = useState<LedgerSort>('cost');
 
   const isControlled = onEditingChange !== undefined;
-  const editingId = isControlled ? controlledEditingId : uncontrolledEditingId;
-  const setEditingId = isControlled
-    ? onEditingChange
-    : setUncontrolledEditingId;
+  const editingId = isControlled ? controlledEditingId : uncontrolledId;
+  const setEditingId = isControlled ? onEditingChange : setUncontrolledId;
 
-  const sorted = [...subscriptions].sort(
-    (a, b) => b.monthly_equivalent - a.monthly_equivalent,
+  const sorted = [...subscriptions].sort((a, b) =>
+    sort === 'cost'
+      ? b.monthly_equivalent - a.monthly_equivalent
+      : parseDateOnly(a.renewal_date).getTime() -
+        parseDateOnly(b.renewal_date).getTime(),
   );
 
-  return (
-    // A real list, so assistive tech announces how many subscriptions there are
-    // and lets the user jump between them. This was a div of divs.
-    <ul className='flex list-none flex-col gap-3 p-0'>
-      {sorted.map((sub) => {
-        const isEditing = editingId === sub.id;
-        const style = getBrandStyle(sub.name);
-        const unused = isLikelyUnused(sub);
+  const fromEmail = subscriptions.filter((s) => s.source === 'email').length;
 
-        return (
-          <motion.li
-            layout
-            key={sub.id}
-            transition={{
-              layout: {
-                duration: 0.25,
-                ease: 'easeInOut',
-              },
-            }}
-            // `border` is required for any border-* colour to render: Tailwind
-            // v4's preflight sets `border: 0 solid` on every element, so the
-            // colour utilities below were silently doing nothing and every card
-            // drew borderless. The editing state's border-ink/20 in particular
-            // never appeared — only its ring did.
-            className={`overflow-hidden rounded-2xl border bg-white transition-all duration-200 ${
-              isEditing
-                ? 'border-ink/20 shadow-md ring-1 ring-ink/10'
-                : 'border-sage/60 shadow-sm hover:border-sage/80 hover:shadow'
-            }`}
-          >
-            {/* Clickable Header Row */}
-            <button
-              type='button'
-              onClick={() => setEditingId(isEditing ? null : sub.id)}
-              // Without these, a screen reader announced this as a plain button
-              // and gave no indication that it toggles an edit panel or whether
-              // that panel is currently open.
-              aria-expanded={isEditing}
-              aria-controls={`sub-editor-${sub.id}`}
-              className='w-full text-left transition-colors hover:bg-sage/10 p-4 sm:p-5'
+  return (
+    <section className='w-full self-start rounded-sm border border-line bg-surface'>
+      <div className='flex items-center justify-between p-[22px] pb-4'>
+        <h3 className='section-label m-0'>
+          <span className='text-pine'>04</span>&nbsp; LEDGER
+        </h3>
+
+        <div className='flex gap-1.5'>
+          {SORTS.map((option) => {
+            const on = sort === option.id;
+            return (
+              <button
+                key={option.id}
+                type='button'
+                aria-pressed={on}
+                onClick={() => setSort(option.id)}
+                className={`cursor-pointer rounded-sm border px-2.5 py-1.5 font-mono text-[10px] tracking-[0.08em] transition-colors duration-150 ${
+                  on
+                    ? 'border-line bg-surface text-ink'
+                    : 'border-transparent bg-transparent text-ink/50 hover:text-ink'
+                }`}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div
+        className={`grid ${COLUMNS} border-b border-line px-[22px] pb-2.5 font-mono text-[10px] tracking-[0.12em] text-ink/40`}
+      >
+        <span>SERVICE</span>
+        <span>CYCLE</span>
+        <span>RENEWS</span>
+        <span className='text-right'>MONTHLY</span>
+        <span />
+      </div>
+
+      {/* `layout` on each row is what makes re-sorting legible: rows travel to
+          their new position instead of the list blinking into a different
+          order, so you can see WHERE a subscription went. This is the one
+          thing here that CSS genuinely cannot do. */}
+      <ul className='m-0 flex list-none flex-col p-0'>
+        {sorted.map((sub) => {
+          const open = editingId === sub.id;
+          const style = getBrandStyle(sub.name);
+          const unused = isLikelyUnused(sub);
+          const panelId = `ledger-row-${sub.id}`;
+
+          return (
+            <motion.li
+              key={sub.id}
+              layout
+              transition={{ layout: { duration: 0.32, ease: EASE_OUT_EXPO } }}
+              className='border-b border-line-soft'
             >
-              <div className='flex items-center justify-between gap-4'>
-                {/* Left Side: Avatar & Name/Metadata */}
-                <div className='flex items-center gap-3.5 min-w-0'>
-                  {/* Brand Avatar / Badge */}
-                  <div
-                    // getBrandStyle returns `text: 'light' | 'dark'` precisely
-                    // so the glyph can contrast with the brand colour, and
-                    // UpcomingStrip already honours it — this one hardcoded
-                    // text-white, so the five brands declared 'dark' rendered
-                    // white on a bright background: Hulu at roughly 1.6:1,
-                    // Spotify and Amazon at 2.2:1. The letter was unreadable.
+              <motion.button
+                type='button'
+                onClick={() => setEditingId(open ? null : sub.id)}
+                aria-expanded={open}
+                aria-controls={panelId}
+                whileTap={{ y: 1 }}
+                transition={{ duration: DURATION.press }}
+                className={`group relative grid w-full ${COLUMNS} cursor-pointer items-center border-0 bg-transparent px-[22px] py-3.5 text-left text-ink transition-colors duration-150 ${
+                  open ? 'bg-surface' : 'hover:bg-sunken'
+                }`}
+              >
+                {/* Accent edge: armed on hover, locked on while open. */}
+                <span
+                  aria-hidden='true'
+                  className={`absolute inset-y-0 left-0 w-0.5 origin-center bg-pine transition-transform duration-200 ease-[var(--ease-out-expo)] ${
+                    open ? 'scale-y-100' : 'scale-y-0 group-hover:scale-y-100'
+                  }`}
+                />
+
+                <span className='flex min-w-0 items-center gap-3'>
+                  <span
+                    aria-hidden='true'
+                    className='flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-sm font-mono text-[11px] font-bold'
                     style={{
                       backgroundColor: style.bg,
+                      // getBrandStyle declares this precisely so the glyph can
+                      // contrast with the brand colour. Hardcoding white put
+                      // Hulu at ~1.6:1 and Spotify at ~2.2:1.
                       color: style.text === 'dark' ? '#1C2321' : '#FFFFFF',
                     }}
-                    className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold shadow-sm font-mono'
-                    aria-hidden='true'
                   >
                     {sub.name.charAt(0).toUpperCase()}
-                  </div>
-
-                  {/* Title and Pills */}
-                  <div className='min-w-0 space-y-1'>
-                    <div className='flex items-center gap-2'>
-                      <h3 className='text-sm font-medium text-ink font-display truncate'>
-                        {sub.name}
-                      </h3>
-
-                      {unused && (
-                        <span className='inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200/60 px-2 py-0.5 text-[10px] font-mono font-medium text-amber-700'>
-                          <span className='h-1.5 w-1.5 rounded-full bg-amber-500' />
-                          Unused
-                        </span>
-                      )}
-                    </div>
-
-                    <div className='text-xs font-mono text-ink/50'>
-                      <span>Renews {formatDate(sub.renewal_date)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Side: Cost & Chevron */}
-                <div className='flex items-center gap-3 shrink-0'>
-                  <div className='text-right'>
-                    <span className='font-display text-base sm:text-lg font-medium text-ink tabular-nums block'>
-                      {formatMoney(sub.monthly_equivalent, sub.currency)}
+                  </span>
+                  <span className='truncate text-[14px]'>{sub.name}</span>
+                  {unused && (
+                    <span className='shrink-0 rounded-xs bg-rust-tint px-1.5 py-0.5 font-mono text-tag text-rust'>
+                      UNUSED
                     </span>
-                    <span className='text-[10px] font-mono text-ink/40 block'>
-                      /month
-                    </span>
-                  </div>
+                  )}
+                </span>
 
-                  <motion.div
-                    animate={{ rotate: isEditing ? 180 : 0 }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 350,
-                      damping: 22,
-                    }}
-                    className='rounded-lg p-1.5 text-ink/40 bg-sage/20 hover:text-ink'
-                  >
-                    <FiChevronDown size={16} />
-                  </motion.div>
-                </div>
-              </div>
-            </button>
-
-            {/* Expandable Form Drawer */}
-            <AnimatePresence initial={false}>
-              {isEditing && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{
-                    duration: 0.22,
-                    ease: 'easeInOut',
-                  }}
-                  id={`sub-editor-${sub.id}`}
-                  className='overflow-hidden border-t border-sage/40 bg-paper/50'
+                <span className='font-mono text-[11px] tracking-[0.06em] text-ink/55'>
+                  {sub.billing_cycle === 'yearly' ? 'YEARLY' : 'MONTHLY'}
+                </span>
+                <span className='font-mono text-[12px] text-ink/70 tnum'>
+                  {formatDate(sub.renewal_date)}
+                </span>
+                <span className='text-right font-mono text-[14px] tnum'>
+                  {formatMoney(sub.monthly_equivalent, sub.currency)}
+                </span>
+                <motion.span
+                  aria-hidden='true'
+                  animate={{ rotate: open ? 90 : 0 }}
+                  transition={SPRING.snap}
+                  className='text-right font-mono text-[12px] text-ink/30'
                 >
-                  <div className='p-4 sm:p-5'>
-                    <div className='mb-3 flex items-center justify-between border-b border-sage/30 pb-2'>
-                      <span className='text-xs font-mono font-semibold uppercase tracking-wider text-ink/50'>
-                        Edit Subscription
-                      </span>
-                      <button
-                        type='button'
-                        onClick={() => setEditingId(null)}
-                        className='text-xs font-mono text-ink/40 hover:text-ink transition-colors'
-                      >
-                        Cancel
-                      </button>
-                    </div>
+                  &rsaquo;
+                </motion.span>
+              </motion.button>
 
-                    {/* No max-height. This was `max-h-40 overflow-y-auto`,
-                        which forced a ~400px form through a 160-pixel window —
-                        users scrolled an inner pane to reach the save button,
-                        inside a card that itself scrolls. The drawer animates
-                        to `height: auto`, so it can simply be as tall as the
-                        form. */}
-                    <SubscriptionForm
-                      existing={sub}
-                      onDone={() => setEditingId(null)}
-                    />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.li>
-        );
-      })}
-    </ul>
+              <AnimatePresence initial={false}>
+                {open && (
+                  <motion.div
+                    id={panelId}
+                    variants={unfold}
+                    initial='hidden'
+                    animate='show'
+                    exit='exit'
+                    className='overflow-hidden bg-surface'
+                  >
+                    {/* No max-height. This was a 160px scroll box around a
+                        ~400px form, so users edited through a porthole and
+                        scrolled an inner pane to reach Save. */}
+                    <div className='border-t border-line-soft px-[22px] py-5'>
+                      <SubscriptionForm
+                        existing={sub}
+                        onDone={() => setEditingId(null)}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.li>
+          );
+        })}
+      </ul>
+
+      <div className='flex justify-between p-[22px] py-4'>
+        <span className='font-mono text-[11px] text-ink/45'>
+          {subscriptions.length} LOGGED &middot; {fromEmail} FROM EMAIL
+        </span>
+      </div>
+    </section>
   );
 }

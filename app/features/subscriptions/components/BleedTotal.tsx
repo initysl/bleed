@@ -1,32 +1,37 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import type { Subscription } from '@/app/features/subscriptions/types';
-import { formatMoney } from '@/lib/utils/currency';
+import { moneyParts, formatMoney } from '@/lib/utils/currency';
 import { useCountUp } from '@/app/features/subscriptions/hooks/useCountUp';
+import { SegmentedControl } from '@/app/components/ui/SegmentedControl';
+import { DURATION, EASE_OUT_EXPO } from '@/lib/motion';
 
-// Split currency into main integer string and muted decimal string
-function FormattedAmount({
-  amount,
-  currency,
-}: {
-  amount: number;
-  currency: string;
-}) {
-  const animatedValue = useCountUp(amount);
-  const formatted = formatMoney(animatedValue, currency);
+// Tints of the single accent, in descending order. The largest subscription
+// takes the strongest tone, so the bar reads as a ranking and not a palette.
+const TINTS = ['var(--color-pine)', 'var(--color-pine-60)', 'var(--color-pine-35)', 'var(--color-pine-20)'];
 
-  // Match currency string parts (e.g., "$80,883.59" -> "$80,883" & ".59")
-  const parts = formatted.match(/^([^\d]*[\d,]+)(\.\d+)?$/);
-  const mainPart = parts ? parts[1] : formatted;
-  const decimalPart = parts && parts[2] ? parts[2] : '';
+function Amount({ amount, currency }: { amount: number; currency: string }) {
+  // Animates from the PREVIOUS value, so switching currency or adding a
+  // subscription reads as the meter moving rather than resetting.
+  const animated = useCountUp(amount, DURATION.meter);
+  const { symbol, whole, fraction } = moneyParts(animated, currency);
 
   return (
-    <h2 className='font-display text-4xl sm:text-5xl tracking-tight text-ink tabular-nums'>
-      {mainPart}
-      {decimalPart && (
-        <span className='text-ink/35 font-normal'>{decimalPart}</span>
+    <h2 className='flex items-baseline gap-[3px]'>
+      <span className='font-mono text-[22px] text-ink/40 tnum'>{symbol}</span>
+      <span className='font-display text-meter font-bold text-ink tnum'>
+        {whole}
+      </span>
+      {fraction && (
+        <span className='font-display text-[26px] font-medium text-ink/35 tnum'>
+          {fraction}
+        </span>
       )}
+      <span className='ml-1.5 font-mono text-[11px] tracking-[0.1em] text-ink/40'>
+        /MO
+      </span>
     </h2>
   );
 }
@@ -38,107 +43,104 @@ export function BleedTotal({
   subscriptions: Subscription[];
   onCurrencyChange?: (currency: string) => void;
 }) {
-  // Aggregate data by currency
-  const totalsByCurrency = subscriptions.reduce<
-    Record<string, { total: number; count: number }>
-  >((acc, sub) => {
-    if (!acc[sub.currency]) {
-      acc[sub.currency] = { total: 0, count: 0 };
-    }
-    acc[sub.currency].total += sub.monthly_equivalent;
-    acc[sub.currency].count += 1;
-    return acc;
-  }, {});
-
-  const currencies = Object.keys(totalsByCurrency);
-
-  // The user's *preference*, which may not be present in the current data —
-  // derived rather than synced. This used to be state kept in step by an effect
-  // whose dependency array contained `currencies`, a fresh array identity on
-  // every render, so the effect re-ran after every single render and called
-  // setState from inside it (the react-hooks/set-state-in-effect error).
-  // Deriving needs no effect and cannot fall out of step.
-  const [preferredCurrency, setPreferredCurrency] = useState<string | null>(
-    null,
+  const byCurrency = subscriptions.reduce<Record<string, Subscription[]>>(
+    (acc, sub) => {
+      (acc[sub.currency] ??= []).push(sub);
+      return acc;
+    },
+    {},
   );
-  const activeCurrency =
-    preferredCurrency && currencies.includes(preferredCurrency)
-      ? preferredCurrency
+
+  const currencies = Object.keys(byCurrency).sort();
+
+  // The user's preference, which may not exist in the current data — derived
+  // rather than synced in an effect, so there is no cascading render and no
+  // way for the two to fall out of step.
+  const [preferred, setPreferred] = useState<string | null>(null);
+  const active =
+    preferred && currencies.includes(preferred)
+      ? preferred
       : (currencies[0] ?? 'USD');
 
-  const handleCurrencySelect = (currency: string) => {
-    setPreferredCurrency(currency);
-    if (onCurrencyChange) onCurrencyChange(currency);
-  };
+  const rows = byCurrency[active] ?? [];
+  const total = rows.reduce((sum, s) => sum + s.monthly_equivalent, 0);
 
-  const currentData = totalsByCurrency[activeCurrency] ?? {
-    total: 0,
-    count: 0,
-  };
+  // Top four by cost, so the bar stays legible; everything else is one
+  // remainder segment rather than a row of slivers.
+  const ranked = [...rows].sort(
+    (a, b) => b.monthly_equivalent - a.monthly_equivalent,
+  );
+  const lead = ranked.slice(0, 4);
+  const restTotal = ranked
+    .slice(4)
+    .reduce((sum, s) => sum + s.monthly_equivalent, 0);
 
-  // Quick Currency Flag Helper (Optional enhancement)
-  const getFlag = (code: string) => {
-    switch (code.toUpperCase()) {
-      case 'USD':
-        return '🇺🇸';
-      case 'EUR':
-        return '🇪🇺';
-      case 'GBP':
-        return '🇬🇧';
-      case 'CAD':
-        return '🇨🇦';
-      case 'NGN':
-        return '🇳🇬';
-      default:
-        return '🌐';
-    }
-  };
+  const segments = [
+    ...lead.map((s, i) => ({
+      key: s.id,
+      name: s.name,
+      value: s.monthly_equivalent,
+      color: TINTS[i],
+    })),
+    ...(restTotal > 0
+      ? [{ key: '__rest', name: 'Everything else', value: restTotal, color: 'var(--color-line)' }]
+      : []),
+  ];
+
+  function selectCurrency(next: string) {
+    setPreferred(next);
+    onCurrencyChange?.(next);
+  }
 
   return (
-    <div className='w-full rounded-2xl bg-white border border-sage/60 p-6 sm:p-7 shadow-sm'>
-      {/* 1. Currency Selector Pill Row */}
-      {currencies.length > 1 && (
-        <div className='flex items-center gap-2 mb-6 overflow-x-auto pb-1 scrollbar-none'>
-          {currencies.map((curr) => {
-            const isActive = curr === activeCurrency;
-            return (
-              <button
-                key={curr}
-                type='button'
-                onClick={() => handleCurrencySelect(curr)}
-                // These are a toggle set, not plain buttons — without
-                // aria-pressed a screen reader gives no indication which
-                // currency is currently shown. The inactive text was ink/50
-                // (~3:1); ink/70 clears 4.5:1 against the sage tint.
-                aria-pressed={isActive}
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all ${
-                  isActive
-                    ? 'bg-paper text-ink shadow-sm'
-                    : 'bg-sage/20 text-ink/70 hover:bg-sage/40 hover:text-ink'
-                }`}
-              >
-                <span aria-hidden='true'>{getFlag(curr)}</span>
-                <span className='uppercase'>{curr}</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
+    <section className='w-full rounded-sm border border-line bg-surface p-[22px] pb-[18px]'>
+      <div className='mb-5 flex items-center justify-between gap-3'>
+        <h3 className='section-label m-0'>
+          <span className='text-pine'>01</span>&nbsp; MONTHLY BLEED
+        </h3>
 
-      {/* 2. Primary Balance Display */}
-      <div className='space-y-1'>
-        <FormattedAmount amount={currentData.total} currency={activeCurrency} />
-
-        {/* Metric Subtitle */}
-        <div className='flex items-center gap-2 pt-1'>
-          <span className='text-xs text-ink/70 font-medium'>Monthly bleed</span>
-          <span className='inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-600'>
-            <span className='h-1.5 w-1.5 rounded-full bg-emerald-500' />
-            {currentData.count}{' '}
-            {currentData.count === 1 ? 'active sub' : 'active subs'}
-          </span>
-        </div>
+        {currencies.length > 1 && (
+          <SegmentedControl
+            label='Display currency'
+            size='sm'
+            value={active}
+            onChange={selectCurrency}
+            segments={currencies.map((c) => ({ value: c, label: c }))}
+          />
+        )}
       </div>
-    </div>
+
+      <Amount amount={total} currency={active} />
+
+      {/* Proportion bar. Keyed on the currency so the segments re-grow when
+          the meter switches books — the growth IS the signal that the number
+          underneath now refers to something else. */}
+      <div key={active} className='mt-5 mb-2.5 flex h-1.5 gap-0.5'>
+        {segments.map((seg, i) => (
+          <motion.div
+            key={seg.key}
+            title={`${seg.name} — ${formatMoney(seg.value, active)}`}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{
+              duration: 0.76,
+              ease: EASE_OUT_EXPO,
+              delay: 0.1 + i * 0.08,
+            }}
+            className='origin-left rounded-xs'
+            style={{ flexGrow: seg.value, background: seg.color }}
+          />
+        ))}
+      </div>
+
+      <div className='mt-3.5 flex justify-between border-t border-line pt-3'>
+        <span className='font-mono text-[11px] text-ink/55'>
+          {rows.length} ACTIVE
+        </span>
+        <span className='font-mono text-[11px] text-ink/55 tnum'>
+          {formatMoney(total * 12, active)} / YEAR
+        </span>
+      </div>
+    </section>
   );
 }
