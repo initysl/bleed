@@ -1,0 +1,194 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #F7F8F6;
+      color: #1C2321;
+      font-family: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+      font-weight: 500;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: #2F6F5E; text-decoration: none; }
+    a:hover { color: #1F4D40; }
+    .m { font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace; }
+    .num { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; }
+    .idx { color: #2F6F5E; }
+
+    /* Touch feedback is a press, not a hover: the row depresses and releases. */
+    .row { transition: background-color 120ms ease-out, transform 120ms ease-out; }
+    .row:active { background: #FFFFFF; transform: scale(0.995); }
+    .btn { transition: transform 120ms ease-out, background-color 140ms ease-out; }
+    .btn:active { transform: translateY(1px); }
+
+    :where(a, button, input, [tabindex]):focus-visible {
+      outline: 2px solid #2F6F5E; outline-offset: 2px;
+    }
+
+    .fill { transform-origin: left center; animation: fill 900ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+    @keyframes fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    .rise { animation: rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</helmet>
+
+<!-- No painted status bar: the device draws its own on top of this.
+     Same reason there is no fake keyboard anywhere in the set. -->
+<div style="min-height: 100%; background: #F7F8F6; padding-bottom: 28px;">
+
+  <header style="display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 16px; border-bottom: 1px solid #DCE5E0;">
+    <h1 style="margin: 0; font-size: 16px; font-weight: 700; letter-spacing: 0.14em;">BLEED</h1>
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <button type="button" class="btn m" aria-label="Settings" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border: 0; background: transparent; cursor: pointer; color: #1C2321;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.2.61.77 1.03 1.42 1.03H21a2 2 0 0 1 0 4h-.09c-.65 0-1.22.42-1.42 1.03z"></path>
+        </svg>
+      </button>
+      <button type="button" class="btn m" style="height: 44px; font-size: 11px; letter-spacing: 0.1em; padding: 0 14px; border: 0; border-radius: 2px; background: #2F6F5E; color: #F7F8F6; cursor: pointer;">+ LOG</button>
+    </div>
+  </header>
+
+  <div style="padding: 16px; display: flex; flex-direction: column; gap: 14px;">
+
+    <!-- 01 — meter first: the number is why anyone opens this -->
+    <section class="rise" style="background: #FFFFFF; border: 1px solid #DCE5E0; border-radius: 2px; padding: 18px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <h2 class="m" style="margin: 0; font-size: 10px; font-weight: 500; letter-spacing: 0.16em; opacity: 0.55;">
+          <span class="idx" style="opacity: 1;">01</span>&nbsp; MONTHLY BLEED
+        </h2>
+        <div style="display: flex; border: 1px solid #DCE5E0; border-radius: 2px; overflow: hidden;">
+          <button type="button" class="m" aria-pressed="true" style="font-size: 10px; letter-spacing: 0.1em; padding: 7px 10px; border: 0; background: #1C2321; color: #F7F8F6; cursor: pointer;">NGN</button>
+          <button type="button" class="m" aria-pressed="false" style="font-size: 10px; letter-spacing: 0.1em; padding: 7px 10px; border: 0; background: #FFFFFF; color: rgba(28,35,33,0.55); cursor: pointer;">USD</button>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: baseline; gap: 2px;">
+        <span class="m num" style="font-size: 18px; opacity: 0.4;">&#8358;</span>
+        <span class="num" style="font-size: 42px; font-weight: 700; letter-spacing: -0.02em; line-height: 1;">11,400</span>
+        <span class="num" style="font-size: 21px; opacity: 0.35;">.00</span>
+        <span class="m" style="font-size: 10px; letter-spacing: 0.1em; opacity: 0.4; margin-left: 5px;">/MO</span>
+      </div>
+
+      <div style="display: flex; gap: 2px; height: 6px; margin: 16px 0 0;">
+        <div class="fill" style="flex-grow: 79; background: #2F6F5E; border-radius: 1px; animation-delay: 120ms;"></div>
+        <div class="fill" style="flex-grow: 22; background: #5E9080; border-radius: 1px; animation-delay: 210ms;"></div>
+        <div class="fill" style="flex-grow: 13; background: #9BBBB0; border-radius: 1px; animation-delay: 300ms;"></div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; border-top: 1px solid #DCE5E0; margin-top: 14px; padding-top: 11px;">
+        <span class="m" style="font-size: 11px; opacity: 0.55;">3 ACTIVE</span>
+        <span class="m num" style="font-size: 11px; opacity: 0.55;">&#8358;136,800 / YEAR</span>
+      </div>
+    </section>
+
+    <!-- 02 — the fortnight ruler survives the narrow column -->
+    <section class="rise" style="background: #FFFFFF; border: 1px solid #DCE5E0; border-radius: 2px; padding: 18px; animation-delay: 80ms;">
+      <h2 class="m" style="margin: 0 0 18px; font-size: 10px; font-weight: 500; letter-spacing: 0.16em; opacity: 0.55;">
+        <span class="idx" style="opacity: 1;">02</span>&nbsp; NEXT 14 DAYS
+      </h2>
+      <div style="position: relative; height: 30px;">
+        <div style="position: absolute; left: 0; right: 0; top: 20px; height: 1px; background: #DCE5E0;"></div>
+        <div style="position: absolute; top: 13px; left: 0; width: 1px; height: 8px; background: #DCE5E0;"></div>
+        <div style="position: absolute; top: 13px; left: 50%; width: 1px; height: 8px; background: #DCE5E0;"></div>
+        <div style="position: absolute; top: 13px; right: 0; width: 1px; height: 8px; background: #DCE5E0;"></div>
+        <div style="position: absolute; top: 15px; left: 14.3%; width: 9px; height: 9px; margin-left: -4px; border-radius: 50%; background: #B4573F; border: 2px solid #FFFFFF;"></div>
+        <div style="position: absolute; top: 15px; left: 35.7%; width: 9px; height: 9px; margin-left: -4px; border-radius: 50%; background: #2F6F5E; border: 2px solid #FFFFFF;"></div>
+        <div style="position: absolute; top: 15px; left: 64.3%; width: 9px; height: 9px; margin-left: -4px; border-radius: 50%; background: #2F6F5E; border: 2px solid #FFFFFF;"></div>
+        <div style="position: absolute; top: 15px; left: 92.8%; width: 9px; height: 9px; margin-left: -4px; border-radius: 50%; background: #9BBBB0; border: 2px solid #FFFFFF;"></div>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+        <span class="m" style="font-size: 10px; opacity: 0.4;">TODAY</span>
+        <span class="m" style="font-size: 10px; opacity: 0.4;">+7D</span>
+        <span class="m" style="font-size: 10px; opacity: 0.4;">+14D</span>
+      </div>
+
+      <button type="button" class="row" style="display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; text-align: left; padding: 8px; border: 0; border-top: 1px solid #EEF2F0; background: transparent; cursor: pointer; font-family: inherit; color: #1C2321;">
+        <span style="width: 3px; height: 22px; background: #B4573F; border-radius: 1px;"></span>
+        <span style="font-size: 14px; flex-grow: 1;">Claude Pro</span>
+        <span class="m num" style="font-size: 12px; opacity: 0.6;">$20.00</span>
+        <span class="m" style="font-size: 10px; letter-spacing: 0.08em; padding: 4px 7px; border-radius: 2px; background: #FBF2EF; color: #B4573F;">2 DAYS</span>
+      </button>
+      <button type="button" class="row" style="display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; text-align: left; padding: 8px; border: 0; border-top: 1px solid #EEF2F0; background: transparent; cursor: pointer; font-family: inherit; color: #1C2321;">
+        <span style="width: 3px; height: 22px; background: #2F6F5E; border-radius: 1px;"></span>
+        <span style="font-size: 14px; flex-grow: 1;">Netflix</span>
+        <span class="m num" style="font-size: 12px; opacity: 0.6;">&#8358;7,900</span>
+        <span class="m" style="font-size: 10px; letter-spacing: 0.08em; padding: 4px 7px; border-radius: 2px; background: #F2F5F3; color: rgba(28,35,33,0.55);">5 DAYS</span>
+      </button>
+    </section>
+
+    <!-- 03 — the ledger, reachable without scrolling past onboarding -->
+    <section class="rise" style="background: #FFFFFF; border: 1px solid #DCE5E0; border-radius: 2px; animation-delay: 160ms;">
+      <h2 class="m" style="margin: 0; padding: 18px 18px 12px; font-size: 10px; font-weight: 500; letter-spacing: 0.16em; opacity: 0.55;">
+        <span class="idx" style="opacity: 1;">03</span>&nbsp; LEDGER
+      </h2>
+
+      <button type="button" class="row" style="display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; text-align: left; padding: 12px 18px; border: 0; border-top: 1px solid #EEF2F0; background: transparent; cursor: pointer; font-family: inherit; color: #1C2321;">
+        <span aria-hidden="true" style="flex-shrink: 0; width: 30px; height: 30px; border-radius: 2px; background: #DA1F26; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">A</span>
+        <span style="flex-grow: 1; min-width: 0;">
+          <span style="display: block; font-size: 14px;">Adobe CC</span>
+          <span class="m" style="display: block; font-size: 10px; letter-spacing: 0.06em; opacity: 0.5; margin-top: 2px;">YEARLY &middot; 14 MAR 2027</span>
+        </span>
+        <span class="m num" style="font-size: 14px;">$59.99</span>
+      </button>
+
+      <button type="button" class="row" style="display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; text-align: left; padding: 12px 18px; border: 0; border-top: 1px solid #EEF2F0; background: transparent; cursor: pointer; font-family: inherit; color: #1C2321;">
+        <span aria-hidden="true" style="flex-shrink: 0; width: 30px; height: 30px; border-radius: 2px; background: #E50914; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">N</span>
+        <span style="flex-grow: 1; min-width: 0;">
+          <span style="display: block; font-size: 14px;">Netflix</span>
+          <span class="m" style="display: block; font-size: 10px; letter-spacing: 0.06em; opacity: 0.5; margin-top: 2px;">MONTHLY &middot; 17 SEP 2026</span>
+        </span>
+        <span class="m num" style="font-size: 14px;">&#8358;7,900</span>
+      </button>
+
+      <!-- Spotify's brand colour is declared text:'dark' in brandColors.ts —
+           ink on green, not the white the shipped list hardcodes at ~2.2:1. -->
+      <button type="button" class="row" style="display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; text-align: left; padding: 12px 18px; border: 0; border-top: 1px solid #EEF2F0; background: transparent; cursor: pointer; font-family: inherit; color: #1C2321;">
+        <span aria-hidden="true" style="flex-shrink: 0; width: 30px; height: 30px; border-radius: 2px; background: #1DB954; color: #1C2321; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">S</span>
+        <span style="flex-grow: 1; min-width: 0;">
+          <span style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 14px;">Spotify</span>
+            <span class="m" style="font-size: 9px; letter-spacing: 0.06em; padding: 2px 5px; border-radius: 2px; background: #FBF2EF; color: #B4573F;">UNUSED</span>
+          </span>
+          <span class="m" style="display: block; font-size: 10px; letter-spacing: 0.06em; opacity: 0.5; margin-top: 2px;">MONTHLY &middot; 25 SEP 2026</span>
+        </span>
+        <span class="m num" style="font-size: 14px;">&#8358;1,300</span>
+      </button>
+
+      <div style="padding: 14px 18px; border-top: 1px solid #EEF2F0;">
+        <span class="m" style="font-size: 11px; opacity: 0.45;">+ 4 MORE</span>
+      </div>
+    </section>
+
+    <!-- 04 — the address moves below the data, not above it -->
+    <section class="rise" style="border: 1px dashed #C6D3CC; border-radius: 2px; padding: 14px 16px; animation-delay: 240ms;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+        <span style="min-width: 0;">
+          <span class="m" style="display: block; font-size: 9px; letter-spacing: 0.14em; opacity: 0.5;">INBOUND ADDRESS</span>
+          <span class="m" style="display: block; font-size: 12px; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">u-8f3c91ba2e@in.bleed.app</span>
+        </span>
+        <button type="button" class="btn m" style="flex-shrink: 0; min-height: 44px; font-size: 10px; letter-spacing: 0.1em; padding: 0 14px; border: 1px solid #DCE5E0; border-radius: 2px; background: #FFFFFF; color: #2F6F5E; cursor: pointer;">COPY</button>
+      </div>
+    </section>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

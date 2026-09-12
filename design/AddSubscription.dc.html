@@ -1,0 +1,226 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #EDF0EE;
+      color: #1C2321;
+      font-family: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+      font-weight: 500;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: #2F6F5E; text-decoration: none; }
+    a:hover { color: #1F4D40; }
+    .m { font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace; }
+    .num { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; }
+
+    /* Inputs: the border tightens to the accent and a hairline underline
+       wipes in, so focus reads even when the ring is clipped by a parent. */
+    .in {
+      width: 100%; border: 1px solid #DCE5E0; border-radius: 2px;
+      background: #FBFCFB; padding: 11px 12px; font-size: 14px; color: #1C2321;
+      font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+      transition: border-color 140ms ease-out, background-color 140ms ease-out;
+    }
+    .in:hover { border-color: #C6D3CC; }
+    .in:focus { outline: none; border-color: #2F6F5E; background: #FFFFFF; }
+    .in::placeholder { color: rgba(28,35,33,0.3); }
+
+    .lbl { display: block; font-size: 10px; letter-spacing: 0.14em; opacity: 0.55; margin-bottom: 7px; }
+
+    .btn { transition: background-color 140ms ease-out, transform 120ms ease-out, border-color 140ms ease-out; }
+    .btn:active { transform: translateY(1px); }
+
+    /* Switch: the thumb travels, the track fills. 44px wide, 24px tall — over
+       the 24x24 minimum target, unlike the 36x20 one in the shipped app. */
+    .sw { position: relative; width: 44px; height: 24px; flex-shrink: 0; border: 0; border-radius: 2px; cursor: pointer; padding: 0; transition: background-color 180ms ease-out; }
+    .sw span {
+      position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
+      background: #FFFFFF; border-radius: 1px;
+      transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .sw[aria-checked="true"] span { transform: translateX(20px); }
+
+    /* Choice chips: selection is a fill, not a border flicker. */
+    .chip { transition: background-color 140ms ease-out, color 140ms ease-out, border-color 140ms ease-out; }
+
+    :where(a, button, input, select, [tabindex]):focus-visible {
+      outline: 2px solid #2F6F5E; outline-offset: 2px;
+    }
+
+    .alert { animation: alert 280ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+    @keyframes alert { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+    .panel { animation: panel 320ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+    @keyframes panel { from { opacity: 0; transform: translateY(8px) scale(0.985); } to { opacity: 1; transform: none; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; padding: 24px; display: flex; align-items: flex-start; justify-content: center;">
+  <div class="panel" style="width: 100%; max-width: 512px; background: #F7F8F6; border: 1px solid #C6D3CC; border-radius: 2px; box-shadow: 0 18px 40px rgba(28,35,33,0.10);">
+
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid #DCE5E0;">
+      <h2 class="m" style="margin: 0; font-size: 11px; font-weight: 500; letter-spacing: 0.16em;">
+        <span aria-hidden="true" style="color: #2F6F5E;">&#9679;</span>&nbsp; EDIT SUBSCRIPTION
+      </h2>
+      <button type="button" class="btn" aria-label="Close" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 2px; background: transparent; cursor: pointer; color: rgba(28,35,33,0.6);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <div style="padding: 22px;">
+
+      <!-- Failure is visible, and it is not styled like a hint. -->
+      <sc-if value="{{showError}}" hint-placeholder-val="{{ true }}">
+        <div class="alert" role="alert" style="display: flex; align-items: flex-start; gap: 9px; padding: 10px 12px; margin-bottom: 18px; border: 1px solid #E0B8AC; border-radius: 2px; background: #FBF2EF; color: #B4573F;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink: 0; margin-top: 1px;" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16.5v.01"></path></svg>
+          <span style="font-size: 13px; line-height: 1.45;">Couldn&#39;t save. Too many changes in the last hour &mdash; try again in a few minutes.</span>
+        </div>
+      </sc-if>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+
+        <label style="display: block;">
+          <span class="lbl m">SERVICE</span>
+          <input class="in" type="text" value="Netflix" style="font-family: 'Space Grotesk', Arial, sans-serif; font-size: 15px;">
+        </label>
+
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) 108px; gap: 12px;">
+          <label style="display: block;">
+            <span class="lbl m">PRICE</span>
+            <input class="in num" type="text" value="7900" inputmode="decimal">
+          </label>
+          <label style="display: block;">
+            <span class="lbl m">CURRENCY</span>
+            <select class="in" style="cursor: pointer;">
+              <option>NGN</option><option>USD</option><option>GBP</option><option>EUR</option>
+              <option>GHS</option><option>KES</option><option>ZAR</option>
+            </select>
+          </label>
+        </div>
+
+        <div>
+          <span class="lbl m">BILLING CYCLE</span>
+          <div style="display: flex; gap: 6px;">
+            <sc-for list="{{cycles}}" as="c" hint-placeholder-count="2">
+              <button type="button" class="chip m" onClick="{{c.pick}}" aria-pressed="{{c.on}}" style="flex-grow: 1; font-size: 11px; letter-spacing: 0.1em; padding: 11px 0; border: 1px solid {{c.border}}; border-radius: 2px; background: {{c.bg}}; color: {{c.fg}}; cursor: pointer;">{{c.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <label style="display: block;">
+          <span class="lbl m">NEXT RENEWAL</span>
+          <input class="in num" type="date" value="2026-09-17" style="cursor: pointer;">
+        </label>
+
+        <!-- Reminder: a real fieldset, with the constraint stated up front
+             rather than discovered by hitting it. -->
+        <fieldset style="margin: 0; padding: 16px; border: 1px solid #DCE5E0; border-radius: 2px; background: #FFFFFF;">
+          <legend class="lbl m" style="padding: 0 6px; margin: 0; float: none;">REMIND ME</legend>
+
+          <div style="display: flex; gap: 6px; margin-bottom: 16px;">
+            <sc-for list="{{leads}}" as="l" hint-placeholder-count="4">
+              <button type="button" class="chip m num" onClick="{{l.pick}}" aria-pressed="{{l.on}}" style="flex-grow: 1; font-size: 11px; padding: 9px 0; border: 1px solid {{l.border}}; border-radius: 2px; background: {{l.bg}}; color: {{l.fg}}; cursor: pointer;">{{l.label}}</button>
+            </sc-for>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid #EEF2F0;">
+            <span id="ch-email" style="font-size: 14px;">Email</span>
+            <button type="button" class="sw" role="switch" aria-checked="{{email.on}}" aria-labelledby="ch-email" onClick="{{email.toggle}}" style="background: {{email.track}};"><span></span></button>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid #EEF2F0;">
+            <span id="ch-push" style="font-size: 14px;">Push</span>
+            <button type="button" class="sw" role="switch" aria-checked="{{push.on}}" aria-labelledby="ch-push" onClick="{{push.toggle}}" style="background: {{push.track}};"><span></span></button>
+          </div>
+
+          <p class="m" style="margin: 10px 0 0; font-size: 11px; line-height: 1.5; color: {{hintColor}};">{{hint}}</p>
+        </fieldset>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 22px;">
+        <button type="button" class="btn m" style="flex-grow: 1; font-size: 11px; letter-spacing: 0.12em; padding: 13px 0; border: 0; border-radius: 2px; background: #2F6F5E; color: #F7F8F6; cursor: pointer;">SAVE CHANGES</button>
+        <!-- Destructive actions arm before they fire. -->
+        <button type="button" class="btn m" onClick="{{del.press}}" style="font-size: 11px; letter-spacing: 0.1em; padding: 13px 18px; border: 1px solid #B4573F; border-radius: 2px; background: {{del.bg}}; color: {{del.fg}}; cursor: pointer;">{{del.label}}</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"showError":{"editor":"boolean","default":false,"section":"States"}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { cycle: 'monthly', lead: 3, email: true, push: true, arming: false };
+  }
+
+  chip(on) {
+    return on
+      ? { bg: '#1C2321', fg: '#F7F8F6', border: '#1C2321' }
+      : { bg: '#FFFFFF', fg: 'rgba(28,35,33,0.65)', border: '#DCE5E0' };
+  }
+
+  renderVals() {
+    const s = this.state;
+
+    const cycles = [
+      { id: 'monthly', label: 'MONTHLY' },
+      { id: 'yearly', label: 'YEARLY' },
+    ].map((c) => Object.assign({ label: c.label, on: s.cycle === c.id, pick: () => this.setState({ cycle: c.id }) }, this.chip(s.cycle === c.id)));
+
+    const leads = [1, 3, 7, 14].map((d) => Object.assign({
+      label: d + 'D',
+      on: s.lead === d,
+      pick: () => this.setState({ lead: d }),
+    }, this.chip(s.lead === d)));
+
+    // The last enabled channel cannot be switched off — and the rule is shown
+    // before it is enforced, rather than as a rejection afterwards.
+    const only = (which) => (which === 'email' ? s.email && !s.push : s.push && !s.email);
+    const channel = (which) => ({
+      on: s[which],
+      track: s[which] ? '#2F6F5E' : '#C6D3CC',
+      toggle: () => {
+        if (only(which)) return;
+        this.setState({ [which]: !s[which] });
+      },
+    });
+
+    const lastOne = (s.email && !s.push) || (s.push && !s.email);
+
+    return {
+      showError: this.props.showError ?? false,
+      cycles,
+      leads,
+      email: channel('email'),
+      push: channel('push'),
+      hint: lastOne
+        ? 'At least one channel stays on — that one is locked.'
+        : 'Sent ' + s.lead + (s.lead === 1 ? ' day' : ' days') + ' before renewal, at 9am your time.',
+      hintColor: lastOne ? '#B4573F' : 'rgba(28,35,33,0.5)',
+      del: s.arming
+        ? { label: 'CONFIRM?', bg: '#B4573F', fg: '#F7F8F6', press: () => this.setState({ arming: false }) }
+        : { label: 'REMOVE', bg: 'transparent', fg: '#B4573F', press: () => this.setState({ arming: true }) },
+    };
+  }
+}
+</script>
+</body>
+</html>

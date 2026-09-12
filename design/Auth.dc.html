@@ -1,0 +1,234 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #F7F8F6;
+      color: #1C2321;
+      font-family: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+      font-weight: 500;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: #2F6F5E; text-decoration: none; }
+    a:hover { color: #1F4D40; }
+    .m { font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace; }
+    .num { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; }
+
+    .lbl { display: block; font-size: 10px; letter-spacing: 0.14em; opacity: 0.55; margin-bottom: 7px; font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace; }
+    .in {
+      width: 100%; border: 1px solid #DCE5E0; border-radius: 2px;
+      background: #FFFFFF; padding: 13px 14px; font-size: 15px; color: #1C2321;
+      font-family: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+      transition: border-color 140ms ease-out;
+    }
+    .in:hover { border-color: #C6D3CC; }
+    .in:focus { outline: none; border-color: #2F6F5E; }
+    .in::placeholder { color: rgba(28,35,33,0.3); }
+
+    .btn { transition: background-color 150ms ease-out, transform 120ms ease-out, border-color 150ms ease-out, color 150ms ease-out; }
+    .btn:active { transform: translateY(1px); }
+    :where(a, button, input, [tabindex]):focus-visible { outline: 2px solid #2F6F5E; outline-offset: 2px; }
+
+    /* Mode switch: one indicator slides, matching the dashboard's meter. */
+    .segwrap { position: relative; display: flex; border: 1px solid #DCE5E0; border-radius: 2px; overflow: hidden; background: #FFFFFF; }
+    .segind { position: absolute; top: 0; bottom: 0; left: 0; background: #1C2321; transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1); }
+    .seg { position: relative; z-index: 1; background: transparent; border: 0; cursor: pointer; transition: color 200ms ease-out; }
+
+    /* The strength meter fills as the rule is met — it never blocks typing. */
+    .pip { transition: background-color 240ms ease-out; }
+
+    .rise { animation: rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    .alert { animation: alert 260ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+    @keyframes alert { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 520px;">
+
+  <!-- ===== Brand side: the product states its case while you sign in ===== -->
+  <div style="background: #1C2321; color: #F7F8F6; padding: 48px; display: flex; flex-direction: column; justify-content: space-between;">
+    <span style="font-size: 19px; font-weight: 700; letter-spacing: 0.14em;">BLEED</span>
+
+    <div>
+      <span class="m" style="font-size: 10px; letter-spacing: 0.18em; opacity: 0.45;">SUBSCRIPTION METER</span>
+      <p style="margin: 20px 0 0; font-size: 30px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; max-width: 17ch; text-wrap: pretty;">
+        Forward one receipt. That&#39;s the setup.
+      </p>
+
+      <div style="margin-top: 36px; border: 1px solid rgba(247,248,246,0.14); border-radius: 2px; padding: 22px; max-width: 380px;">
+        <div class="m" style="font-size: 10px; letter-spacing: 0.14em; opacity: 0.45;">MONTHLY BLEED</div>
+        <div style="display: flex; align-items: baseline; gap: 3px; margin-top: 12px;">
+          <span class="m num" style="font-size: 18px; opacity: 0.4;">&#8358;</span>
+          <span class="num" style="font-size: 40px; font-weight: 700; letter-spacing: -0.02em; line-height: 1;">11,400</span>
+          <span class="num" style="font-size: 20px; opacity: 0.35;">.00</span>
+        </div>
+        <div style="display: flex; gap: 2px; height: 5px; margin-top: 18px;">
+          <div style="flex-grow: 79; background: #2F6F5E; border-radius: 1px;"></div>
+          <div style="flex-grow: 22; background: #5E9080; border-radius: 1px;"></div>
+          <div style="flex-grow: 13; background: #9BBBB0; border-radius: 1px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="m" style="margin: 0; font-size: 11px; opacity: 0.4; line-height: 1.6; max-width: 42ch;">
+      No bank connection. No card. Bleed only reads the emails you forward it.
+    </p>
+  </div>
+
+  <!-- ===== Form side ===== -->
+  <div class="rise" style="padding: 48px 44px; display: flex; flex-direction: column; justify-content: center; background: #F7F8F6;">
+
+    <div class="segwrap" style="align-self: flex-start; margin-bottom: 34px;">
+      <div class="segind" style="width: 116px; transform: translateX({{seg.offset}});"></div>
+      <sc-for list="{{modes}}" as="mo" hint-placeholder-count="2">
+        <button type="button" class="seg m" onClick="{{mo.pick}}" aria-pressed="{{mo.on}}" style="width: 116px; font-size: 10px; letter-spacing: 0.12em; padding: 9px 0; color: {{mo.fg}};">{{mo.label}}</button>
+      </sc-for>
+    </div>
+
+    <h1 style="margin: 0; font-size: 30px; font-weight: 700; letter-spacing: -0.02em;">{{copy.title}}</h1>
+    <!-- The shipped login screen reads "Mange your subscriptions." -->
+    <p style="margin: 10px 0 0; font-size: 15px; line-height: 1.6; opacity: 0.65;">{{copy.lede}}</p>
+
+    <sc-if value="{{showError}}" hint-placeholder-val="{{ true }}">
+      <div class="alert" role="alert" style="display: flex; align-items: flex-start; gap: 9px; padding: 11px 13px; margin-top: 22px; border: 1px solid #E0B8AC; border-radius: 2px; background: #FBF2EF; color: #B4573F;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink: 0; margin-top: 1px;" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16.5v.01"></path></svg>
+        <span style="font-size: 13px; line-height: 1.45;">That email and password don&#39;t match an account.</span>
+      </div>
+    </sc-if>
+
+    <div style="display: flex; flex-direction: column; gap: 18px; margin-top: 28px;">
+      <!-- Visible labels. The shipped forms are placeholder-only, which fails
+           WCAG 3.3.2 and vanishes the moment you type. -->
+      <label style="display: block;">
+        <span class="lbl">EMAIL</span>
+        <input class="in" type="email" autocomplete="email" placeholder="you@example.com">
+      </label>
+
+      <div>
+        <label style="display: block;">
+          <span class="lbl">PASSWORD</span>
+          <span style="position: relative; display: block;">
+            <input class="in" type="password" autocomplete="{{copy.pwAutocomplete}}" placeholder="At least 8 characters" style="padding-right: 84px;">
+            <button type="button" class="btn m" onClick="{{reveal.toggle}}" aria-pressed="{{reveal.on}}" style="position: absolute; top: 50%; right: 6px; transform: translateY(-50%); font-size: 10px; letter-spacing: 0.1em; padding: 8px 10px; border: 0; border-radius: 2px; background: transparent; color: #2F6F5E; cursor: pointer;">{{reveal.label}}</button>
+          </span>
+        </label>
+
+        <!-- Sign-up gets strength feedback; the shipped form has none and
+             only enforces min(8) at submit. -->
+        <sc-if value="{{isSignup}}" hint-placeholder-val="{{ true }}">
+          <div style="margin-top: 12px;">
+            <div style="display: flex; gap: 4px;">
+              <sc-for list="{{pips}}" as="p" hint-placeholder-count="4">
+                <div class="pip" style="flex-grow: 1; height: 3px; border-radius: 1px; background: {{p.color}};"></div>
+              </sc-for>
+            </div>
+            <p class="m" style="margin: 8px 0 0; font-size: 11px; opacity: 0.55;">8 characters minimum. Longer beats complicated.</p>
+          </div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{isSignin}}" hint-placeholder-val="{{ true }}">
+        <div style="display: flex; justify-content: flex-end; margin-top: -4px;">
+          <a href="#" class="m" style="font-size: 11px; letter-spacing: 0.06em;">Forgot your password?</a>
+        </div>
+      </sc-if>
+
+      <button type="button" class="btn m" style="margin-top: 6px; font-size: 12px; letter-spacing: 0.12em; padding: 15px 0; border: 0; border-radius: 2px; background: #2F6F5E; color: #F7F8F6; cursor: pointer;">{{copy.cta}}</button>
+    </div>
+
+    <!-- No "OR" divider: the shipped form draws one and then offers nothing
+         after it, promising social auth that doesn't exist. -->
+    <p style="margin: 26px 0 0; font-size: 14px; text-align: center; opacity: 0.7;">
+      {{copy.switchLead}}
+      <button type="button" onClick="{{copy.switchTo}}" class="m" style="border: 0; background: transparent; padding: 0 2px; font-size: 13px; color: #2F6F5E; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;">{{copy.switchCta}}</button>
+    </p>
+
+    <p class="m" style="margin: 28px 0 0; font-size: 11px; line-height: 1.6; text-align: center; opacity: 0.45;">
+      By continuing you agree to the <a href="#" style="opacity: 1;">Terms</a> and <a href="#" style="opacity: 1;">Privacy&nbsp;Policy</a>.
+    </p>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"showError":{"editor":"boolean","default":false,"section":"States"},"strength":{"editor":"range","default":2,"min":0,"max":4,"step":1,"section":"States"}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { mode: 'signin', revealed: false };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const isSignup = s.mode === 'signup';
+
+    const modes = [
+      { id: 'signin', label: 'SIGN IN' },
+      { id: 'signup', label: 'CREATE ACCOUNT' },
+    ].map((m) => ({
+      label: m.label,
+      on: s.mode === m.id,
+      fg: s.mode === m.id ? '#F7F8F6' : 'rgba(28,35,33,0.55)',
+      pick: () => this.setState({ mode: m.id }),
+    }));
+
+    const strength = Math.max(0, Math.min(4, this.props.strength ?? 2));
+    const tone = strength >= 4 ? '#2F6F5E' : strength >= 2 ? '#5E9080' : '#B4573F';
+    const pips = [0, 1, 2, 3].map((i) => ({
+      color: i < strength ? tone : '#DCE5E0',
+    }));
+
+    return {
+      modes,
+      seg: { offset: (['signin', 'signup'].indexOf(s.mode) * 116) + 'px' },
+      isSignup,
+      isSignin: !isSignup,
+      showError: this.props.showError ?? false,
+      pips,
+      reveal: {
+        on: s.revealed,
+        label: s.revealed ? 'HIDE' : 'SHOW',
+        toggle: () => this.setState({ revealed: !s.revealed }),
+      },
+      copy: isSignup
+        ? {
+            title: 'Create your account',
+            lede: 'One address to forward receipts to, and a running total you can actually act on.',
+            cta: 'CREATE ACCOUNT',
+            pwAutocomplete: 'new-password',
+            switchLead: 'Already have an account?',
+            switchCta: 'Sign in',
+            switchTo: () => this.setState({ mode: 'signin' }),
+          }
+        : {
+            title: 'Welcome back',
+            lede: 'Manage your subscriptions and see what renews next.',
+            cta: 'SIGN IN',
+            pwAutocomplete: 'current-password',
+            switchLead: 'New here?',
+            switchCta: 'Create an account',
+            switchTo: () => this.setState({ mode: 'signup' }),
+          },
+    };
+  }
+}
+</script>
+</body>
+</html>

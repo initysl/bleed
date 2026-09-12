@@ -1,0 +1,408 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #F7F8F6;
+      color: #1C2321;
+      font-family: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+      font-weight: 500;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: #2F6F5E; text-decoration: none; }
+    a:hover { color: #1F4D40; }
+
+    /* Mono is the instrument face: every number, label and identifier. */
+    .m { font-family: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace; }
+    .num { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; }
+    .idx { color: #2F6F5E; }
+
+    /* ---- Micro-interactions -------------------------------------------
+       Each one signals a state change, none of them loop. ---------------- */
+
+    /* Ledger row: an accent edge wipes in from the left. Hover arms it,
+       selection locks it on. */
+    .row { position: relative; transition: background-color 140ms ease-out; }
+    .row::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+      background: #2F6F5E; transform: scaleY(0); transform-origin: 50% 50%;
+      transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .row:hover { background: #FBFCFB; }
+    .row:hover::before, .row.on::before { transform: scaleY(1); }
+    .row.on { background: #FFFFFF; }
+    .chev { transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1); }
+    .row:hover .chev { transform: translateX(2px); }
+    .row.on .chev { transform: rotate(90deg); }
+
+    /* Segmented control: one indicator slides between cells instead of two
+       backgrounds blinking on and off. */
+    .segwrap { position: relative; display: flex; border: 1px solid #DCE5E0; border-radius: 2px; overflow: hidden; background: #FFFFFF; }
+    .segind {
+      position: absolute; top: 0; bottom: 0; left: 0; background: #1C2321;
+      transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), width 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .seg { position: relative; z-index: 1; background: transparent; border: 0; cursor: pointer; transition: color 200ms ease-out; }
+
+    /* Buttons compress under the pointer — a press, not a colour change. */
+    .btn { transition: background-color 140ms ease-out, transform 120ms ease-out, border-color 140ms ease-out, color 140ms ease-out; }
+    .btn:active { transform: translateY(1px); }
+
+    :where(a, button, input, select, [tabindex]):focus-visible {
+      outline: 2px solid #2F6F5E; outline-offset: 2px;
+    }
+
+    /* Meter segments grow from zero, and re-grow when the currency changes. */
+    .fill { transform-origin: left center; animation: fill 760ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+    @keyframes fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+    .rise { animation: rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    /* The expanded row unfolds rather than appearing. */
+    .unfold { animation: unfold 260ms cubic-bezier(0.22, 1, 0.36, 1) both; overflow: hidden; }
+    @keyframes unfold { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+    /* A renewal inside 48h breathes once, then stops. Never a loop. */
+    .arm { animation: arm 1400ms cubic-bezier(0.22, 1, 0.36, 1) 600ms 1 both; }
+    @keyframes arm {
+      0% { box-shadow: 0 0 0 0 rgba(180, 87, 63, 0.35); }
+      100% { box-shadow: 0 0 0 10px rgba(180, 87, 63, 0); }
+    }
+
+    /* Ruler markers grow on hover and when their row is open. */
+    .mark { transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1); cursor: pointer; border: 0; padding: 0; }
+    .mark:hover { transform: scale(1.35); }
+    .mark.on { transform: scale(1.5); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; background: #F7F8F6;">
+
+  <!-- ===== Masthead ===== -->
+  <header style="display: flex; align-items: center; justify-content: space-between; gap: 24px; height: 64px; padding: 0 32px; border-bottom: 1px solid #DCE5E0;">
+    <h1 style="display: flex; align-items: baseline; gap: 14px; margin: 0; font-size: 19px; font-weight: 700; letter-spacing: 0.14em;">
+      BLEED
+      <span class="m" style="font-size: 10px; font-weight: 500; letter-spacing: 0.16em; color: #1C2321; opacity: 0.45;">SUBSCRIPTION METER</span>
+    </h1>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <a href="#" class="m" style="font-size: 11px; letter-spacing: 0.1em; padding: 8px 12px; color: #1C2321; opacity: 0.65;">SETTINGS</a>
+      <a href="#" class="m" style="font-size: 11px; letter-spacing: 0.1em; padding: 8px 12px; color: #1C2321; opacity: 0.65;">SIGN&nbsp;OUT</a>
+      <button type="button" class="btn m" style="font-size: 11px; letter-spacing: 0.1em; padding: 10px 16px; margin-left: 8px; border: 0; border-radius: 2px; background: #2F6F5E; color: #F7F8F6; cursor: pointer;">+ LOG SUBSCRIPTION</button>
+    </div>
+  </header>
+
+  <!-- ===== Interrupt: extraction that needs a human ===== -->
+  <div class="rise" style="display: flex; align-items: center; gap: 16px; padding: 12px 32px; border-bottom: 1px solid #DCE5E0; background: #FBF2EF;">
+    <span class="m" style="font-size: 10px; letter-spacing: 0.14em; color: #B4573F; border: 1px solid #B4573F; padding: 3px 7px; border-radius: 2px;">REVIEW</span>
+    <span style="font-size: 13px;">1 forwarded receipt couldn&#39;t be read automatically.</span>
+    <span class="m" style="font-size: 12px; opacity: 0.55;">Re: Your Vercel invoice</span>
+    <div style="margin-left: auto; display: flex; gap: 8px;">
+      <button type="button" class="btn m" style="font-size: 11px; letter-spacing: 0.08em; padding: 7px 12px; border: 1px solid #B4573F; border-radius: 2px; background: transparent; color: #B4573F; cursor: pointer;">VIEW EMAIL</button>
+      <button type="button" class="btn m" style="font-size: 11px; letter-spacing: 0.08em; padding: 7px 12px; border: 1px solid #DCE5E0; border-radius: 2px; background: #FFFFFF; color: #1C2321; cursor: pointer;">ADD MANUALLY</button>
+    </div>
+  </div>
+
+  <main style="display: grid; grid-template-columns: 420px minmax(0, 1fr); gap: 28px; padding: 28px 32px 40px;">
+
+    <!-- ===== Left instrument rail ===== -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+
+      <!-- 01 — the meter -->
+      <section class="rise" style="background: #FFFFFF; border: 1px solid #DCE5E0; border-radius: 2px; padding: 22px 22px 18px; animation-delay: 60ms;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px;">
+          <h2 class="m" style="margin: 0; font-size: 10px; font-weight: 500; letter-spacing: 0.16em; opacity: 0.55;">
+            <span class="idx" style="opacity: 1;">01</span>&nbsp; MONTHLY BLEED
+          </h2>
+          <div class="segwrap">
+            <div class="segind" style="width: {{seg.width}}; transform: translateX({{seg.offset}});"></div>
+            <sc-for list="{{currencies}}" as="c" hint-placeholder-count="2">
+              <button type="button" class="seg m" onClick="{{c.pick}}" aria-pressed="{{c.on}}" style="font-size: 10px; letter-spacing: 0.1em; padding: 6px 11px; width: 54px; color: {{c.fg}};">{{c.code}}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: baseline; gap: 3px;">
+          <span class="m num" style="font-size: 22px; opacity: 0.4;">{{meter.symbol}}</span>
+          <span class="num" style="font-size: 52px; font-weight: 700; letter-spacing: -0.02em; line-height: 1;">{{meter.whole}}</span>
+          <span class="num" style="font-size: 26px; font-weight: 500; opacity: 0.35;">{{meter.cents}}</span>
+          <span class="m" style="font-size: 11px; letter-spacing: 0.1em; opacity: 0.4; margin-left: 6px;">/MO</span>
+        </div>
+
+        <div style="display: flex; gap: 2px; height: 6px; margin: 20px 0 10px;">
+          <sc-for list="{{meter.segments}}" as="s" hint-placeholder-count="3">
+            <div class="fill" style="flex-grow: {{s.weight}}; background: {{s.color}}; border-radius: 1px; animation-delay: {{s.delay}};"></div>
+          </sc-for>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; border-top: 1px solid #DCE5E0; margin-top: 14px; padding-top: 12px;">
+          <span class="m" style="font-size: 11px; opacity: 0.55;">{{meter.count}} ACTIVE</span>
+          <span class="m num" style="font-size: 11px; opacity: 0.55;">{{meter.yearly}} / YEAR</span>
+        </div>
+      </section>
+
+      <!-- 02 — the fortnight, as a ruler. Markers select their ledger row. -->
+      <section class="rise" style="background: #FFFFFF; border: 1px solid #DCE5E0; border-radius: 2px; padding: 22px; animation-delay: 140ms;">
+        <h2 class="m" style="margin: 0 0 22px; font-size: 10px; font-weight: 500; letter-spacing: 0.16em; opacity: 0.55;">
+          <span class="idx" style="opacity: 1;">02</span>&nbsp; NEXT 14 DAYS
+        </h2>
+
+        <div style="position: relative; height: 34px; margin-bottom: 6px;">
+          <div style="position: absolute; left: 0; right: 0; top: 22px; height: 1px; background: #DCE5E0;"></div>
+          <sc-for list="{{ticks}}" as="t" hint-placeholder-count="15">
+            <div style="position: absolute; top: {{t.top}}; left: {{t.left}}; width: 1px; height: {{t.h}}; background: #DCE5E0;"></div>
+          </sc-for>
+          <sc-for list="{{upcoming}}" as="u" hint-placeholder-count="4">
+            <button type="button" class="mark {{u.markClass}}" onClick="{{u.pick}}" aria-label="{{u.label}}" style="position: absolute; top: 16px; left: {{u.left}}; width: 9px; height: 9px; margin-left: -4px; border-radius: 50%; background: {{u.color}}; box-shadow: 0 0 0 2px #FFFFFF;"></button>
+          </sc-for>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 18px;">
+          <span class="m" style="font-size: 10px; opacity: 0.4;">TODAY</span>
+          <span class="m" style="font-size: 10px; opacity: 0.4;">+7D</span>
+          <span class="m" style="font-size: 10px; opacity: 0.4;">+14D</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column;">
+          <sc-for list="{{upcoming}}" as="u" hint-placeholder-count="4">
+            <button type="button" class="row {{u.rowClass}}" onClick="{{u.pick}}" style="display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 10px 8px; border: 0; border-top: 1px solid #EEF2F0; background: transparent; cursor: pointer; font-family: inherit; color: #1C2321;">
+              <span style="width: 3px; height: 22px; background: {{u.color}}; border-radius: 1px;"></span>
+              <span style="font-size: 13px; flex-grow: 1;">{{u.name}}</span>
+              <span class="m num" style="font-size: 12px; opacity: 0.6;">{{u.price}}</span>
+              <span class="m {{u.armClass}}" style="font-size: 10px; letter-spacing: 0.08em; padding: 3px 7px; border-radius: 2px; background: {{u.chipBg}}; color: {{u.chipFg}};">{{u.when}}</span>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+
+      <!-- 03 — the address the whole product hinges on -->
+      <section class="rise" style="background: #FFFFFF; border: 1px solid #DCE5E0; border-radius: 2px; padding: 22px; animation-delay: 220ms;">
+        <h2 class="m" style="margin: 0 0 14px; font-size: 10px; font-weight: 500; letter-spacing: 0.16em; opacity: 0.55;">
+          <span class="idx" style="opacity: 1;">03</span>&nbsp; INBOUND ADDRESS
+        </h2>
+        <div style="display: flex; align-items: stretch; border: 1px solid #DCE5E0; border-radius: 2px; overflow: hidden;">
+          <input class="m" type="text" readonly value="u-8f3c91ba2e@in.bleed.app" aria-label="Your forwarding address" style="flex-grow: 1; min-width: 0; border: 0; padding: 11px 12px; font-size: 12px; background: #FBFCFB; color: #1C2321;">
+          <button type="button" class="btn m" onClick="{{copy}}" style="flex-shrink: 0; font-size: 10px; letter-spacing: 0.1em; padding: 0 16px; border: 0; border-left: 1px solid #DCE5E0; background: {{copyBg}}; color: {{copyFg}}; cursor: pointer;">{{copyLabel}}</button>
+        </div>
+        <p style="margin: 12px 0 0; font-size: 12px; line-height: 1.55; opacity: 0.6;">
+          Forward any receipt here. Bleed reads the amount, cycle and renewal date, then logs it &mdash; no typing.
+        </p>
+      </section>
+    </div>
+
+    <!-- ===== Ledger ===== -->
+    <section class="rise" style="background: #FFFFFF; border: 1px solid #DCE5E0; border-radius: 2px; animation-delay: 100ms; align-self: start;">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 22px 22px 16px;">
+        <h2 class="m" style="margin: 0; font-size: 10px; font-weight: 500; letter-spacing: 0.16em; opacity: 0.55;">
+          <span class="idx" style="opacity: 1;">04</span>&nbsp; LEDGER
+        </h2>
+        <div style="display: flex; gap: 6px;">
+          <sc-for list="{{sorts}}" as="s" hint-placeholder-count="2">
+            <button type="button" class="btn m" onClick="{{s.pick}}" aria-pressed="{{s.on}}" style="font-size: 10px; letter-spacing: 0.08em; padding: 6px 10px; border: 1px solid {{s.border}}; border-radius: 2px; background: {{s.bg}}; color: #1C2321; opacity: {{s.op}}; cursor: pointer;">{{s.label}}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <div class="m" style="display: grid; grid-template-columns: minmax(0, 1fr) 96px 132px 128px 20px; gap: 16px; padding: 0 22px 9px; font-size: 10px; letter-spacing: 0.12em; opacity: 0.4; border-bottom: 1px solid #DCE5E0;">
+        <span>SERVICE</span>
+        <span>CYCLE</span>
+        <span>RENEWS</span>
+        <span style="text-align: right;">MONTHLY</span>
+        <span></span>
+      </div>
+
+      <sc-for list="{{ledger}}" as="r" hint-placeholder-count="7">
+        <div style="border-bottom: 1px solid #EEF2F0;">
+          <button type="button" class="row {{r.rowClass}}" onClick="{{r.toggle}}" aria-expanded="{{r.open}}" style="display: grid; grid-template-columns: minmax(0, 1fr) 96px 132px 128px 20px; gap: 16px; align-items: center; width: 100%; text-align: left; padding: 14px 22px; border: 0; background: transparent; cursor: pointer; font-family: inherit; color: #1C2321;">
+            <span style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+              <span aria-hidden="true" style="flex-shrink: 0; width: 26px; height: 26px; border-radius: 2px; background: {{r.brand}}; color: {{r.brandInk}}; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">{{r.initial}}</span>
+              <span style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{r.name}}</span>
+              <span class="m" style="flex-shrink: 0; font-size: 9px; letter-spacing: 0.08em; padding: 2px 5px; border-radius: 2px; background: {{r.tagBg}}; color: {{r.tagFg}};">{{r.tag}}</span>
+            </span>
+            <span class="m" style="font-size: 11px; letter-spacing: 0.06em; opacity: 0.55;">{{r.cycle}}</span>
+            <span class="m num" style="font-size: 12px; opacity: 0.7;">{{r.renews}}</span>
+            <span class="m num" style="font-size: 14px; text-align: right;">{{r.monthly}}</span>
+            <span class="chev m" aria-hidden="true" style="font-size: 12px; opacity: 0.3; text-align: right;">&rsaquo;</span>
+          </button>
+
+          <sc-if value="{{r.open}}" hint-placeholder-val="{{ false }}">
+            <div class="unfold" style="padding: 4px 22px 20px; background: #FFFFFF;">
+              <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding: 16px; border: 1px solid #EEF2F0; border-radius: 2px; background: #FBFCFB;">
+                <div>
+                  <div class="m" style="font-size: 9px; letter-spacing: 0.12em; opacity: 0.45;">LISTED PRICE</div>
+                  <div class="m num" style="font-size: 15px; margin-top: 5px;">{{r.price}}</div>
+                </div>
+                <div>
+                  <div class="m" style="font-size: 9px; letter-spacing: 0.12em; opacity: 0.45;">REMINDER</div>
+                  <div class="m num" style="font-size: 15px; margin-top: 5px;">{{r.reminder}}</div>
+                </div>
+                <div>
+                  <div class="m" style="font-size: 9px; letter-spacing: 0.12em; opacity: 0.45;">SOURCE</div>
+                  <div class="m" style="font-size: 15px; margin-top: 5px;">{{r.source}}</div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 12px;">
+                <button type="button" class="btn m" style="font-size: 10px; letter-spacing: 0.1em; padding: 9px 14px; border: 0; border-radius: 2px; background: #2F6F5E; color: #F7F8F6; cursor: pointer;">EDIT</button>
+                <button type="button" class="btn m" style="font-size: 10px; letter-spacing: 0.1em; padding: 9px 14px; border: 1px solid #DCE5E0; border-radius: 2px; background: #FFFFFF; color: #1C2321; cursor: pointer;">MARK CANCELLED</button>
+                <button type="button" class="btn m" style="margin-left: auto; font-size: 10px; letter-spacing: 0.1em; padding: 9px 14px; border: 1px solid #B4573F; border-radius: 2px; background: transparent; color: #B4573F; cursor: pointer;">REMOVE</button>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+
+      <div style="display: flex; justify-content: space-between; padding: 16px 22px;">
+        <span class="m" style="font-size: 11px; opacity: 0.45;">7 LOGGED &middot; 5 FROM EMAIL</span>
+        <span class="m" style="font-size: 11px; opacity: 0.45;">LAST SYNC 4 MIN AGO</span>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"accent":{"editor":"color","default":"#2F6F5E","options":["#2F6F5E","#1C2321","#B4573F","#3A5568"],"section":"Theme"}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { cur: 'NGN', copied: false, sort: 'cost', openId: 'netflix' };
+  }
+
+  renderVals() {
+    const accent = this.props.accent ?? '#2F6F5E';
+    const s = this.state;
+
+    // Sample figures — representative of a real account, not live data.
+    const books = {
+      NGN: {
+        symbol: '₦', whole: '11,400', cents: '.00', count: '3', yearly: '₦136,800',
+        segments: [{ w: 79, c: accent }, { w: 22, c: '#5E9080' }, { w: 13, c: '#9BBBB0' }],
+      },
+      USD: {
+        symbol: '$', whole: '114', cents: '.99', count: '4', yearly: '$1,379.88',
+        segments: [{ w: 60, c: accent }, { w: 20, c: '#5E9080' }, { w: 20, c: '#9BBBB0' }, { w: 15, c: '#C6D8D1' }],
+      },
+    };
+
+    const codes = ['NGN', 'USD'];
+    const activeIndex = codes.indexOf(s.cur);
+    const currencies = codes.map((code) => ({
+      code,
+      on: code === s.cur,
+      fg: code === s.cur ? '#F7F8F6' : 'rgba(28,35,33,0.55)',
+      pick: () => this.setState({ cur: code }),
+    }));
+
+    const book = books[s.cur];
+    const meter = {
+      symbol: book.symbol, whole: book.whole, cents: book.cents,
+      count: book.count, yearly: book.yearly,
+      segments: book.segments.map((seg, i) => ({
+        weight: seg.w, color: seg.c, delay: (100 + i * 80) + 'ms',
+      })),
+    };
+
+    const ticks = [];
+    for (let d = 0; d <= 14; d++) {
+      const major = d % 7 === 0;
+      ticks.push({
+        left: 'calc(' + ((d / 14) * 100) + '% - 0.5px)',
+        top: major ? '14px' : '18px',
+        h: major ? '9px' : '5px',
+      });
+    }
+
+    const upcoming = [
+      { id: 'claude', name: 'Claude Pro', price: '$20.00', days: 2, color: '#B4573F', when: '2 DAYS' },
+      { id: 'netflix', name: 'Netflix', price: '₦7,900', days: 5, color: accent, when: '5 DAYS' },
+      { id: 'figma', name: 'Figma', price: '$15.00', days: 9, color: accent, when: '9 DAYS' },
+      { id: 'spotify', name: 'Spotify', price: '₦1,300', days: 13, color: '#9BBBB0', when: '13 DAYS' },
+    ].map((u) => ({
+      name: u.name, price: u.price, when: u.when, color: u.color,
+      left: ((u.days / 14) * 100) + '%',
+      label: u.name + ' renews in ' + u.days + ' days',
+      markClass: s.openId === u.id ? 'on' : '',
+      rowClass: s.openId === u.id ? 'on' : '',
+      armClass: u.days <= 2 ? 'arm' : '',
+      chipBg: u.days <= 2 ? '#FBF2EF' : '#F2F5F3',
+      chipFg: u.days <= 2 ? '#B4573F' : 'rgba(28,35,33,0.55)',
+      // Selecting on the ruler opens the matching ledger row, so the two
+      // views of the same data stay tied together.
+      pick: () => this.setState({ openId: s.openId === u.id ? null : u.id }),
+    }));
+
+    const sorts = [
+      { id: 'cost', label: 'COST ↓' },
+      { id: 'renewal', label: 'RENEWAL' },
+    ].map((o) => ({
+      label: o.label,
+      on: s.sort === o.id,
+      bg: s.sort === o.id ? '#FFFFFF' : 'transparent',
+      border: s.sort === o.id ? '#DCE5E0' : 'transparent',
+      op: s.sort === o.id ? '1' : '0.5',
+      pick: () => this.setState({ sort: o.id }),
+    }));
+
+    const rows = [
+      { id: 'adobe', name: 'Adobe Creative Cloud', initial: 'A', brand: '#DA1F26', brandInk: '#FFFFFF', cycle: 'YEARLY', renews: '14 MAR 2027', monthly: '$59.99', usd: 59.99, order: 6, tag: 'EMAIL', price: '$719.88 / yr', reminder: '11 MAR, 9:00', source: 'Forwarded receipt' },
+      { id: 'claude', name: 'Claude Pro', initial: 'C', brand: '#DA7756', brandInk: '#FFFFFF', cycle: 'MONTHLY', renews: '14 SEP 2026', monthly: '$20.00', usd: 20, order: 1, tag: 'EMAIL', price: '$20.00 / mo', reminder: '11 SEP, 9:00', source: 'Forwarded receipt' },
+      { id: 'vercel', name: 'Vercel Pro', initial: 'V', brand: '#1C2321', brandInk: '#FFFFFF', cycle: 'MONTHLY', renews: '01 OCT 2026', monthly: '$20.00', usd: 20, order: 5, tag: 'MANUAL', price: '$20.00 / mo', reminder: '28 SEP, 9:00', source: 'Added by hand' },
+      { id: 'figma', name: 'Figma Professional', initial: 'F', brand: '#A259FF', brandInk: '#FFFFFF', cycle: 'MONTHLY', renews: '21 SEP 2026', monthly: '$15.00', usd: 15, order: 3, tag: 'EMAIL', price: '$15.00 / mo', reminder: '18 SEP, 9:00', source: 'Forwarded receipt' },
+      { id: 'netflix', name: 'Netflix', initial: 'N', brand: '#E50914', brandInk: '#FFFFFF', cycle: 'MONTHLY', renews: '17 SEP 2026', monthly: '₦7,900', usd: 5.1, order: 2, tag: 'EMAIL', price: '₦7,900 / mo', reminder: '14 SEP, 9:00', source: 'Forwarded receipt' },
+      { id: 'youtube', name: 'YouTube Premium', initial: 'Y', brand: '#FF0000', brandInk: '#FFFFFF', cycle: 'MONTHLY', renews: '28 SEP 2026', monthly: '₦2,200', usd: 1.4, order: 4, tag: 'EMAIL', price: '₦2,200 / mo', reminder: '25 SEP, 9:00', source: 'Forwarded receipt' },
+      // Spotify is declared text:'dark' in lib/utils/brandColors.ts — ink on
+      // green, not the white the shipped list hardcodes at ~2.2:1.
+      { id: 'spotify', name: 'Spotify Premium', initial: 'S', brand: '#1DB954', brandInk: '#1C2321', cycle: 'MONTHLY', renews: '25 SEP 2026', monthly: '₦1,300', usd: 0.84, order: 7, tag: 'UNUSED 74D', unused: true, price: '₦1,300 / mo', reminder: '22 SEP, 9:00', source: 'Forwarded receipt' },
+    ];
+
+    const sorted = rows.slice().sort((a, b) =>
+      s.sort === 'cost' ? b.usd - a.usd : a.order - b.order,
+    );
+
+    const ledger = sorted.map((r) => ({
+      name: r.name, initial: r.initial, brand: r.brand, brandInk: r.brandInk,
+      cycle: r.cycle, renews: r.renews, monthly: r.monthly, tag: r.tag,
+      price: r.price, reminder: r.reminder, source: r.source,
+      tagBg: r.unused ? '#FBF2EF' : '#F2F5F3',
+      tagFg: r.unused ? '#B4573F' : 'rgba(28,35,33,0.5)',
+      open: s.openId === r.id,
+      rowClass: s.openId === r.id ? 'on' : '',
+      toggle: () => this.setState({ openId: s.openId === r.id ? null : r.id }),
+    }));
+
+    return {
+      currencies,
+      seg: { width: '54px', offset: (activeIndex * 54) + 'px' },
+      meter,
+      ticks,
+      upcoming,
+      sorts,
+      ledger,
+      copyLabel: s.copied ? 'COPIED' : 'COPY',
+      copyBg: s.copied ? '#2F6F5E' : '#FFFFFF',
+      copyFg: s.copied ? '#F7F8F6' : '#2F6F5E',
+      copy: () => {
+        this.setState({ copied: true });
+        setTimeout(() => this.setState({ copied: false }), 1600);
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>
