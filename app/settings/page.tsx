@@ -74,26 +74,6 @@ export default async function SettingsPage() {
           </Link>
         </div>
 
-        {/* Sticky Mobile Bookmark Navigation Bar */}
-        <div className='sticky top-2 z-20 -mx-4 mb-6 bg-paper/80 px-4 py-2 backdrop-blur-md sm:mx-0 sm:px-0 lg:hidden'>
-          <div className='flex gap-2 overflow-x-auto pb-1 scrollbar-none'>
-            {navItems.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-xs font-medium shadow-xs transition-all active:scale-95 ${
-                  item.danger
-                    ? 'border-red-200 bg-red-50/80 text-red-600 active:bg-red-100'
-                    : 'border-sage/60 bg-white text-ink/70 hover:border-sage hover:text-ink active:bg-sage/20'
-                }`}
-              >
-                <item.icon size={13} />
-                <span>{item.label}</span>
-              </a>
-            ))}
-          </div>
-        </div>
-
         {/* Main Grid Layout */}
         <div className='grid gap-6 sm:gap-8 lg:grid-cols-[220px_minmax(0,1fr)]'>
           {/* Sticky Desktop Navigation */}
@@ -135,17 +115,20 @@ export default async function SettingsPage() {
                 </p>
               </div>
 
-              <div className='mt-4 space-y-4 sm:mt-5'>
-                <div className='rounded-xl border border-sage/40 bg-paper/60 p-3.5 sm:p-4'>
-                  <span className='block font-mono text-[10px] font-semibold uppercase tracking-wider text-ink/40'>
-                    Primary Email
-                  </span>
-                  <p className='mt-1 truncate font-mono text-xs font-medium text-ink sm:text-sm'>
-                    {user.email}
-                  </p>
-                </div>
+              <div className='mt-4 sm:mt-5'>
+                <div className='flex items-center gap-3 rounded-xl border border-sage/40 bg-paper/60 p-3.5 sm:p-4'>
+                  {/* min-w-0 is what lets the address actually truncate: a flex
+                      child defaults to min-width:auto and refuses to shrink
+                      below its content, which would push the button off. */}
+                  <div className='min-w-0 flex-1'>
+                    <span className='block font-mono text-[10px] font-semibold uppercase tracking-wider text-ink/40'>
+                      Primary Email
+                    </span>
+                    <p className='mt-1 truncate font-mono text-xs font-medium text-ink sm:text-sm'>
+                      {user.email}
+                    </p>
+                  </div>
 
-                <div className='pt-1'>
                   <UpdateAccountButton currentEmail={user.email ?? ''} />
                 </div>
               </div>
