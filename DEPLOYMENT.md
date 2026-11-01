@@ -55,21 +55,21 @@ to an exact version in the service's variables, which takes precedence.
 
 ## Environment variables
 
-| Name | Purpose |
-| --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key (RLS-scoped) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-only. Used by the cron, inbound-email, account deletion, and push fan-out |
-| `DATABASE_URL` | Direct Postgres connection. Not used by the app at runtime — only for running migrations and regenerating `supabase/000_baseline.sql` |
-| `NEXT_PUBLIC_SITE_URL` | Public origin, e.g. `https://bleed.up.railway.app`. **Required** — every server-side redirect is built from it rather than from `request.url`, because Railway's proxy can make the request's host reflect internal container networking |
-| `CRON_SECRET` | Bearer token for `/api/cron/reminders`. The route fails closed if this is unset |
-| `GROQ_API_KEY` / `GROQ_MODEL` | Extraction model. `GROQ_MODEL` defaults to `openai/gpt-oss-20b` |
-| `RESEND_API_KEY` | Outbound and inbound email |
-| `RESEND_FROM_ADDRESS` | Sender for reminders |
-| `RESEND_INBOUND_WEBHOOK_SECRET` | Svix signing secret for `/api/inbound-email` |
-| `NEXT_PUBLIC_INBOUND_DOMAIN` | Domain shown after a user's inbound address |
-| `VAPID_SUBJECT` / `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | Web push |
-| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Rate limiting |
+| Name                                                                   | Purpose                                                                                                                                                                                                                              |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_SUPABASE_URL`                                             | Supabase project URL                                                                                                                                                                                                                 |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`                                        | Supabase anon key (RLS-scoped)                                                                                                                                                                                                       |
+| `SUPABASE_SERVICE_ROLE_KEY`                                            | Server-only. Used by the cron, inbound-email, account deletion, and push fan-out                                                                                                                                                     |
+| `DATABASE_URL`                                                         | Direct Postgres connection. Not used by the app at runtime — only for running migrations and regenerating `supabase/000_baseline.sql`                                                                                                |
+| `NEXT_PUBLIC_SITE_URL`                                                 | Public origin, e.g. `https://bleed.yusola.pro`. **Required** — every server-side redirect is built from it rather than from `request.url`, because Railway's proxy can make the request's host reflect internal container networking |
+| `CRON_SECRET`                                                          | Bearer token for `/api/cron/reminders`. The route fails closed if this is unset                                                                                                                                                      |
+| `GROQ_API_KEY` / `GROQ_MODEL`                                          | Extraction model. `GROQ_MODEL` defaults to `openai/gpt-oss-20b`                                                                                                                                                                      |
+| `RESEND_API_KEY`                                                       | Outbound and inbound email                                                                                                                                                                                                           |
+| `RESEND_FROM_ADDRESS`                                                  | Sender for reminders                                                                                                                                                                                                                 |
+| `RESEND_INBOUND_WEBHOOK_SECRET`                                        | Svix signing secret for `/api/inbound-email`                                                                                                                                                                                         |
+| `NEXT_PUBLIC_INBOUND_DOMAIN`                                           | Domain shown after a user's inbound address                                                                                                                                                                                          |
+| `VAPID_SUBJECT` / `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | Web push                                                                                                                                                                                                                             |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`                  | Rate limiting                                                                                                                                                                                                                        |
 
 `NEXT_PUBLIC_INBOUND_ADDRESS` and `REMINDER_TO_EMAIL` appear in `.env.local` but
 are not referenced anywhere in the code — they are leftovers and can be removed.

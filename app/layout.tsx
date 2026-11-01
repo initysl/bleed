@@ -34,7 +34,7 @@ const quantico = Quantico({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://bleed.up.railway.app'),
+  metadataBase: new URL('https://bleed.yusola.pro'),
   title: {
     default: 'Bleed - See exactly what your subscriptions are costing you',
     template: '%s · Bleed',
@@ -54,11 +54,11 @@ export const metadata: Metadata = {
     title: 'Bleed - See exactly what your subscriptions are costing you',
     description:
       'Forward a receipt, Bleed reads it automatically. Get reminded before anything renews.',
-    url: 'https://bleed.up.railway.app',
+    url: 'https://bleed.yusola.pro',
     siteName: 'Bleed',
     images: [
       {
-        url: 'https://bleed.up.railway.app/og-image.png',
+        url: 'https://bleed.yusola.pro/og-image.png',
         width: 1200,
         height: 630,
         alt: 'Bleed',
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
     title: 'Bleed - See exactly what your subscriptions are costing you',
     description:
       'Forward a receipt, Bleed reads it automatically. Get reminded before anything renews.',
-    images: ['https://bleed.up.railway.app/og-image.png'],
+    images: ['https://bleed.yusola.pro/og-image.png'],
   },
 };
 
