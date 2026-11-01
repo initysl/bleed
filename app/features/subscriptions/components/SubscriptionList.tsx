@@ -74,7 +74,7 @@ export function SubscriptionList({
             // colour utilities below were silently doing nothing and every card
             // drew borderless. The editing state's border-ink/20 in particular
             // never appeared — only its ring did.
-            className={`overflow-hidden rounded-2xl border bg-white transition-all duration-200 ${
+            className={`overflow-hidden rounded-2xl border bg-surface transition-all duration-200 ${
               isEditing
                 ? 'border-ink/20 shadow-md ring-1 ring-ink/10'
                 : 'border-sage/60 shadow-sm hover:border-sage/80 hover:shadow'
@@ -106,7 +106,7 @@ export function SubscriptionList({
                       backgroundColor: style.bg,
                       color: style.text === 'dark' ? '#1C2321' : '#FFFFFF',
                     }}
-                    className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold shadow-sm font-mono'
+                    className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold shadow-sm font-mono dark:ring-1 dark:ring-inset dark:ring-ink/10'
                     aria-hidden='true'
                   >
                     {sub.name.charAt(0).toUpperCase()}
@@ -120,8 +120,8 @@ export function SubscriptionList({
                       </h3>
 
                       {unused && (
-                        <span className='inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200/60 px-2 py-0.5 text-[10px] font-mono font-medium text-amber-700'>
-                          <span className='h-1.5 w-1.5 rounded-full bg-amber-500' />
+                        <span className='inline-flex items-center gap-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-900/50 px-2 py-0.5 text-[10px] font-mono font-medium text-amber-700 dark:text-amber-300'>
+                          <span className='h-1.5 w-1.5 rounded-full bg-amber-500 dark:bg-amber-400' />
                           Unused
                         </span>
                       )}

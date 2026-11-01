@@ -1,27 +1,108 @@
 @import 'tailwindcss';
 
-@theme {
-  --color-paper: #f7f8f6;
-  --color-ink: #1c2321;
-  --color-pine: #2f6f5e;
-  --color-sage: #dce5e0;
-  --color-rust: #b4573f;
+/* ---------------------------------------------------------------------------
+   Theming
 
+   `data-theme` on <html> is always an explicit "light" or "dark" — the inline
+   script in app/layout.tsx resolves the "system" preference to a concrete
+   value before first paint. The media queries below are the no-JS fallback,
+   which is why they are scoped to `:root:not([data-theme])`: once the script
+   has run they can never apply and fight the explicit choice.
+--------------------------------------------------------------------------- */
+@custom-variant dark {
+  &:where([data-theme='dark'], [data-theme='dark'] *) {
+    @slot;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme]), :root:not([data-theme]) *) {
+      @slot;
+    }
+  }
+}
+
+/* `inline` is load-bearing, not a style preference. A plain @theme block bakes
+   each literal into every generated utility — `text-ink` would compile to
+   `color: #1c2321` and no runtime variable swap could ever reach it. `inline`
+   emits `color: var(--ink)` instead, so all ~334 token utilities in the app
+   follow the theme without being touched. */
+@theme inline {
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-pine: var(--pine);
+  --color-sage: var(--sage);
+  --color-rust: var(--rust);
+
+  /* Cards, inputs and drawers — the layer that sits ON the page background.
+     Previously hardcoded as `bg-white`, which has no dark counterpart. */
+  --color-surface: var(--surface);
+}
+
+@theme {
   --font-display: var(--font-space-grotesk), sans-serif;
   --font-body: var(--font-inter), sans-serif;
   --font-mono: var(--font-plex-mono), monospace;
   --font-mini: var(--font-quantico), sans-serif;
 }
 
+:root {
+  --paper: #f7f8f6;
+  --ink: #1c2321;
+  --pine: #2f6f5e;
+  --sage: #dce5e0;
+  --rust: #b4573f;
+  --surface: #ffffff;
+
+  /* Declaring the scheme explicitly stops the browser rendering its own
+     controls against the wrong ground: without it, a visitor whose OS is in
+     dark mode got dark <select>, <input type="date"> and
+     <input type="datetime-local"> widgets sitting inside white cards. Now that
+     there is a real dark theme it also has to follow it, or the pickers invert
+     relative to everything around them. */
+  color-scheme: light;
+}
+
+/* The dark theme is the light one turned over: the ink becomes the ground and
+   the paper becomes the text. Cards are the brand ink #1c2321 exactly, the
+   page sits one step below it on the same 176° hue, and the text takes the
+   light paper's warmer hue rather than a neutral white. Neutrals that drift
+   off that hue read as muddy grey-green instead of Bleed.
+
+   Every pair was checked against WCAG rather than eyeballed, including the
+   opacity tiers as they actually composite. Body text is 14.7:1 on the page
+   and 13.1:1 on cards, 60% ink is 5.6:1, pine text is 7.2:1 and rust 6.2:1 —
+   every tier at or above its light-mode counterpart. The accent lightens so
+   `bg-pine text-paper` buttons invert to dark-on-mint at 8.1:1 rather than
+   going muddy, and sage is lifted slightly further than a straight inversion
+   because hairlines read weaker on a dark ground.
+
+   Keep the two blocks below in sync; CSS has no way to share them. */
+[data-theme='dark'] {
+  --paper: #111816;
+  --ink: #e6e9e4;
+  --pine: #66bea4;
+  --sage: #313c38;
+  --rust: #e7876b;
+  --surface: #1c2321;
+
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --paper: #111816;
+    --ink: #e6e9e4;
+    --pine: #66bea4;
+    --sage: #313c38;
+    --rust: #e7876b;
+    --surface: #1c2321;
+
+    color-scheme: dark;
+  }
+}
+
 html {
   scroll-behavior: smooth;
-
-  /* The app has no dark theme. Declaring the scheme explicitly stops the
-     browser rendering its own controls dark: without this, a visitor whose OS
-     is in dark mode got dark <select>, <input type="date"> and
-     <input type="datetime-local"> widgets sitting inside white cards, and the
-     datetime picker in particular was close to unreadable. */
-  color-scheme: light;
 }
 
 body {

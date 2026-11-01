@@ -12,7 +12,7 @@ import {
   FiTrendingUp,
 } from 'react-icons/fi';
 
-import bleedLogo from '@/public/bleedlogo.svg';
+import { BleedLogo } from '@/app/components/ui/BleedLogo';
 import heroPhone from '@/public/hero-phone.png';
 import addModalPhone from '@/public/add-modal-phone.png';
 import fullDashboard from '@/public/full-dashboard.png';
@@ -46,7 +46,7 @@ const FEATURE_LIST: readonly FeatureItem[] = [
       'Forward any receipt or confirmation email directly to your custom Bleed inbox, or type plain text like "signed up for Spotify premium, $11.99/month".',
     tag: 'Auto-Extraction',
     theme: {
-      bg: 'bg-emerald-50 text-emerald-600',
+      bg: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400',
       hoverText: 'group-hover:text-emerald-600',
       hoverGlow: 'hover:shadow-[0_20px_40px_rgba(16,185,129,0.12)]',
     },
@@ -59,7 +59,7 @@ const FEATURE_LIST: readonly FeatureItem[] = [
       'View your total monthly and yearly spend with live metrics. Subscriptions are sorted by cost with automatic flags for unused services.',
     tag: 'Live Analytics',
     theme: {
-      bg: 'bg-violet-50 text-violet-600',
+      bg: 'bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400',
       hoverText: 'group-hover:text-violet-600',
       hoverGlow: 'hover:shadow-[0_20px_40px_rgba(139,92,246,0.12)]',
     },
@@ -72,7 +72,7 @@ const FEATURE_LIST: readonly FeatureItem[] = [
       'Get email and push notifications days before your card is charged: &ldquo;Netflix renews in 3 days — $15.49/mo. Cancel or keep?&rdquo;',
     tag: 'Smart Alerts',
     theme: {
-      bg: 'bg-amber-50 text-amber-600',
+      bg: 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400',
       hoverText: 'group-hover:text-amber-600',
       hoverGlow: 'hover:shadow-[0_20px_40px_rgba(245,158,11,0.12)]',
     },
@@ -85,7 +85,7 @@ const FEATURE_LIST: readonly FeatureItem[] = [
       'After every renewal, Bleed automatically updates the next billing cycle. Set it once or forward a receipt, and never touch it again.',
     tag: 'Automated',
     theme: {
-      bg: 'bg-sky-50 text-sky-600',
+      bg: 'bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400',
       hoverText: 'group-hover:text-sky-600',
       hoverGlow: 'hover:shadow-[0_20px_40px_rgba(14,165,233,0.12)]',
     },
@@ -165,26 +165,26 @@ export default function BleedLandingPage({
   };
 
   return (
-    <div className='min-h-screen bg-white text-zinc-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 overflow-x-hidden scroll-smooth'>
+    <div className='min-h-screen bg-white dark:bg-paper text-zinc-900 dark:text-ink font-sans selection:bg-emerald-100 selection:text-emerald-900 overflow-x-hidden scroll-smooth'>
       {/* Top Banner Navigation */}
-      <header className='font-mono sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-zinc-100 px-6'>
+      <header className='font-mono sticky top-0 z-50 bg-white/90 dark:bg-paper/90 backdrop-blur-md border-b border-zinc-100 dark:border-sage px-6'>
         <div className='max-w-7xl mx-auto h-20 flex items-center justify-between'>
           <div className='flex items-center gap-3'>
-            <Image src={bleedLogo} alt='Bleed Logo' width={100} priority />
+            <BleedLogo width={100} fetchPriority='high' />
           </div>
 
-          <nav className='hidden md:flex items-center gap-8 text-sm font-medium text-zinc-600'>
+          <nav className='hidden md:flex items-center gap-8 text-sm font-medium text-zinc-600 dark:text-ink/70'>
             <a
               href='#how-it-works'
               onClick={(e) => handleScrollTo(e, 'how-it-works')}
-              className='hover:text-emerald-800 transition-colors'
+              className='hover:text-emerald-800 dark:hover:text-pine transition-colors'
             >
               How it Works
             </a>
             <a
               href='#features'
               onClick={(e) => handleScrollTo(e, 'features')}
-              className='hover:text-emerald-800 transition-colors'
+              className='hover:text-emerald-800 dark:hover:text-pine transition-colors'
             >
               Features
             </a>
@@ -204,14 +204,14 @@ export default function BleedLandingPage({
           >
             <motion.h1
               variants={fadeInUp}
-              className='text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-zinc-900 leading-[1.12]'
+              className='text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-ink leading-[1.12]'
             >
               Stop recurring charges from draining your money.
             </motion.h1>
 
             <motion.p
               variants={fadeInUp}
-              className='text-lg sm:text-xl text-zinc-600 max-w-2xl font-normal leading-relaxed'
+              className='text-lg sm:text-xl text-zinc-600 dark:text-ink/70 max-w-2xl font-normal leading-relaxed'
             >
               No manual data entry. Forward receipts or type plain text - Bleed
               automatically extracts costs, tracks your real monthly spend, and
@@ -221,14 +221,14 @@ export default function BleedLandingPage({
             {/* Live Interactive Forwarding Card Preview */}
             <motion.div
               variants={fadeInUp}
-              className='p-4 sm:p-5 rounded-2xl bg-zinc-50 border border-zinc-200/80 max-w-xl space-y-3 shadow-sm'
+              className='p-4 sm:p-5 rounded-2xl bg-zinc-50 dark:bg-surface border border-zinc-200/80 dark:border-sage/80 max-w-xl space-y-3 shadow-sm'
             >
-              <div className='flex items-center justify-between text-xs font-semibold text-zinc-500 uppercase tracking-wide'>
+              <div className='flex items-center justify-between text-xs font-semibold text-zinc-500 dark:text-ink/60 uppercase tracking-wide'>
                 <span>Example Forwarding Address</span>
                 <span>Frictionless Sync</span>
               </div>
-              <div className='flex items-center justify-between gap-3 bg-white px-4 py-3 rounded-xl border border-zinc-200 shadow-xs'>
-                <code className='text-sm font-mono text-zinc-800 truncate'>
+              <div className='flex items-center justify-between gap-3 bg-white dark:bg-paper px-4 py-3 rounded-xl border border-zinc-200 dark:border-sage shadow-xs'>
+                <code className='text-sm font-mono text-zinc-800 dark:text-ink truncate'>
                   {EXAMPLE_INBOX_ADDRESS}
                 </code>
                 <motion.button
@@ -236,7 +236,7 @@ export default function BleedLandingPage({
                   whileTap={{ scale: 0.97 }}
                   onClick={handleCopyInbox}
                   type='button'
-                  className='px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-800 text-white hover:bg-emerald-900 transition-colors flex items-center gap-1.5 shrink-0'
+                  className='px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-800 dark:bg-pine text-white dark:text-paper hover:bg-emerald-900 dark:hover:bg-pine/90 transition-colors flex items-center gap-1.5 shrink-0'
                 >
                   {copiedInbox ? (
                     <>
@@ -249,7 +249,7 @@ export default function BleedLandingPage({
                   )}
                 </motion.button>
               </div>
-              <p className='text-xs text-zinc-500'>
+              <p className='text-xs text-zinc-500 dark:text-ink/60'>
                 Every real account gets its own private version of this address
                 - forward a receipt to it, and Bleed reads it automatically.
               </p>
@@ -263,7 +263,7 @@ export default function BleedLandingPage({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 href={ctaHref}
-                className='px-7 py-3.5 rounded-xl font-semibold bg-emerald-800 text-white hover:bg-emerald-900 transition-all shadow-md hover:shadow-lg flex items-center gap-2'
+                className='px-7 py-3.5 rounded-xl font-semibold bg-emerald-800 dark:bg-pine text-white dark:text-paper hover:bg-emerald-900 dark:hover:bg-pine/90 transition-all shadow-md hover:shadow-lg flex items-center gap-2'
               >
                 {heroCtaLabel}
               </motion.a>
@@ -272,7 +272,7 @@ export default function BleedLandingPage({
                 whileTap={{ scale: 0.98 }}
                 href='#how-it-works'
                 onClick={(e) => handleScrollTo(e, 'how-it-works')}
-                className='px-7 py-3.5 rounded-xl font-semibold bg-zinc-100 text-zinc-800 hover:bg-zinc-200 transition-colors'
+                className='px-7 py-3.5 rounded-xl font-semibold bg-zinc-100 dark:bg-sage/60 text-zinc-800 dark:text-ink hover:bg-zinc-200 dark:hover:bg-sage transition-colors'
               >
                 See How It Works
               </motion.a>
@@ -327,13 +327,15 @@ export default function BleedLandingPage({
                   delay: 0.8,
                   ease: [0.22, 1, 0.36, 1],
                 }}
-                className='absolute -bottom-6 -left-6 z-20 bg-white p-4 rounded-2xl border border-zinc-200 shadow-xl max-w-65 space-y-2'
+                className='absolute -bottom-6 -left-6 z-20 bg-white dark:bg-surface p-4 rounded-2xl border border-zinc-200 dark:border-sage shadow-xl max-w-65 space-y-2'
               >
-                <div className='flex items-center gap-2 text-emerald-800 text-xs font-bold uppercase tracking-wider'>
-                  <FiBell className='w-4 h-4' aria-hidden='true' /> Proactive Nudge
+                <div className='flex items-center gap-2 text-emerald-800 dark:text-pine text-xs font-bold uppercase tracking-wider'>
+                  <FiBell className='w-4 h-4' aria-hidden='true' /> Proactive
+                  Nudge
                 </div>
-                <p className='text-xs text-zinc-700 font-medium leading-snug'>
-                  &ldquo;Netflix renews in 3 days — $15.49/mo. Cancel or keep?&rdquo;
+                <p className='text-xs text-zinc-700 dark:text-ink/80 font-medium leading-snug'>
+                  &ldquo;Netflix renews in 3 days — $15.49/mo. Cancel or
+                  keep?&rdquo;
                 </p>
               </motion.div>
             </div>
@@ -344,7 +346,7 @@ export default function BleedLandingPage({
       {/* Real Spend Highlight Strip */}
       <section
         id='how-it-works'
-        className='py-20 bg-zinc-50/50 border-b border-zinc-100 scroll-mt-20'
+        className='py-20 bg-zinc-50/50 dark:bg-surface/50 border-b border-zinc-100 dark:border-sage scroll-mt-20'
       >
         <div className='max-w-7xl mx-auto px-6'>
           <motion.div
@@ -354,13 +356,14 @@ export default function BleedLandingPage({
             variants={fadeInUp}
             className='text-center max-w-3xl mx-auto space-y-4 mb-16'
           >
-            <h2 className='font-mini text-xs font-bold text-emerald-800 uppercase tracking-widest'>
+            <h2 className='font-mini text-xs font-bold text-emerald-800 dark:text-pine uppercase tracking-widest'>
               How Bleed Operates
             </h2>
-            <h3 className='font-display text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight'>
-              Turn &ldquo;forgot I was paying for this&rdquo; into timely decisions.
+            <h3 className='font-display text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-ink tracking-tight'>
+              Turn &ldquo;forgot I was paying for this&rdquo; into timely
+              decisions.
             </h3>
-            <p className='font-display text-zinc-600 text-base sm:text-lg'>
+            <p className='font-display text-zinc-600 dark:text-ink/70 text-base sm:text-lg'>
               Designed from the ground up to eliminate repetitive management and
               protect your monthly cash flow.
             </p>
@@ -398,27 +401,27 @@ export default function BleedLandingPage({
                 variants={fadeInUp}
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.25 }}
-                className='group bg-white p-7 rounded-2xl border border-slate-100 shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.08)] hover:border-slate-200/80 transition-all flex flex-col justify-between'
+                className='group bg-white dark:bg-surface p-7 rounded-2xl border border-slate-100 dark:border-sage shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.08)] hover:border-slate-200/80 dark:hover:border-ink/20 transition-all flex flex-col justify-between'
               >
                 <div className='space-y-4'>
                   {/* Header: Step Icon + Stacked Header */}
                   <div className='flex items-start gap-4'>
-                    <div className='font-mini w-12 h-12 rounded-full bg-pine text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-sm'>
+                    <div className='font-mini w-12 h-12 rounded-full bg-pine text-white dark:text-paper font-bold text-sm flex items-center justify-center shrink-0 shadow-sm'>
                       {item.step}
                     </div>
 
                     <div className='space-y-0.5 pt-0.5'>
-                      <h4 className='font-display text-lg font-bold text-slate-900 leading-snug'>
+                      <h4 className='font-display text-lg font-bold text-slate-900 dark:text-ink leading-snug'>
                         {item.title}
                       </h4>
-                      <p className='font-display text-xs font-medium text-slate-400 tracking-wide'>
+                      <p className='font-display text-xs font-medium text-slate-400 dark:text-ink/50 tracking-wide'>
                         {item.tag}
                       </p>
                     </div>
                   </div>
 
                   {/* Description */}
-                  <p className='text-slate-500 text-sm leading-relaxed pt-1'>
+                  <p className='text-slate-500 dark:text-ink/60 text-sm leading-relaxed pt-1'>
                     {item.text}
                   </p>
                 </div>
@@ -431,7 +434,7 @@ export default function BleedLandingPage({
       {/* Feature Section with Live Screenshots */}
       <section
         id='features'
-        className='py-24 bg-white border-b border-zinc-100 scroll-mt-20'
+        className='py-24 bg-white dark:bg-paper border-b border-zinc-100 dark:border-sage scroll-mt-20'
       >
         <div className='max-w-7xl mx-auto px-6 space-y-28'>
           {/* Feature 1: Frictionless Modal Form */}
@@ -443,19 +446,19 @@ export default function BleedLandingPage({
             className='grid grid-cols-1 lg:grid-cols-12 gap-12 items-center'
           >
             <motion.div variants={fadeInUp} className='lg:col-span-6 space-y-6'>
-              <span className='font-mini px-3 py-1 rounded-md bg-emerald-50 text-emerald-800 text-xs font-semibold uppercase tracking-wider'>
+              <span className='font-mini px-3 py-1 rounded-md bg-emerald-50 dark:bg-pine/10 text-emerald-800 dark:text-pine text-xs font-semibold uppercase tracking-wider'>
                 Zero Friction
               </span>
-              <h3 className='font-display text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight'>
+              <h3 className='font-display text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-ink tracking-tight'>
                 No endless form fields or tedious typing.
               </h3>
-              <p className='font-display text-zinc-600 text-base sm:text-lg leading-relaxed'>
+              <p className='font-display text-zinc-600 dark:text-ink/70 text-base sm:text-lg leading-relaxed'>
                 Whether adding manually or through email parsing, Bleed
                 configures exact renewal dates, reminder schedules, and
                 notification preference toggles in seconds.
               </p>
 
-              <ul className='font-mini space-y-3 pt-2 text-zinc-700 font-medium'>
+              <ul className='font-mini space-y-3 pt-2 text-zinc-700 dark:text-ink/80 font-medium'>
                 {[
                   'Automatic detection of billing currencies and cycles',
                   'Customizable reminder lead times (e.g., 3 days prior)',
@@ -466,7 +469,7 @@ export default function BleedLandingPage({
                     variants={fadeInUp}
                     className='flex items-center gap-3'
                   >
-                    <FiCheck className='w-5 h-5 text-emerald-700 shrink-0' />
+                    <FiCheck className='w-5 h-5 text-emerald-700 dark:text-pine shrink-0' />
                     {text}
                   </motion.li>
                 ))}
@@ -501,13 +504,13 @@ export default function BleedLandingPage({
               variants={fadeInUp}
               className='lg:col-span-6 lg:order-2 space-y-6'
             >
-              <span className='font-mini px-3 py-1 rounded-md bg-emerald-50 text-emerald-800 text-xs font-semibold uppercase tracking-wider'>
+              <span className='font-mini px-3 py-1 rounded-md bg-emerald-50 dark:bg-pine/10 text-emerald-800 dark:text-pine text-xs font-semibold uppercase tracking-wider'>
                 Complete Visibility
               </span>
-              <h3 className='font-display text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight'>
+              <h3 className='font-display text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-ink tracking-tight'>
                 Understand your true monthly and annual expenditure.
               </h3>
-              <p className='font-display text-zinc-600 text-base sm:text-lg leading-relaxed'>
+              <p className='font-display text-zinc-600 dark:text-ink/70 text-base sm:text-lg leading-relaxed'>
                 Get a single, clean overview of upcoming bills, total monthly
                 bleed, and active recurring services. Know exactly what you pay
                 for and when.
@@ -515,12 +518,12 @@ export default function BleedLandingPage({
             </motion.div>
 
             <motion.div variants={scaleIn} className='lg:col-span-6 lg:order-1'>
-              <div className='relative w-full aspect-16/10 rounded-2xl overflow-hidden shadow-2xl bg-zinc-50'>
+              <div className='relative w-full aspect-16/8 rounded-2xl overflow-hidden shadow-2xl bg-zinc-50 dark:bg-surface'>
                 <Image
                   src={fullDashboard}
                   alt='Bleed Web Dashboard View'
                   fill
-                  className='object-contain'
+                  className='object-cover'
                 />
               </div>
             </motion.div>
@@ -529,7 +532,7 @@ export default function BleedLandingPage({
       </section>
 
       {/* Grid Features Listing */}
-      <section className='py-24 bg-slate-50/50'>
+      <section className='py-24 bg-slate-50/50 dark:bg-surface/50'>
         <div className='max-w-7xl mx-auto px-6'>
           <motion.div
             initial='hidden'
@@ -553,7 +556,7 @@ export default function BleedLandingPage({
                   variants={fadeInUp}
                   whileHover={{ y: -4 }}
                   transition={{ duration: 0.25 }}
-                  className={`group relative bg-white p-7 rounded-2xl border border-slate-100 shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.08)] hover:border-slate-200/80 transition-all flex flex-col justify-between ${bentoSpanClass}`}
+                  className={`group relative bg-white dark:bg-surface p-7 rounded-2xl border border-slate-100 dark:border-sage shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.08)] hover:border-slate-200/80 dark:hover:border-ink/20 transition-all flex flex-col justify-between ${bentoSpanClass}`}
                 >
                   {/* Top Content Area */}
                   <div className='space-y-4'>
@@ -567,17 +570,17 @@ export default function BleedLandingPage({
 
                       {/* Stacked Title & Category/Tag */}
                       <div className='space-y-0.5 pt-0.5'>
-                        <h4 className='font-display text-lg font-bold text-slate-900 leading-snug group-hover:text-emerald-600 transition-colors'>
+                        <h4 className='font-display text-lg font-bold text-slate-900 dark:text-ink leading-snug group-hover:text-emerald-600 dark:group-hover:text-pine transition-colors'>
                           {feature.title}
                         </h4>
-                        <p className='font-mini text-xs font-medium text-slate-400 tracking-wide uppercase'>
+                        <p className='font-mini text-xs font-medium text-slate-400 dark:text-ink/50 tracking-wide uppercase'>
                           {feature.tag}
                         </p>
                       </div>
                     </div>
 
                     {/* Description */}
-                    <p className='font-display text-slate-500 text-sm leading-relaxed pt-1 max-w-2xl'>
+                    <p className='font-display text-slate-500 dark:text-ink/60 text-sm leading-relaxed pt-1 max-w-2xl'>
                       {feature.description}
                     </p>
                   </div>
@@ -589,7 +592,7 @@ export default function BleedLandingPage({
       </section>
 
       {/* Call to Action Footer Section */}
-      <section className='py-24 bg-zinc-900 text-white relative overflow-hidden'>
+      <section className='py-24 bg-zinc-900 dark:bg-surface text-white dark:text-ink relative overflow-hidden'>
         <motion.div
           initial='hidden'
           whileInView='visible'
@@ -605,7 +608,7 @@ export default function BleedLandingPage({
           </motion.h2>
           <motion.p
             variants={fadeInUp}
-            className='font-mono text-zinc-400 text-lg max-w-2xl mx-auto'
+            className='font-mono text-zinc-400 dark:text-ink/60 text-lg max-w-2xl mx-auto'
           >
             Forward your first receipt and see your real monthly spend in under
             a minute.
@@ -618,7 +621,7 @@ export default function BleedLandingPage({
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               href={ctaHref}
-              className='font-mono px-8 py-4 rounded-xl font-semibold bg-emerald-700 text-white hover:bg-emerald-800 transition-all shadow-lg flex items-center gap-2'
+              className='font-mono px-8 py-4 rounded-xl font-semibold bg-emerald-700 dark:bg-pine text-white dark:text-paper hover:bg-emerald-800 dark:hover:bg-pine/90 transition-all shadow-lg flex items-center gap-2'
             >
               {ctaLabel}
             </motion.a>
@@ -627,15 +630,10 @@ export default function BleedLandingPage({
       </section>
 
       {/* Footer Navigation */}
-      <footer className='font-mono py-12 bg-white border-t border-zinc-100 text-sm text-zinc-500'>
+      <footer className='font-mono py-12 bg-white dark:bg-paper border-t border-zinc-100 dark:border-sage text-sm text-zinc-500 dark:text-ink/60'>
         <div className='max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6'>
           <div className='flex items-center gap-3'>
-            <Image
-              src={bleedLogo}
-              alt='Bleed Logo Footer'
-              width={100}
-              className='grayscale opacity-80'
-            />
+            <BleedLogo width={100} className='grayscale opacity-80' />
           </div>
 
           <p className='text-xs'>

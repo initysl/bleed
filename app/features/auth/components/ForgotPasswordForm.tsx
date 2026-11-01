@@ -7,8 +7,7 @@ import { useForm } from '@tanstack/react-form';
 import { FiArrowLeft } from 'react-icons/fi';
 import { createClient } from '@/lib/supabase/client';
 import { emailSchema } from '@/app/features/auth/schema';
-import Image from 'next/image';
-import Logo from '@/public/bleedlogo.svg';
+import { BleedLogo } from '@/app/components/ui/BleedLogo';
 
 function firstErrorMessage(errors: unknown[]): string | null {
   if (!errors.length) return null;
@@ -61,11 +60,11 @@ export function ForgotPasswordForm() {
           opacity: 1,
           scale: 1,
         }}
-        className='w-full max-w-md rounded-4xl border border-white/50 bg-white/80 p-10'
+        className='w-full max-w-md rounded-4xl border border-white/50 dark:border-sage/60 bg-surface/80 p-10'
       >
         <div className='flex flex-col items-center text-center'>
           <div className='mx-auto mb-5 flex items-center justify-center'>
-            <Image src={Logo} alt='Bleed logo' width={110} priority={true} />
+            <BleedLogo width={110} fetchPriority='high' />
           </div>
 
           <h1 className='font-display text-3xl text-ink'>Check your inbox</h1>
@@ -105,13 +104,13 @@ export function ForgotPasswordForm() {
       transition={{
         duration: 0.4,
       }}
-      className='w-full max-w-md rounded-4xl border border-white/50 bg-white/75 p-10'
+      className='w-full max-w-md rounded-4xl border border-white/50 dark:border-sage/60 bg-surface/75 p-10'
     >
       {/* Header */}
 
       <div className='mb-10 text-center'>
         <div className='flex items-center justify-center'>
-          <Image src={Logo} alt='Bleed logo' width={150} priority={true} />
+          <BleedLogo width={150} fetchPriority='high' />
         </div>
         <p className='font-display mt-3 text-sm leading-6 text-ink/60'>
           Enter your email and we&apos;ll send you a secure link to reset your

@@ -6,6 +6,7 @@ import {
   FiInbox,
   FiBell,
   FiAlertTriangle,
+  FiSun,
 } from 'react-icons/fi';
 import { createClient } from '@/lib/supabase/server';
 import { DeleteAccountButton } from '@/app/features/auth/components/DeleteAccountButton';
@@ -14,6 +15,7 @@ import { NotificationSettings } from '@/app/features/notifications/components/No
 import { InboxAddress } from '../features/inbox/components/InboxAddress';
 import { AnimatedIn } from '../components/ui/AnimatedIn';
 import { AnimatedSection } from '../components/ui/AnimatedSection';
+import { ThemeToggle } from '@/app/features/settings/components/ThemeToggle';
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -40,6 +42,7 @@ export default async function SettingsPage() {
     { label: 'Account', href: '#account', icon: FiUser },
     { label: 'Inbox Address', href: '#inbox', icon: FiInbox },
     { label: 'Notifications', href: '#notifications', icon: FiBell },
+    { label: 'Appearance', href: '#appearance', icon: FiSun },
     {
       label: 'Danger Zone',
       href: '#danger',
@@ -64,7 +67,7 @@ export default async function SettingsPage() {
 
           <Link
             href='/dashboard'
-            className='group inline-flex shrink-0 items-center gap-1.5 rounded-full border border-sage/60 bg-white px-3 py-1.5 text-xs font-semibold text-ink shadow-sm transition-all hover:border-sage hover:bg-sage/10'
+            className='group inline-flex shrink-0 items-center gap-1.5 rounded-full border border-sage/60 bg-surface px-3 py-1.5 text-xs font-semibold text-ink shadow-sm transition-all hover:border-sage hover:bg-sage/10'
           >
             <FiArrowLeft
               className='transition-transform duration-200 group-hover:-translate-x-0.5'
@@ -88,7 +91,7 @@ export default async function SettingsPage() {
                   href={item.href}
                   className={`flex items-center gap-2.5 rounded-xl px-3 py-2 font-mono text-xs transition-all ${
                     item.danger
-                      ? 'text-red-600 hover:bg-red-50'
+                      ? 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40'
                       : 'text-ink/60 hover:bg-sage/20 hover:text-ink'
                   }`}
                 >
@@ -104,7 +107,7 @@ export default async function SettingsPage() {
             {/* 1. Account Section */}
             <AnimatedSection
               id='account'
-              className='scroll-mt-20 sm:scroll-mt-10 rounded-2xl bg-white p-5 sm:p-6 shadow-xs transition-all hover:shadow-md'
+              className='scroll-mt-20 sm:scroll-mt-10 rounded-2xl bg-surface p-5 sm:p-6 shadow-xs transition-all hover:shadow-md'
             >
               <div className='border-b border-sage/30 pb-3 sm:pb-4'>
                 <h2 className='font-display text-base font-bold text-ink sm:text-lg'>
@@ -137,7 +140,7 @@ export default async function SettingsPage() {
             {/* 2. Inbox Address Section */}
             <AnimatedSection
               id='inbox'
-              className='scroll-mt-20 sm:scroll-mt-10 rounded-2xl border border-sage/50 bg-white p-5 sm:p-6 shadow-xs transition-all hover:shadow-md'
+              className='scroll-mt-20 sm:scroll-mt-10 rounded-2xl border border-sage/50 bg-surface p-5 sm:p-6 shadow-xs transition-all hover:shadow-md'
             >
               <div className='border-b border-sage/30 pb-3 sm:pb-4'>
                 <h2 className='font-display text-base font-bold text-ink sm:text-lg'>
@@ -156,7 +159,7 @@ export default async function SettingsPage() {
             {/* 3. Notifications Section */}
             <AnimatedSection
               id='notifications'
-              className='scroll-mt-20 sm:scroll-mt-10 rounded-2xl border border-sage/50 bg-white p-5 sm:p-6 shadow-xs transition-all hover:shadow-md'
+              className='scroll-mt-20 sm:scroll-mt-10 rounded-2xl border border-sage/50 bg-surface p-5 sm:p-6 shadow-xs transition-all hover:shadow-md'
             >
               <div className='border-b border-sage/30 pb-3 sm:pb-4'>
                 <h2 className='font-display text-base font-bold text-ink sm:text-lg'>
@@ -172,19 +175,38 @@ export default async function SettingsPage() {
               </div>
             </AnimatedSection>
 
-            {/* 4. Danger Zone Section */}
+            {/* 4. Appearance Section */}
+            <AnimatedSection
+              id='appearance'
+              className='scroll-mt-20 sm:scroll-mt-10 rounded-2xl border border-sage/50 bg-surface p-5 sm:p-6 shadow-xs transition-all hover:shadow-md'
+            >
+              <div className='border-b border-sage/30 pb-3 sm:pb-4'>
+                <h2 className='font-display text-base font-bold text-ink sm:text-lg'>
+                  Appearance
+                </h2>
+                <p className='mt-0.5 font-mono text-[11px] text-ink/50 sm:text-xs'>
+                  Choose a light or dark theme, or follow your device.
+                </p>
+              </div>
+
+              <div className='mt-4 sm:mt-5'>
+                <ThemeToggle />
+              </div>
+            </AnimatedSection>
+
+            {/* 5. Danger Zone Section */}
             <AnimatedSection
               id='danger'
-              className='scroll-mt-20 sm:scroll-mt-10 rounded-2xl border border-red-200 bg-red-50/40 p-5 sm:p-6 shadow-xs'
+              className='scroll-mt-20 sm:scroll-mt-10 rounded-2xl border border-red-200 dark:border-red-900/60 bg-red-50/40 dark:bg-red-950/30 p-5 sm:p-6 shadow-xs'
             >
-              <div className='border-b border-red-200/60 pb-3 sm:pb-4'>
+              <div className='border-b border-red-200/60 dark:border-red-900/50 pb-3 sm:pb-4'>
                 <div className='flex items-center gap-2'>
-                  <FiAlertTriangle className='text-red-600' size={18} />
-                  <h2 className='font-display text-base font-bold text-red-700 sm:text-lg'>
+                  <FiAlertTriangle className='text-red-600 dark:text-red-400' size={18} />
+                  <h2 className='font-display text-base font-bold text-red-700 dark:text-red-300 sm:text-lg'>
                     Danger Zone
                   </h2>
                 </div>
-                <p className='mt-0.5 font-mono text-[11px] text-red-600/70 sm:text-xs'>
+                <p className='mt-0.5 font-mono text-[11px] text-red-600/70 dark:text-red-400/70 sm:text-xs'>
                   Irreversible actions regarding your account and subscription
                   history.
                 </p>

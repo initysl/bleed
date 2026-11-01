@@ -8,8 +8,7 @@ import { useForm } from '@tanstack/react-form';
 import { FiEye, FiEyeOff, FiCheckCircle } from 'react-icons/fi';
 import { createClient } from '@/lib/supabase/client';
 import { loginSchema } from '@/app/features/auth/schema';
-import Image from 'next/image';
-import Logo from '@/public/bleedlogo.svg';
+import { BleedLogo } from '@/app/components/ui/BleedLogo';
 
 function firstErrorMessage(errors: unknown[]): string | null {
   if (!errors.length) return null;
@@ -73,7 +72,7 @@ export function LoginForm() {
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
-        className='w-full max-w-md rounded-4xl border border-white/50 bg-white/80 p-10'
+        className='w-full max-w-md rounded-4xl border border-white/50 dark:border-sage/60 bg-surface/80 p-10'
       >
         <div className='flex flex-col items-center text-center'>
           <div className='mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-pine/10'>
@@ -107,10 +106,10 @@ export function LoginForm() {
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45 }}
-      className='w-full max-w-md rounded-4xl border border-white/50 bg-white/75 p-10'
+      className='w-full max-w-md rounded-4xl border border-white/50 dark:border-sage/60 bg-surface/75 p-10'
     >
       <div className='mb-5 flex flex-col gap-1 items-center text-center'>
-        <Image src={Logo} alt='Bleed logo' width={110} priority={true} />
+        <BleedLogo width={110} fetchPriority='high' />
         <p className='font-mini text-sm leading-6 text-ink/60'>
           Manage your subscriptions.
         </p>

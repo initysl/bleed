@@ -29,7 +29,7 @@ export function InboxAddress({ address }: { address: string }) {
 
   return (
     <div className='w-full max-w-md'>
-      <div className='flex items-center justify-between gap-3 rounded-2xl bg-white/60 px-4 py-3'>
+      <div className='flex items-center justify-between gap-3 rounded-2xl bg-surface/60 px-4 py-3'>
         {/* A readonly input rather than a <span>. The address was truncated
             text, so a user who couldn't use the clipboard API had no way to
             select the full value at all. An input is selectable, scrollable,

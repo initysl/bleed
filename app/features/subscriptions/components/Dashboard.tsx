@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
+import { BleedLogo } from '@/app/components/ui/BleedLogo';
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
 import { FiLogOut, FiPlus, FiSettings, FiMenu, FiX } from 'react-icons/fi';
 import type { NeedsReviewItem } from '@/app/features/needs-review/types';
@@ -81,19 +81,13 @@ export function Dashboard({
         variants={item}
         className='sticky top-0 z-30 flex w-full items-center justify-between px-3 py-2.5 backdrop-blur-xl rounded-xl'
       >
-        <Image
-          src='/bleedlogo.svg'
-          alt='Bleed logo'
-          width={100}
-          height={32}
-          priority={true}
-        />
+        <BleedLogo width={100} height={32} fetchPriority='high' />
 
         {/* Desktop Navigation (sm and up) */}
-        <div className='hidden sm:flex items-center rounded-full border border-sage/50 bg-white/70 p-1.5 shadow-xs backdrop-blur-md'>
+        <div className='hidden sm:flex items-center rounded-full border border-sage/50 bg-surface/70 p-1.5 shadow-xs backdrop-blur-md'>
           <Link
             href='/settings'
-            className='group inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-xs font-medium text-ink/70 transition-all hover:bg-white hover:text-ink hover:shadow-2xs active:scale-95'
+            className='group inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-xs font-medium text-ink/70 transition-all hover:bg-surface hover:text-ink hover:shadow-2xs active:scale-95'
             title='Settings'
           >
             <FiSettings
@@ -106,11 +100,11 @@ export function Dashboard({
           <form action='/auth/signout' method='post' className='inline-flex'>
             <button
               type='submit'
-              className='group inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-xs font-medium text-ink/60 transition-all hover:bg-red-50 hover:text-red-600 active:scale-95'
+              className='group inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-xs font-medium text-ink/60 transition-all hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400 active:scale-95'
               title='Sign out'
             >
               <FiLogOut
-                className='text-ink/50 transition-transform duration-200 group-hover:-translate-x-0.5 group-hover:text-red-600'
+                className='text-ink/50 transition-transform duration-200 group-hover:-translate-x-0.5 group-hover:text-red-600 dark:group-hover:text-red-400'
                 size={14}
               />
               <span>Sign out</span>
@@ -135,7 +129,7 @@ export function Dashboard({
             onClick={() => setMobileMenuOpen(true)}
             aria-label='Open navigation menu'
             aria-expanded={mobileMenuOpen}
-            className='inline-flex items-center justify-center rounded-full border border-sage/60 bg-white p-2.5 text-ink/80 shadow-xs transition-all active:scale-95'
+            className='inline-flex items-center justify-center rounded-full border border-sage/60 bg-surface p-2.5 text-ink/80 shadow-xs transition-all active:scale-95'
           >
             <FiMenu size={20} />
           </button>
@@ -174,17 +168,12 @@ export function Dashboard({
               aria-modal='true'
               aria-label='Navigation menu'
               tabIndex={-1}
-              className='fixed top-0 right-0 bottom-0 z-50 flex w-4/5 max-w-xs flex-col justify-between border-l border-sage/60 bg-white p-6 shadow-2xl outline-none sm:hidden'
+              className='fixed top-0 right-0 bottom-0 z-50 flex w-4/5 max-w-xs flex-col justify-between border-l border-sage/60 bg-surface p-6 shadow-2xl outline-none sm:hidden'
             >
               {/* Drawer Header with Close Icon */}
               <div className='space-y-6'>
                 <div className='flex items-center justify-between border-b border-sage/30 pb-4'>
-                  <Image
-                    src='/bleedlogo.svg'
-                    alt='Bleed logo'
-                    width={80}
-                    height={26}
-                  />
+                  <BleedLogo width={80} height={26} />
                   <button
                     type='button'
                     onClick={() => setMobileMenuOpen(false)}
@@ -225,7 +214,7 @@ export function Dashboard({
                 <form action='/auth/signout' method='post' className='w-full'>
                   <button
                     type='submit'
-                    className='flex w-full items-center gap-3 rounded-2xl border border-red-200 bg-red-50/50 px-4 py-3 font-mono text-xs font-medium text-red-600 hover:bg-red-100/50 transition-colors'
+                    className='flex w-full items-center gap-3 rounded-2xl border border-red-200 dark:border-red-900/60 bg-red-50/50 dark:bg-red-950/30 px-4 py-3 font-mono text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-100/50 dark:hover:bg-red-950/50 transition-colors'
                   >
                     <FiLogOut size={18} />
                     <span>Sign out</span>

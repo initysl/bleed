@@ -62,7 +62,7 @@ export function EnableNotifications() {
   }
 
   return (
-    <div className='font-mini flex w-full max-w-md flex-col gap-2 rounded-lg border border-sage bg-white/60 px-4 py-3'>
+    <div className='font-mini flex w-full max-w-md flex-col gap-2 rounded-lg border border-sage bg-surface/60 px-4 py-3'>
       <div className='flex items-center justify-between gap-3'>
         <p className='text-sm text-ink/70'>
           Get a push notification a few days before something renews.

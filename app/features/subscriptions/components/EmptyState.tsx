@@ -4,12 +4,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import { FiSettings, FiLogOut, FiPlus } from 'react-icons/fi';
-import Image from 'next/image';
 import { GhostTotal } from './GhostTotal';
 import { EnableNotifications } from '@/app/features/notifications/components/EnableNotifications';
 import { SubscriptionForm } from './SubscriptionForm';
 import { InboxAddress } from '../../inbox/components/InboxAddress';
 import { Modal } from '@/app/components/ui/Modal';
+import { BleedLogo } from '@/app/components/ui/BleedLogo';
 
 export function EmptyState({ inboxAddress }: { inboxAddress: string }) {
   const shouldReduceMotion = useReducedMotion();
@@ -41,13 +41,7 @@ export function EmptyState({ inboxAddress }: { inboxAddress: string }) {
         variants={item}
         className='sticky top-0 flex sm:p-0 p-5 w-full h-20 items-center justify-between backdrop-blur-xl rounded-2xl'
       >
-        <Image
-          src='/bleedlogo.svg'
-          alt='Bleed logo'
-          width={100}
-          height={32}
-          priority={true}
-        />
+        <BleedLogo width={100} height={32} fetchPriority='high' />
 
         <div className='flex items-center gap-4'>
           <Link

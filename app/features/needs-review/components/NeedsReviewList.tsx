@@ -67,7 +67,7 @@ export function NeedsReviewList({ items }: { items: NeedsReviewItem[] }) {
           return (
             <li
               key={item.id}
-              className='rounded-md bg-white/60 px-3 py-2'
+              className='rounded-md bg-surface/60 px-3 py-2'
             >
               <div className='flex items-start justify-between gap-3'>
                 <div className='flex min-w-0 flex-col'>
