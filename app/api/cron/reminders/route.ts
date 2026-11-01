@@ -46,6 +46,16 @@ export async function GET(req: NextRequest) {
   const today = nowIso.slice(0, 10);
 
   // ---- Phase 1: dispatch any reminders whose time has come ----
+  //
+  // ...but only for renewals that haven't happened yet. Whenever this cron
+  // misses runs — it was never scheduled on Railway for weeks — reminders pile
+  // up whose renewal has already passed, and the first run back sent every one
+  // of them: "renews soon" for a charge that went through a month ago. Phase 2
+  // below advances those to their next cycle, which schedules the next
+  // reminder, so skipping them here loses nothing that still matters.
+  //
+  // `gte today` mirrors phase 2's `lt today`: a renewal due today still gets
+  // its reminder.
   let dueSubscriptions: Subscription[];
   try {
     dueSubscriptions = await fetchAllPages<Subscription>((from, to) =>
@@ -53,6 +63,7 @@ export async function GET(req: NextRequest) {
         .from('subscriptions')
         .select('*')
         .lte('reminder_at', nowIso)
+        .gte('renewal_date', today)
         .order('id', { ascending: true })
         .range(from, to),
     );
@@ -178,9 +189,10 @@ export async function GET(req: NextRequest) {
   // ---- Phase 2: advance any subscription whose renewal date has passed ----
   // Deliberately separate from phase 1 — reminder_at is always set before
   // renewal_date, so by the time a renewal_date has passed, that cycle's
-  // reminder has already necessarily fired earlier in a previous run.
-  // Advancing here computes the NEXT reminder_at, so future reminders keep
-  // firing every cycle without the user re-entering anything.
+  // reminder has either fired in an earlier run or, if the cron was down, been
+  // skipped by phase 1 as stale. Advancing here computes the NEXT reminder_at,
+  // so future reminders keep firing every cycle without the user re-entering
+  // anything.
   //
   // Strictly less-than today, not lte: a subscription renewing TODAY has not
   // renewed yet as far as the user is concerned, and advancing it on the first
