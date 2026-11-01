@@ -34,7 +34,7 @@ function ToggleRow({
   const descId = useId();
 
   return (
-    <div className='flex flex-col gap-1 rounded-lg border border-sage bg-white/60 px-4 py-3'>
+    <div className='flex flex-col gap-1 rounded-lg border border-sage bg-surface/60 px-4 py-3'>
       <div className='flex items-center gap-2'>
         {icon}
         <span id={labelId} className='text-sm text-ink'>
@@ -58,7 +58,7 @@ function ToggleRow({
         >
           <span
             className={`block h-5 w-5 rounded-full bg-white shadow transition-transform ${
-              checked ? 'translate-x-5' : 'translate-x-0'
+              checked ? 'translate-x-5 dark:bg-paper' : 'translate-x-0 dark:bg-ink'
             }`}
           />
         </button>

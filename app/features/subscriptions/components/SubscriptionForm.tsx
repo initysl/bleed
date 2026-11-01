@@ -159,7 +159,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
                 placeholder='Netflix'
                 aria-invalid={error ? true : undefined}
                 aria-describedby={error ? msgId : undefined}
-                className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink focus:border-pine'
+                className='rounded-md border border-sage bg-surface px-3 py-2 text-sm text-ink focus:border-pine'
               />
               {error && (
                 <span id={msgId} className='text-xs text-rust'>
@@ -207,7 +207,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
                     placeholder='15.49'
                     aria-invalid={error ? true : undefined}
                     aria-describedby={error ? msgId : undefined}
-                    className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink focus:border-pine'
+                    className='rounded-md border border-sage bg-surface px-3 py-2 font-mono text-sm text-ink focus:border-pine'
                   />
                   {error && (
                     <span id={msgId} className='text-xs text-rust'>
@@ -226,7 +226,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
                 <select
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink focus:border-pine'
+                  className='rounded-md border border-sage bg-surface px-3 py-2 font-mono text-sm text-ink focus:border-pine'
                 >
                   {CURRENCIES.map((c) => (
                     <option key={c} value={c}>
@@ -249,7 +249,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
                 onChange={(e) =>
                   field.handleChange(e.target.value as 'monthly' | 'yearly')
                 }
-                className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink focus:border-pine'
+                className='rounded-md border border-sage bg-surface px-3 py-2 text-sm text-ink focus:border-pine'
               >
                 <option value='monthly'>Monthly</option>
                 <option value='yearly'>Yearly</option>
@@ -284,7 +284,7 @@ export function SubscriptionForm({ onDone, existing }: SubscriptionFormProps) {
                 }
               }}
               onBlur={field.handleBlur}
-              className='rounded-md border border-sage bg-white px-3 py-2 font-mono text-sm text-ink focus:border-pine'
+              className='rounded-md border border-sage bg-surface px-3 py-2 font-mono text-sm text-ink focus:border-pine'
             />
           </label>
         )}

@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from '@tanstack/react-form';
 import { createClient } from '@/lib/supabase/client';
 import { newPasswordSchema } from '@/app/features/auth/schema';
-import Image from 'next/image';
-import Logo from '@/public/bleedlogo.svg';
+import { BleedLogo } from '@/app/components/ui/BleedLogo';
 
 function firstErrorMessage(errors: unknown[]): string | null {
   if (!errors.length) return null;
@@ -46,10 +45,10 @@ export function ResetPasswordForm() {
   });
 
   return (
-    <div className='w-full max-w-md rounded-4xl bg-white p-10'>
+    <div className='w-full max-w-md rounded-4xl bg-surface p-10'>
       <div className='mb-8 text-center'>
         <div className='flex items-center justify-center'>
-          <Image src={Logo} alt='Bleed logo' width={110} priority={true} />
+          <BleedLogo width={110} fetchPriority='high' />
         </div>
         <p className='font-display mt-3 text-sm leading-6 text-ink/55'>
           Your new password must be different from the one you previously used.
@@ -77,7 +76,7 @@ export function ResetPasswordForm() {
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  className='font-display h-14 w-full rounded-full border border-sage/40 bg-[#F7F7F7] px-6 text-sm transition focus:border-pine focus:bg-white'
+                  className='font-display h-14 w-full rounded-full border border-sage/40 bg-paper px-6 text-sm transition focus:border-pine focus:bg-surface'
                 />
 
                 {error && <p className='mt-2 text-xs text-rust'>{error}</p>}
@@ -99,7 +98,7 @@ export function ResetPasswordForm() {
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  className='font-display h-14 w-full rounded-full border border-sage/40 bg-[#F7F7F7] px-6 text-sm transition focus:border-pine focus:bg-white'
+                  className='font-display h-14 w-full rounded-full border border-sage/40 bg-paper px-6 text-sm transition focus:border-pine focus:bg-surface'
                 />
 
                 {error && <p className='mt-2 text-xs text-rust'>{error}</p>}
@@ -109,7 +108,7 @@ export function ResetPasswordForm() {
         </form.Field>
 
         {formError && (
-          <div className='font-mini rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-rust'>
+          <div className='font-mini rounded-2xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 p-4 text-sm text-rust'>
             {formError}
           </div>
         )}

@@ -56,7 +56,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
           // "full-screen" overlay to that ancestor's bounds instead of the
           // actual viewport. A portal escapes the tree entirely, so no
           // ancestor's transform can ever affect this again.
-          className='fixed inset-0 z-40 flex items-center justify-center overflow-y-auto bg-ink/30 p-4 backdrop-blur-sm'
+          className='fixed inset-0 z-40 flex items-center justify-center overflow-y-auto bg-ink/30 dark:bg-black/60 p-4 backdrop-blur-sm'
         >
           <motion.div
             key='panel'

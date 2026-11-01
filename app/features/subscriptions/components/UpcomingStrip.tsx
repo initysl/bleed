@@ -56,7 +56,9 @@ export function UpcomingStrip({
                 onClick={() => onSelect?.(sub)}
                 disabled={!onSelect}
                 style={{ backgroundColor: style.bg, color: textColor }}
-                className='flex w-full flex-col gap-2 rounded-lg px-4 py-3 text-left transition-transform enabled:hover:scale-[1.02] enabled:active:scale-[0.98]'
+                // Black brands (Apple, Notion, GitHub) have no edge against the
+                // dark page, so the card dissolved; the hairline is dark-only.
+                className='flex w-full flex-col gap-2 rounded-lg px-4 py-3 text-left transition-transform enabled:hover:scale-[1.02] enabled:active:scale-[0.98] dark:ring-1 dark:ring-inset dark:ring-ink/10'
                 aria-label={`${sub.name}, ${formatMoney(
                   sub.price,
                   sub.currency,

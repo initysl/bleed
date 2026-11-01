@@ -63,7 +63,7 @@ export function DeleteAccountButton({ email }: { email: string }) {
               type='text'
               value={typedEmail}
               onChange={(e) => setTypedEmail(e.target.value)}
-              className='rounded-md border border-sage bg-white px-3 py-2 text-sm text-ink focus:border-rust'
+              className='rounded-md border border-sage bg-surface px-3 py-2 text-sm text-ink focus:border-rust'
             />
           </label>
 

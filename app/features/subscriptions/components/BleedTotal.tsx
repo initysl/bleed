@@ -95,7 +95,7 @@ export function BleedTotal({
   };
 
   return (
-    <div className='w-full rounded-2xl bg-white border border-sage/60 p-6 sm:p-7 shadow-sm'>
+    <div className='w-full rounded-2xl bg-surface border border-sage/60 p-6 sm:p-7 shadow-sm'>
       {/* 1. Currency Selector Pill Row */}
       {currencies.length > 1 && (
         <div className='flex items-center gap-2 mb-6 overflow-x-auto pb-1 scrollbar-none'>
@@ -132,8 +132,8 @@ export function BleedTotal({
         {/* Metric Subtitle */}
         <div className='flex items-center gap-2 pt-1'>
           <span className='text-xs text-ink/70 font-medium'>Monthly bleed</span>
-          <span className='inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-600'>
-            <span className='h-1.5 w-1.5 rounded-full bg-emerald-500' />
+          <span className='inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400'>
+            <span className='h-1.5 w-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400' />
             {currentData.count}{' '}
             {currentData.count === 1 ? 'active sub' : 'active subs'}
           </span>

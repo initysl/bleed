@@ -24,7 +24,7 @@ export default function DashboardLoading() {
       <div className='grid gap-10 md:grid-cols-[420px_minmax(0,1fr)]'>
         <div className='flex flex-col gap-6'>
           {/* BleedTotal */}
-          <div className='w-full rounded-2xl border border-sage/60 bg-white p-6 sm:p-7'>
+          <div className='w-full rounded-2xl border border-sage/60 bg-surface p-6 sm:p-7'>
             <div className='h-12 w-48 animate-pulse rounded-md bg-sage/60' />
             <div className='mt-3 h-4 w-32 animate-pulse rounded bg-sage/40' />
           </div>
@@ -41,7 +41,7 @@ export default function DashboardLoading() {
           {[0, 1, 2, 3].map((i) => (
             <div
               key={i}
-              className='flex items-center gap-3.5 rounded-2xl border border-sage/60 bg-white p-4 sm:p-5'
+              className='flex items-center gap-3.5 rounded-2xl border border-sage/60 bg-surface p-4 sm:p-5'
             >
               <div className='h-11 w-11 shrink-0 animate-pulse rounded-xl bg-sage/60' />
               <div className='flex-1 space-y-2'>
