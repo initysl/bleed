@@ -40,6 +40,19 @@ curl -i -H "Authorization: Bearer $CRON_SECRET" https://<domain>/api/cron/remind
 curl -i https://<domain>/api/cron/reminders
 ```
 
+## Node.js version
+
+`engines.node` in `package.json` is what Railway's builder uses to choose the
+runtime. Without it the builder picks its own default, which can be an
+unpatched release or a new major the app has never run on. The floor is
+24.22.1, the first 24.x with the October 2026 security fixes (including the
+Brotli RCE, CVE-2026-111497).
+
+The builder does not reliably honour semver ranges, so check the build log
+after any deploy that matters. If it installed something older than the floor,
+set `RAILPACK_NODE_VERSION` (or `NIXPACKS_NODE_VERSION` on the older builder)
+to an exact version in the service's variables, which takes precedence.
+
 ## Environment variables
 
 | Name | Purpose |
