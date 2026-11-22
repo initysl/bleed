@@ -128,14 +128,24 @@ export async function POST(req: NextRequest) {
   const { data: email, error: fetchError } =
     await resend.emails.receiving.get(email_id);
 
+  // A 500, not a 200. This fails when Resend itself is down or our API key
+  // can't read received mail (a sending-only key) — both fixable on our side,
+  // after which Svix's retries recover the email with no action from the user.
+  // Returning 200 here marked every such delivery "Success" in Resend and
+  // dropped the email for good. Retrying is safe: nothing has been inserted
+  // yet, and the source_email_id check above dedupes any later success.
   if (fetchError || !email) {
+    console.error(
+      `[inbound-email] could not fetch email ${email_id}:`,
+      fetchError?.message,
+    );
     return NextResponse.json(
       {
         ok: false,
         reason: 'could not fetch email body',
         error: fetchError?.message,
       },
-      { status: 200 },
+      { status: 500 },
     );
   }
 
