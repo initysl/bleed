@@ -24,6 +24,19 @@
 .DS_Store
 *.pem
 
+# keys, certificates and database dumps (schema-only migrations in
+# supabase/*.sql are fine; a dump with data is not)
+*.key
+*.p12
+*.pfx
+*.dump
+*.backup
+
+# local CLI state, which can hold tokens and project links
+.railway/
+supabase/.temp/
+supabase/.branches/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
@@ -45,3 +58,7 @@ note.txt
 # design canvas artboards — working files for the Claude Design canvas, not
 # part of the app build. Kept locally rather than in the repo.
 /design/
+
+# deployment notes and database schema/migrations — kept locally, not public
+DEPLOYMENT.md
+/supabase/
