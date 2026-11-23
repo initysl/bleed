@@ -53,6 +53,7 @@ const contentSecurityPolicy = [
   .concat(';');
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   async headers() {
     return [
       {
